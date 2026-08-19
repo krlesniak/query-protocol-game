@@ -1,4 +1,4 @@
-import { ShieldAlert, Key, Image as ImageIcon } from 'lucide-react';
+import { ShieldAlert, Key, Image as ImageIcon, FileText, Terminal as TerminalIcon, FileCode2 } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 import { LEVELS } from '../../game/levels';
 import { EVIDENCE_DB } from '../../game/evidence';
@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface MissionSidebarProps {
   onLog: (msg: string, type: 'info' | 'success' | 'error' | 'warning') => void;
   onOpenEvidence: (id: string) => void;
-  viewedLevel: number; 
+  viewedLevel: number;
 }
 
 export const MissionSidebar = ({ onLog, onOpenEvidence, viewedLevel }: MissionSidebarProps) => {
@@ -16,9 +16,18 @@ export const MissionSidebar = ({ onLog, onOpenEvidence, viewedLevel }: MissionSi
   
   const isHistorical = viewedLevel < currentLevel;
 
+  const getEvidenceIcon = (type: string) => {
+    switch(type) {
+      case 'DOCUMENT': return <FileText className="w-3.5 h-3.5 text-[var(--accent-yellow)]" />;
+      case 'IMAGE': return <ImageIcon className="w-3.5 h-3.5 text-[var(--accent-bright)]" />;
+      case 'LOG': return <TerminalIcon className="w-3.5 h-3.5 text-[var(--accent-greeny)]" />;
+      default: return <FileCode2 className="w-3.5 h-3.5 text-[var(--text-muted)]" />;
+    }
+  };
+
   return (
     <aside className="min-h-0 flex flex-col gap-2">
-      {/* MISSION */}
+      {/* MISSION SECTION */}
       <section className="flex-[3] min-h-0 bg-[var(--surface-1)] border border-[var(--border)] flex flex-col overflow-hidden">
         <div className="h-11 border-b border-[var(--border)] px-4 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
@@ -116,30 +125,46 @@ export const MissionSidebar = ({ onLog, onOpenEvidence, viewedLevel }: MissionSi
         </AnimatePresence>
       </section>
 
-      {/* EVIDENCE */}
+      {/* EVIDENCE SECTION  */}
       <section className="flex-[2] min-h-0 bg-[var(--surface-1)] border border-[var(--border)] flex flex-col overflow-hidden">
-        <div className="h-11 border-b border-[var(--border)] px-4 flex items-center justify-between shrink-0">
+        <div className="h-11 border-b border-[var(--border)] px-4 flex items-center justify-between shrink-0 bg-[#0d1217]">
           <div className="flex items-center gap-2">
-            <ImageIcon className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+            <FileCode2 className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
             <span className="font-mono text-[11px] tracking-widest text-[var(--text-secondary)]">CASE FILE / EVIDENCE</span>
           </div>
           <span className="font-mono text-[11px] text-[var(--text-muted)]">{collectedEvidence.length} ITEMS</span>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-3">
+        <div className="flex-1 overflow-y-auto p-3 bg-[var(--bg-base)]">
           {collectedEvidence.length === 0 ? (
-            <div className="h-full border border-dashed border-[var(--border)] flex flex-col items-center justify-center text-center px-6 bg-[var(--bg-base)]">
-              <ImageIcon className="w-6 h-6 text-[var(--text-faint)] mb-3" />
+            <div className="h-full border border-dashed border-[var(--border)] flex flex-col items-center justify-center text-center px-6">
+              <FileCode2 className="w-6 h-6 text-[var(--text-faint)] mb-3" />
               <span className="font-mono text-[11px] tracking-widest text-[var(--text-muted)]">NO EVIDENCE</span>
             </div>
           ) : (
             <div className="space-y-2">
               {collectedEvidence.map(evId => {
-                const ev = EVIDENCE_DB[evId] || { title: evId, type: 'UNKNOWN' };
+                const ev = EVIDENCE_DB[evId] || { title: evId, type: 'UNKNOWN', id: evId };
                 return (
-                  <div key={evId} onClick={() => onOpenEvidence(evId)} className="p-2 bg-[var(--surface-2)] border border-[var(--border)] flex items-center justify-between cursor-pointer hover:border-[var(--accent-yellow)] transition-colors duration-200">
-                    <span className="font-mono text-[10px] text-[var(--text-main)] truncate max-w-[150px]">{ev.title}</span>
-                    <span className="text-[8px] font-mono border border-[var(--border)] px-1 py-0.5 text-[var(--text-muted)]">{ev.type}</span>
+                  <div 
+                    key={evId} 
+                    onClick={() => onOpenEvidence(evId)} 
+                    className="group flex flex-col p-2.5 bg-[var(--surface-1)] border border-[var(--border)] cursor-pointer hover:bg-[#1a2228] hover:border-[var(--accent-muted)] transition-all duration-200"
+                  >
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        {getEvidenceIcon(ev.type)}
+                        <span className="font-mono text-[10px] tracking-wider text-[var(--text-main)] group-hover:text-[var(--accent-bright)] transition-colors truncate max-w-[130px]">
+                          {ev.id}
+                        </span>
+                      </div>
+                      <span className="text-[8px] font-mono border border-[var(--border)] px-1.5 py-0.5 text-[var(--text-muted)] bg-[var(--bg-base)] tracking-widest">
+                        {ev.type}
+                      </span>
+                    </div>
+                    <span className="font-mono text-[10px] text-[var(--text-secondary)] truncate pl-5">
+                      {ev.title}
+                    </span>
                   </div>
                 )
               })}

@@ -36,7 +36,7 @@ export const generateDatabaseSQL = (): string => {
       id INTEGER PRIMARY KEY,
       employee_id INTEGER,
       location_id INTEGER,
-      action TEXT,
+      action_type TEXT,
       created_at TEXT,
       access_granted INTEGER
     );

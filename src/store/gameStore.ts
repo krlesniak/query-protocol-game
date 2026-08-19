@@ -9,14 +9,14 @@ interface GameState {
   completedLevels: number[];
   usedHints: Record<number, number[]>;
   queryAttempts: number;
-  completedQueries: Record<number, string>; // <-- NOWE: Zapisane zapytania
+  completedQueries: Record<number, string>; 
 
   addScore: (points: number) => void;
   setCurrentLevel: (level: number) => void;
   unlockTable: (tableName: string) => void;
   addEvidence: (evidenceId: string) => void;
   completeLevel: (levelId: number) => void;
-  completeCurrentLevel: (successfulQuery: string) => void; // <-- NOWE: Przyjmuje zapytanie
+  completeCurrentLevel: (successfulQuery: string) => void; 
   resetGame: () => void;
   
   applyHint: (levelId: number, hintId: number, cost: number) => void;
@@ -29,7 +29,7 @@ interface GameState {
 
 const initialState = {
   currentLevel: 1,
-  score: 0,
+  score: 200,
   unlockedTables: ['employees'],
   collectedEvidence: [],
   completedLevels: [],
@@ -72,7 +72,6 @@ export const useGameStore = create<GameState>()(
             : [...state.completedLevels, levelId],
         })),
 
-      // ZMODYFIKOWANA FUNKCJA
       completeCurrentLevel: (successfulQuery: string) =>
         set((state) => {
           const newCompletedLevels = state.completedLevels.includes(state.currentLevel)

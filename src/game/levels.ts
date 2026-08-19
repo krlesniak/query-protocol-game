@@ -23,7 +23,7 @@ export const LEVELS: LevelDefinition[] = [
     id: 1,
     title: "ŚLAD",
     briefing: "Z systemu zniknęła osoba oznaczona jako ORACLE-01. Oficjalny raport mówi, że konto zostało dezaktywowane dwa dni temu. Chcę wiedzieć tylko jedno: Kto nadal posiada aktywne konto związane z projektem ORACLE?",
-    objective: "Znajdź aktywny profil pracownika powiązany z ORACLE.",
+    objective: "Znajdź status i nazwę profilu pracownika powiązany z ORACLE.",
     requiredRows: [{ username: 'oracle_01', status: 'ACTIVE' }],
     maxRows: 1, rewardXP: 150, unlocksTable: 'locations',
     hints: [
@@ -35,7 +35,7 @@ export const LEVELS: LevelDefinition[] = [
     id: 2,
     title: "GDZIE?",
     briefing: "Znalazłeś aktywne konto. Problem w tym, że nie wiesz, gdzie ORACLE pracował. W dokumentacji HR znajduje się tylko ID przypisanego obszaru. Znajdź dokładną lokalizację (nazwę i sektor) przypisaną do projektu ORACLE.",
-    objective: "Ustal przypisany obiekt, w którym pracował ORACLE, korzystając z tabeli locations.",
+    objective: "Ustal przypisany obiekt, w którym pracował oracle, korzystając z tabeli locations.",
     requiredRows: [{ name: 'ORACLE_LAB', sector: 'B' }],
     maxRows: 1, rewardXP: 200, unlocksTable: 'access_logs', unlocksEvidence: 'EVD_ORACLE_LAB_LOC',
     hints: [
@@ -47,9 +47,9 @@ export const LEVELS: LevelDefinition[] = [
     id: 3,
     title: "03:42",
     briefing: "W nocy, kiedy ORACLE zniknął, system bezpieczeństwa zarejestrował nietypowy ruch. Administrator twierdzi, że po 03:00 nikt nie wszedł do ORACLE_LAB. Sprawdź, czy system mówi prawdę.",
-    objective: "Znajdź wpis w logach dostępu dowodzący wejścia do laboratorium po godzinie 03:00 w dniu 2026-02-12.",
-    requiredRows: [{ action: 'ENTER', location_id: 4 }],
-    maxRows: 5, rewardXP: 300, unlocksTable: 'incidents', unlocksEvidence: 'EVD_SERVER_LOG_CONTRADICTION',
+    objective: "Znajdź wpis w logach dostępu dowodzący WEJŚCIA do LABORATORIUM po godzinie 03:00 w dniu 2026-02-12.",
+    requiredRows: [{ action_type: 'ENTER', location_id: 4 }],
+    maxRows: 3, rewardXP: 300, unlocksTable: 'incidents', unlocksEvidence: 'EVD_SERVER_LOG_CONTRADICTION',
     hints: [
       { id: 1, text: "Zacznij od analizy tabeli logów dostępu (access_logs).", cost: 100 },
       { id: 2, text: "Filtruj wpisy po location_id = 4 oraz użyj warunku created_at > '2026-02-12 03:00:00'.", cost: 200 },
@@ -153,7 +153,7 @@ export const LEVELS: LevelDefinition[] = [
     hints: [
       { id: 1, text: "Zapytanie bazowe: SELECT DISTINCT department FROM employees e...", cost: 200 }, 
       { id: 2, text: "Zastosuj korelację w EXISTS: EXISTS (SELECT 1 FROM access_logs a WHERE a.employee_id = e.id AND ...)", cost: 400 },
-      { id: 3, text: "SELECT DISTINCT department FROM employees e WHERE EXISTS (SELECT 1 FROM access_logs a WHERE a.employee_id = e.id AND a.location_id = 4 AND a.action = 'ENTER')", cost: 1000 }
+      { id: 3, text: "SELECT DISTINCT department FROM employees e WHERE EXISTS (SELECT 1 FROM access_logs a WHERE a.employee_id = e.id AND a.location_id = 4 AND a.action_type = 'ENTER')", cost: 1000 }
     ]
   },
 

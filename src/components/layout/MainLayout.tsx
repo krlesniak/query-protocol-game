@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Terminal, Play, ShieldAlert, Image as ImageIcon, X, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Terminal, Play, ShieldAlert, Image as ImageIcon, X, ChevronRight, ChevronLeft, AlertTriangle, Database } from 'lucide-react';
 import Editor, { type OnMount } from '@monaco-editor/react';
 import { dbService } from '../../db/DatabaseService';
 import type { QueryExecResult } from 'sql.js';
@@ -19,7 +19,7 @@ import { SystemLog, type LogEntry } from './SystemLog';
 const TABLE_SCHEMA: Record<string, string[]> = {
   employees: ['id', 'username', 'full_name', 'department', 'pos', 'clearance_level', 'status', 'assigned_location_id'],
   locations: ['id', 'name', 'sector', 'security_level'],
-  access_logs: ['id', 'employee_id', 'location_id', 'action', 'created_at', 'access_granted'],
+  access_logs: ['id', 'employee_id', 'location_id', 'action_type', 'created_at', 'access_granted'],
   messages: ['id', 'sender_id', 'receiver_id', 'created_at', 'subject', 'body', 'is_encrypted'],
   incidents: ['id', 'location_id', 'created_at', 'severity', 'description'],
 };
@@ -53,6 +53,8 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
   const [selectedEvidence, setSelectedEvidence] = useState<string | null>(null);
   const [newTableFlash, setNewTableFlash] = useState<string | null>(null);
   const [toast, setToast] = useState<{ title: string; desc: string } | null>(null);
+  const [imageError, setImageError] = useState(false);
+  const [showSchema, setShowSchema] = useState(false); 
 
   const [logs, setLogs] = useState<LogEntry[]>([
     { id: 1, time: new Date().toLocaleTimeString(), msg: 'NEXUS_OS connection initialized', type: 'info' },
@@ -64,12 +66,16 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
   const historyIndex = useRef<number>(-1);
   const logIdCounter = useRef<number>(3);
   
-  // Zachowujemy to co gracz pisał przed przełączeniem levelu
+
   const currentQueryDraft = useRef(initialQuery); 
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSelectedEvidence(null);
+      if (e.key === 'Escape') {
+        setSelectedEvidence(null);
+        setImageError(false); 
+        setShowSchema(false);
+      }
     };
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
@@ -94,7 +100,7 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
     }
   };
 
-  // NAWIGACJA STRZAŁKAMI PO ARCHIWALNYCH POZIOMACH
+
   const handleNavigate = (dir: 'prev' | 'next') => {
     if (viewedLevel === currentLevel) {
       currentQueryDraft.current = query; 
@@ -152,7 +158,7 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
     try {
       addLog(`Executing query...`, 'info');
 
-      // --- SQL FIREWALL ---
+
       const lockedTables = Object.keys(TABLE_SCHEMA).filter(t => !unlockedTables.includes(t));
       const attemptedTable = lockedTables.find(t => new RegExp(`\\b${t}\\b`, 'i').test(sqlToRun));
       
@@ -223,78 +229,70 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
     inherit: true,
 
     rules: [
-        // SQL keywords (SELECT, FROM, WHERE) — wyrazisty, lodowy błękit (zamiast fioletu)
-        { token: 'keyword', foreground: '66B2FF', fontStyle: 'bold' },
-        { token: 'keyword.sql', foreground: '66B2FF', fontStyle: 'bold' },
-
-        // Nazwy tabel i kolumn — jasny, bardzo czytelny szaro-biały
+        { token: 'keyword', foreground: '8BD49C', fontStyle: 'bold' },
+        { token: 'keyword.sql', foreground: '8BD49C', fontStyle: 'bold' },
         { token: 'identifier', foreground: 'D1D9E0' },
         { token: 'identifier.sql', foreground: 'D1D9E0' },
-
-        // Stringi — jaskrawy, terminalowy zielony (idealnie pasuje do klimatu)
-        { token: 'string', foreground: '8BD49C' },
-        { token: 'string.sql', foreground: '8BD49C' },
-        { token: 'string.quote.sql', foreground: '8BD49C' },
-
-        // Liczby — wyraźny, ostry żółty
+        { token: 'string', foreground: 'C77DFF' },
+        { token: 'string.sql', foreground: 'C77DFF' },
+        { token: 'string.quote.sql', foreground: 'C77DFF' },
         { token: 'number', foreground: 'F0C674' },
         { token: 'number.sql', foreground: 'F0C674' },
 
-        // Operatory (=, <>, >=) — stonowany niebiesko-szary
+
         { token: 'operator', foreground: '88A4B8' },
         { token: 'operator.sql', foreground: '88A4B8' },
-
-        // Komentarze — rozjaśniony szary (nie znikną w czarnym tle)
+        
         { token: 'comment', foreground: '7A8B99', fontStyle: 'italic' },
         { token: 'comment.sql', foreground: '7A8B99', fontStyle: 'italic' },
-
-        // Nawiasy / separatory
+        
         { token: 'delimiter', foreground: '9BA8B5' },
         { token: 'delimiter.sql', foreground: '9BA8B5' },
 
-        // NULL / TRUE / FALSE — stonowany, ale widoczny pomarańcz
         { token: 'constant', foreground: 'E59B76' },
         { token: 'constant.sql', foreground: 'E59B76' },
     ],
-
+    
     colors: {
-        // Główne tło dokładnie w klimacie strony
+
         'editor.background': '#0D1217',
         'editor.foreground': '#C5D4E0',
 
-        // Aktywna linia (bardzo delikatne podświetlenie)
+
         'editor.lineHighlightBackground': '#141B22',
+
         'editor.lineHighlightBorder': '#00000000',
 
-        // Zaznaczenie tekstu (bardziej nasycony, czytelny niebieski)
+
         'editor.selectionBackground': '#1D3B53',
+
         'editor.inactiveSelectionBackground': '#152A3B',
 
-        // Kursor
+        
         'editorCursor.foreground': '#8BD49C',
 
-        // Numery linii (wystarczający kontrast, ale nie krzyczą)
+        
         'editorLineNumber.foreground': '#4C5966',
         'editorLineNumber.activeForeground': '#8BA2B5',
 
-        // Scrollbar (dopasowany do tła)
+
         'scrollbarSlider.background': '#212D38',
         'scrollbarSlider.hoverBackground': '#304152',
         'scrollbarSlider.activeBackground': '#3E556B',
 
-        // Linie pomocnicze (wcięcia)
+
         'editorIndentGuide.background': '#162029',
         'editorIndentGuide.activeBackground': '#2A3C4D',
 
-        // Nawiasy
+
         'editorBracketMatch.background': '#1A3B34',
         'editorBracketMatch.border': '#499373',
 
-        // Wyszukiwanie (Find)
+
         'editor.findMatchBackground': '#435C3A',
         'editor.findMatchHighlightBackground': '#2C3D26',
 
-        // Widgety Monaco (okienka z podpowiedziami)
+
         'editorWidget.background': '#10161C',
         'editorWidget.border': '#253340',
         'editorSuggestWidget.background': '#10161C',
@@ -341,7 +339,7 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
   return (
     <div className="relative h-screen w-full overflow-hidden bg-[var(--bg-base)] text-[var(--text-main)] font-sans selection:bg-[var(--accent)]/20 selection:text-[var(--accent-bright)]">
 
-      {/* --- EVIDENCE TOAST --- */}
+
       <AnimatePresence>
         {toast && (
           <motion.div
@@ -359,7 +357,7 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
         )}
       </AnimatePresence>
 
-      {/* --- LEVEL UP OVERLAY --- */}
+
       <AnimatePresence>
         {showLevelUp && (
           <motion.div 
@@ -392,41 +390,114 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
         {selectedEvidence && (
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
-            className="absolute inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm"
-            onClick={() => setSelectedEvidence(null)}
+            className="absolute inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-md p-4"
+            onClick={() => { setSelectedEvidence(null); setImageError(false); }}
           >
             <motion.div 
-              initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} 
-              className="bg-[var(--surface-1)] border border-[var(--border)] w-full max-w-2xl flex flex-col shadow-2xl"
+              initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} 
+              className="bg-[var(--surface-1)] border border-[var(--border)] w-full max-w-4xl max-h-[90vh] flex flex-col shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden"
               onClick={e => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)] bg-[var(--surface-2)]">
-                <span className="font-mono text-[11px] text-[var(--text-secondary)] tracking-widest">CASE FILE</span>
-                <button onClick={() => setSelectedEvidence(null)} className="text-[var(--text-muted)] hover:text-white transition-colors">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)] bg-[#131920]">
+                <div className="flex items-center gap-3">
+                  <ShieldAlert className="w-5 h-5 text-[var(--accent-yellow)]" />
+                  <span className="font-mono text-[12px] text-[var(--accent-yellow)] tracking-[0.2em] font-bold">NEXUS_OS // CLASSIFIED DATA</span>
+                </div>
+                <button onClick={() => { setSelectedEvidence(null); setImageError(false); }} className="text-[var(--text-muted)] hover:text-white transition-colors bg-[var(--surface-2)] p-1 rounded-sm">
                    <X className="w-5 h-5" />
                 </button>
               </div>
               
-              <div className="p-6 flex flex-col gap-4">
-                {(() => {
-                  const ev = EVIDENCE_DB[selectedEvidence];
-                  if (!ev) return <p className="font-mono text-[var(--error)]">FILE CORRUPTED OR NOT FOUND</p>;
-                  return (
-                    <>
-                      <h2 className="text-xl font-mono text-[var(--text-main)] uppercase tracking-wide">{ev.title}</h2>
-                      <span className="text-[10px] font-mono text-[var(--accent-yellow)] px-2 py-0.5 border border-[var(--accent-yellow)] self-start rounded-sm">{ev.type}</span>
+              {(() => {
+                const ev = EVIDENCE_DB[selectedEvidence];
+                if (!ev) return <div className="p-10 text-center font-mono text-[var(--error)]">ERROR: FILE CORRUPTED OR NOT FOUND IN DATABASE</div>;
+                
+                return (
+                  <div className="flex flex-col lg:flex-row h-full min-h-0">
+                    <div className="lg:w-3/5 bg-[#0a0d10] border-r border-[var(--border)] relative flex items-center justify-center p-4 min-h-[300px]">
+                      <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
                       
-                      <div className="w-full h-48 border border-dashed border-[var(--border)] flex items-center justify-center bg-[var(--bg-base)] text-[var(--text-muted)] mt-2">
-                         <ImageIcon className="w-8 h-8 opacity-50 mb-2" />
-                         <span className="font-mono text-[10px] block w-full text-center">IMAGE_DATA_MISSING</span>
+                      {!imageError ? (
+                        <img 
+                          src={ev.imagePath} 
+                          alt={ev.title} 
+                          className="max-w-full max-h-full object-contain relative z-10 shadow-2xl border border-white/5"
+                          onError={() => setImageError(true)} 
+                        />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center text-[var(--text-muted)] z-10 w-full h-full border border-dashed border-[var(--border)] bg-black/20 backdrop-blur-sm p-8">
+                          <AlertTriangle className="w-12 h-12 mb-4 text-[var(--accent-yellow)] opacity-50" />
+                          <span className="font-mono text-[12px] tracking-[0.1em] text-[var(--accent-yellow)] mb-2 font-bold">DECRYPTION PENDING</span>
+                          <span className="font-mono text-[11px] text-center max-w-xs opacity-70">Graphic asset `{ev.imagePath}` could not be loaded from the local server. Awaiting asset delivery.</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="lg:w-2/5 flex flex-col p-8 bg-[var(--surface-1)] overflow-y-auto">
+                      <div className="mb-8">
+                        <h2 className="text-2xl font-mono text-white tracking-wide uppercase leading-tight mb-3">{ev.title}</h2>
+                        
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          <span className="text-[10px] font-mono text-[var(--accent-yellow)] px-2 py-1 border border-[var(--accent-yellow)]/30 bg-[var(--accent-yellow)]/10 rounded-sm">TYPE: {ev.type}</span>
+                          <span className="text-[10px] font-mono text-[var(--accent-bright)] px-2 py-1 border border-[var(--accent-bright)]/30 bg-[var(--accent-bright)]/10 rounded-sm">SOURCE_LVL: {ev.sourceLevel.toString().padStart(2, '0')}</span>
+                          <span className="text-[10px] font-mono text-[var(--text-muted)] px-2 py-1 border border-[var(--border)] bg-[var(--surface-2)] rounded-sm">ID: {ev.id}</span>
+                        </div>
                       </div>
 
-                      <p className="font-mono text-[13px] text-[var(--text-secondary)] leading-relaxed mt-4">
-                        {ev.description}
-                      </p>
-                    </>
-                  )
-                })()}
+                      <div className="flex-1">
+                        <h3 className="font-mono text-[11px] tracking-widest text-[var(--text-secondary)] mb-3 border-b border-[var(--border)] pb-2">INVESTIGATOR'S NOTES //</h3>
+                        <p className="font-mono text-[13px] text-[#AAB4BE] leading-[1.8] whitespace-pre-wrap">
+                          {ev.storyDescription || ev.description}
+                        </p>
+                      </div>
+                      
+                      <div className="mt-8 pt-4 border-t border-[var(--border)] border-dashed flex justify-between items-center opacity-50">
+                        <span className="font-mono text-[9px] tracking-widest text-[var(--text-muted)]">NEXUS_OS V.3.1.4</span>
+                        <span className="font-mono text-[9px] tracking-widest text-[var(--text-muted)]">END OF FILE</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })()}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* --- SCHEMA LIGHTBOX --- */}
+      <AnimatePresence>
+        {showSchema && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
+            className="absolute inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-md p-4"
+            onClick={() => setShowSchema(false)}
+          >
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} 
+              className="bg-[var(--surface-1)] border border-[var(--border)] w-full max-w-5xl max-h-[90vh] flex flex-col shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden"
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Header Schematu */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)] bg-[#131920]">
+                <div className="flex items-center gap-3">
+                  <Database className="w-5 h-5 text-[var(--accent-bright)]" />
+                  <span className="font-mono text-[12px] text-[var(--accent-bright)] tracking-[0.2em] font-bold">
+                    NEXUS_OS // DATABASE SCHEMA V{Math.min(unlockedTables.length, 5)}.0
+                  </span>
+                </div>
+                <button onClick={() => setShowSchema(false)} className="text-[var(--text-muted)] hover:text-white transition-colors bg-[var(--surface-2)] p-1 rounded-sm">
+                   <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              {/* Sekcja graficzna */}
+              <div className="flex-1 bg-[#0a0d10] relative flex items-center justify-center p-8 min-h-[400px] overflow-auto">
+                <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+                <img 
+                  src={`/assets/schema/schema${Math.min(unlockedTables.length, 5)}.png`} 
+                  alt="Database Schema" 
+                  className="max-w-full max-h-full object-contain relative z-10 border border-white/5 shadow-2xl"
+                />
               </div>
             </motion.div>
           </motion.div>
@@ -439,9 +510,12 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
       <div className="h-[calc(100vh-54px)] p-2 flex flex-col gap-2 min-h-0">
         <div className="flex-1 min-h-0 grid grid-cols-[225px_minmax(0,1fr)_300px] gap-2">
 
-          <DatabaseSidebar newTableFlash={newTableFlash} />
+          <DatabaseSidebar newTableFlash={newTableFlash} onOpenSchema={() => setShowSchema(true)} />
 
-          {/* CENTER: SQL EDITOR & RESULTS */}
+
+
+
+
           <main className="min-w-0 min-h-0 flex flex-col gap-2">
             
             <section className="flex-1 min-h-0 flex flex-col border border-[var(--border)] bg-[var(--surface-1)] focus-within:border-[var(--accent-muted)] transition-colors duration-200 overflow-hidden">
@@ -452,7 +526,7 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
                   <span className="text-[11px] tracking-widest text-[var(--text-secondary)]">SQL CONSOLE</span>
                 </div>
 
-                {/* --- NAWIGACJA STRZAŁKAMI --- */}
+
                 <div className="flex items-center gap-3">
                   {currentLevel > 1 && (
                     <div className="flex items-center bg-[var(--surface-2)] rounded-sm border border-[var(--border)] overflow-hidden">

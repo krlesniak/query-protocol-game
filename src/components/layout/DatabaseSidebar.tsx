@@ -1,21 +1,22 @@
 import { useState } from 'react';
-import { Database, Lock, ChevronRight } from 'lucide-react';
+import { Database, Lock, ChevronRight, Network } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const TABLE_SCHEMA: Record<string, string[]> = {
   employees: ['id', 'username', 'full_name', 'department', 'pos', 'clearance_level', 'status', 'assigned_location_id'],
   locations: ['id', 'name', 'sector', 'security_level'],
-  access_logs: ['id', 'employee_id', 'location_id', 'action', 'created_at', 'access_granted'],
+  access_logs: ['id', 'employee_id', 'location_id', 'action_type', 'created_at', 'access_granted'],
   messages: ['id', 'sender_id', 'receiver_id', 'created_at', 'subject', 'body', 'is_encrypted'],
   incidents: ['id', 'location_id', 'created_at', 'severity', 'description'],
 };
 
 interface DatabaseSidebarProps {
   newTableFlash: string | null;
+  onOpenSchema: () => void;
 }
 
-export const DatabaseSidebar = ({ newTableFlash }: DatabaseSidebarProps) => {
+export const DatabaseSidebar = ({ newTableFlash, onOpenSchema }: DatabaseSidebarProps) => {
   const { unlockedTables } = useGameStore();
   const [expandedTables, setExpandedTables] = useState<string[]>(['employees']);
 
@@ -27,12 +28,20 @@ export const DatabaseSidebar = ({ newTableFlash }: DatabaseSidebarProps) => {
 
   return (
     <aside className="bg-[var(--surface-1)] border border-[var(--border)] flex flex-col min-h-0 overflow-hidden">
-      <div className="h-11 px-4 border-b border-[var(--border)] flex items-center justify-between shrink-0">
+      <div className="h-11 px-3 border-b border-[var(--border)] flex items-center justify-between shrink-0 bg-[#0d1217]">
         <div className="flex items-center gap-2">
           <Database className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
           <span className="font-mono text-[11px] tracking-widest text-[var(--text-secondary)]">DATABASE</span>
         </div>
-        <span className="font-mono text-[10px] text-[var(--text-muted)]">SQLITE</span>
+        
+        <button 
+          onClick={onOpenSchema}
+          className="flex items-center gap-1.5 px-2 py-1 bg-[var(--surface-2)] hover:bg-[var(--surface-3)] border border-[var(--border)] hover:border-[var(--accent-bright)] text-[var(--text-muted)] hover:text-[var(--accent-bright)] transition-colors rounded-sm group"
+          title="Show Entity-Relationship Diagram"
+        >
+          <Network className="w-3.5 h-3.5 group-hover:text-[var(--accent-bright)] transition-colors" />
+          <span className="font-mono text-[9px] tracking-widest">SCHEMA</span>
+        </button>
       </div>
 
       <div className="p-2 overflow-y-auto font-mono text-xs">
