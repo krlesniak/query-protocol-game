@@ -86,18 +86,18 @@ export const useGameStore = create<GameState>()(
           };
         }),
 
-      applyHint: (levelId: number, hintId: number, cost: number) =>
-        set((state) => {
-          const levelHints = state.usedHints[levelId] || [];
-          if (levelHints.includes(hintId)) return state;
-          if (state.score < cost) return state;
-
+      applyHint: (levelId, hintId, cost) => set((state) => {
+        if (state.score >= cost && !state.usedHints[levelId]?.includes(hintId)) {
           return {
-            usedHints: { ...state.usedHints, [levelId]: [...levelHints, hintId] },
-            score: state.score - cost, 
+            score: state.score - cost,
+            usedHints: {
+              ...state.usedHints,
+              [levelId]: [...(state.usedHints[levelId] || []), hintId]
+            }
           };
-        }),
-
+        }
+        return state; 
+      }),
       incrementQueryAttempts: () => set((state) => ({ queryAttempts: state.queryAttempts + 1 })),
 
       resetGame: () => set(initialState),

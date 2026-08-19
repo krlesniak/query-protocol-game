@@ -1,12 +1,11 @@
-import { Terminal, Activity, Wifi, Clock3, RotateCcw } from 'lucide-react';
+import { Terminal, Activity, Wifi, Clock3, LogOut } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 
 interface HeaderProps {
-  onReset: () => void;
   onReturnToMenu: () => void;
 }
 
-export const Header = ({ onReset, onReturnToMenu }: HeaderProps) => {
+export const Header = ({ onReturnToMenu }: HeaderProps) => {
   const { score } = useGameStore();
 
   return (
@@ -26,9 +25,6 @@ export const Header = ({ onReset, onReturnToMenu }: HeaderProps) => {
           
           <div className="hidden sm:flex items-center gap-4 font-mono text-[12px] text-[var(--text-muted)]">
             <span>NEXUS_OS // SESSION 03</span>
-            <button onClick={onReset} className="flex items-center gap-1 text-[var(--error)] hover:text-red-400 transition-colors bg-red-950/20 px-2 py-0.5 rounded border border-red-900/50">
-              <RotateCcw className="w-3 h-3" /> RESET
-            </button>
           </div>
         </div>
       </div>
@@ -47,6 +43,16 @@ export const Header = ({ onReset, onReturnToMenu }: HeaderProps) => {
         <div className="hidden sm:flex items-center gap-1.5">
           <Clock3 className="w-3 h-3 text-[var(--accent-greeny)]" />
           <span>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+        </div>
+        
+        <div className="border-l border-[var(--border)] pl-5 ml-1 hidden sm:block">
+          <button 
+            onClick={onReturnToMenu}
+            className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--accent-bright)] transition-colors duration-200"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="tracking-widest">DISCONNECT</span>
+          </button>
         </div>
       </div>
     </header>

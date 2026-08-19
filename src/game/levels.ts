@@ -18,175 +18,170 @@ export interface LevelDefinition {
 }
 
 export const LEVELS: LevelDefinition[] = [
-  // --- ETAP 1 (Podstawy) ---
+  // --- AKT I: THE DISAPPEARANCE ---
   {
     id: 1,
-    title: "ŚLAD",
-    briefing: "Z systemu zniknęła osoba oznaczona jako ORACLE-01. Oficjalny raport mówi, że konto zostało dezaktywowane dwa dni temu. Chcę wiedzieć tylko jedno: Kto nadal posiada aktywne konto związane z projektem ORACLE?",
-    objective: "Znajdź status i nazwę profilu pracownika powiązany z ORACLE.",
-    requiredRows: [{ username: 'oracle_01', status: 'ACTIVE' }],
+    title: "FIRST CONTACT",
+    briefing: "Z systemu NEXUS zniknął Główny Architekt, Dr. Adrian Voss (pseudonim: ORACLE-01). Oficjalny raport głosi, że ukradł dane i uciekł, a jego profil został skasowany. Systemy korporacyjne często kłamią.",
+    objective: "Ustal aktualny status konta oraz pełne imię i nazwisko pracownika ukrywającego się pod loginem 'oracle_01'.",
+    requiredRows: [{ full_name: 'Adrian Voss', status: 'ACTIVE' }],
     maxRows: 1, rewardXP: 150, unlocksTable: 'locations',
     hints: [
-      { id: 1, text: "Użyj SELECT * FROM employees.", cost: 100 },
-      { id: 2, text: "Dodaj klauzulę WHERE username = 'oracle_01'.", cost: 200 }
+      { id: 1, text: "Przeanalizuj tabelę pracowników (employees). Zastanów się, których kolumn potrzebujesz.", cost: 50 },
+      { id: 2, text: "Użyj filtrowania, by wyizolować tylko jeden konkretny pseudonim pracownika.", cost: 100 }
     ]
   },
   {
     id: 2,
-    title: "GDZIE?",
-    briefing: "Znalazłeś aktywne konto. Problem w tym, że nie wiesz, gdzie ORACLE pracował. W dokumentacji HR znajduje się tylko ID przypisanego obszaru. Znajdź dokładną lokalizację (nazwę i sektor) przypisaną do projektu ORACLE.",
-    objective: "Ustal przypisany obiekt, w którym pracował oracle, korzystając z tabeli locations.",
-    requiredRows: [{ name: 'ORACLE_LAB', sector: 'B' }],
+    title: "LAST LOGIN",
+    briefing: "Voss figuruje jako aktywny pracownik, mimo że oficjalnie 'zaginął'. Gdzieś musi być jego baza operacyjna. Dokumentacja HR skrywa ID jego domyślnego obszaru roboczego.",
+    objective: "Odnajdź dokładną nazwę lokacji oraz jej sektor, do której oficjalnie przypisany był zaginiony architekt.",
+    requiredRows: [{ name: 'SERVER_ROOM_03', sector: 'CORE' }],
     maxRows: 1, rewardXP: 200, unlocksTable: 'access_logs', unlocksEvidence: 'EVD_ORACLE_LAB_LOC',
     hints: [
-      { id: 1, text: "ORACLE ma przypisane assigned_location_id = 4 w swojej teczce.", cost: 100 },
-      { id: 2, text: "Odszukaj lokalizację o id = 4 w tabeli 'locations'.", cost: 200 }
+      { id: 1, text: "Sprawdź, jakie ID lokacji przypisano do pracownika z poprzedniego poziomu.", cost: 50 },
+      { id: 2, text: "Przeszukaj nową tabelę lokacji pod kątem znalezionego wcześniej numeru ID.", cost: 100 }
     ]
   },
   {
     id: 3,
-    title: "03:42",
-    briefing: "W nocy, kiedy ORACLE zniknął, system bezpieczeństwa zarejestrował nietypowy ruch. Administrator twierdzi, że po 03:00 nikt nie wszedł do ORACLE_LAB. Sprawdź, czy system mówi prawdę.",
-    objective: "Znajdź wpis w logach dostępu dowodzący WEJŚCIA do LABORATORIUM po godzinie 03:00 w dniu 2026-02-12.",
-    requiredRows: [{ action_type: 'ENTER', location_id: 4 }],
+    title: "NO EXIT",
+    briefing: "Znamy miejsce: SERVER_ROOM_03. Oficjalnie ORACLE opuścił budynek wieczorem. Problem w tym, że żadna kamera nie zarejestrowała jego wyjścia, a system zgłasza nieścisłości.",
+    objective: "Udowodnij kłamstwo. Odszukaj log potwierdzający pomyślne WEJŚCIE do tej serwerowni w dniu 12 lutego po godzinie 23:00.",
+    requiredRows: [{ action_type: 'ENTER', location_id: 3 }],
     maxRows: 3, rewardXP: 300, unlocksTable: 'incidents', unlocksEvidence: 'EVD_SERVER_LOG_CONTRADICTION',
     hints: [
-      { id: 1, text: "Zacznij od analizy tabeli logów dostępu (access_logs).", cost: 100 },
-      { id: 2, text: "Filtruj wpisy po location_id = 4 oraz użyj warunku created_at > '2026-02-12 03:00:00'.", cost: 200 },
-      { id: 3, text: "Znajdź akcję 'ENTER', aby sprawdzić, kto mógł wejść do laboratorium.", cost: 300 }
+      { id: 1, text: "Zbadaj tabelę logów dostępu. Musisz pogodzić ze sobą ID lokacji, konkretną akcję logowania oraz datę.", cost: 50 },
+      { id: 2, text: "Aby wymusić spełnienie wielu warunków naraz, połącz je operatorem logicznym.", cost: 100 },
+      { id: 3, text: "Czas w bazie zapisany jest tekstowo. Możesz szukać wpisów większych (późniejszych) niż '2026-02-12 23:00:00'.", cost: 150 }
+    ]
+  },
+  {
+    id: 4, title: "THE GHOST", 
+    briefing: "Ktoś wszedł do serwerowni o 23:47. Nagranie z kamer bezpieczeństwa to tylko uszkodzony plik wideo, na którym widać rozmytą sylwetkę. Ktoś wywołał błąd systemu celowo.",
+    objective: "Znajdź dokładny opis incydentu o statusie CRITICAL w owej serwerowni z tamtej nocy.",
+    requiredRows: [{ description: 'CCTV feed corrupted. Signal lost.' }], maxRows: 1, rewardXP: 350, unlocksTable: 'messages',
+    hints: [
+      { id: 1, text: "Skoncentruj się na tabeli incydentów (incidents). Zidentyfikuj kolumny opisujące wagę błędu oraz cel.", cost: 100 }, 
+      { id: 2, text: "Odfiltruj wyniki tak, aby pokazać tylko krytyczne awarie z konkretnego pomieszczenia.", cost: 200 }
+    ]
+  },
+  {
+    id: 5, title: "BORROWED IDENTITY", 
+    briefing: "Zidentyfikowałem anomalię w systemie autoryzacji. Karta ORACLE'a nie była używana przez niego. Została na czas ucieczki przypisana operacyjnie komuś z wewnątrz.",
+    objective: "Zdemaskuj 'ducha'. Znajdź pracownika działu operacji bezpieczeństwa (SECURITY), który dysponuje 5. poziomem uprawnień. Podaj jego pełne imię i nazwisko.",
+    requiredRows: [{ full_name: 'Martin Vale' }], maxRows: 1, rewardXP: 400, unlocksEvidence: 'EVD_GHOST_PROFILE',
+    hints: [
+      { id: 1, text: "Zamiast wyciągać wszystkie dane, wypisz w zapytaniu tylko jedną konkretną kolumnę zawierającą dane osobowe.", cost: 100 }, 
+      { id: 2, text: "Znajdź osobę, która spełnia oba warunki działu i wysokiego poziomu zabezpieczeń (clearance_level).", cost: 200 }
     ]
   },
 
-  // --- ETAP 2 (Początkujący / Średniozaawansowany) ---
+  // --- AKT II: SOMEONE IS LYING ---
   {
-    id: 4, title: "ZAMIESZANIE", 
-    briefing: "Coś się stało tamtej nocy w laboratorium. Zanim zagłębimy się w logi personalne, sprawdźmy powód ewakuacji. System zarejestrował tamtej nocy incydent bezpieczeństwa.",
-    objective: "Znajdź dokładny opis incydentu o statusie CRITICAL w ORACLE_LAB",
-    requiredRows: [{ description: 'Unauthorized data extraction detected on terminal ORC-01.' }], maxRows: 1, rewardXP: 350, unlocksTable: 'messages',
+    id: 6, title: "NIGHT SHIFT", 
+    briefing: "Martin Vale. Problem w tym, że w kadrach uparcie twierdzi, że tamtej nocy nie było go w budynku. Ktoś jednak sfałszował jego grafik.",
+    objective: "Znajdź treść wiadomości wysłanej przez Martina, która dowodzi, że pełnił wtedy nocną zmianę (szukaj słowa 'shift').",
+    requiredRows: [{ body: 'Starting my night shift in Sector CORE.' }], maxRows: 1, rewardXP: 450,
     hints: [
-      { id: 1, text: "Użyj tabeli incidents i operatora AND dla wielu warunków.", cost: 100 }, 
-      { id: 2, text: "Filtruj wynik po location_id = 4 AND severity = 'CRITICAL'.", cost: 200 }
+      { id: 1, text: "Ustal ID nadawcy, korzystając z wiedzy z poprzedniego zadania, a następnie przeszukaj jego wiadomości.", cost: 100 }, 
+      { id: 2, text: "Aby wyszukać fragment tekstu ukryty w dłuższym zdaniu, potrzebujesz mechanizmu wyszukiwania wzorców (często łączonego ze znakami %).", cost: 200 }
     ]
   },
   {
-    id: 5, title: "SPRAWCA", 
-    briefing: "Incydent to 'Nieautoryzowana kradzież danych'. Logi z poziomu 3 wyraźnie pokazały, że wszedł tam pracownik o ID 13. Musimy wiedzieć, z kim mamy do czynienia.",
-    objective: "Wyciągnij tylko dwie kolumny: departament i pozycję pracownika o id = 13.",
-    requiredRows: [{ department: 'EXECUTIVE', pos: 'Director' }], maxRows: 1, rewardXP: 400, unlocksEvidence: 'EVD_GHOST_PROFILE',
+    id: 7, title: "DEAD MAN'S MESSAGE", 
+    briefing: "Zaczynamy grzebać za głęboko. System milczy, ale ORACLE był genialnym architektem – wiedział, że zostaną zmanipulowane logi, i ukrył komunikat w starych plikach poczty.",
+    objective: "Odszukaj wiadomość wysłaną przez samego ORACLE'a (ID 77), w której ostrzega, by nie ufać systemowi (szukaj słowa 'trust').",
+    requiredRows: [{ body: 'If you are reading this, do not trust the logs.' }], maxRows: 1, rewardXP: 500, unlocksEvidence: 'EVD_ECHO_DOC',
     hints: [
-      { id: 1, text: "Nie używaj SELECT *. Wymień nazwy kolumn po przecinku.", cost: 100 }, 
-      { id: 2, text: "SELECT department, pos FROM employees WHERE id = 13", cost: 500 }
+      { id: 1, text: "Podobnie jak poprzednio, szukasz specyficznego fragmentu tekstu u konkretnego nadawcy.", cost: 150 }, 
+      { id: 2, text: "Użyj znaku wieloznacznego przed i po szukanym słowie, aby upewnić się, że przechwycisz je w każdym kontekście.", cost: 300 }
     ]
   },
   {
-    id: 6, title: "ROZKAZ", 
-    briefing: "To GHOST, Dyrektor Operacyjny. Taka osoba nie zostawia logów przypadkiem – musiał nakazać Administratorowi (ID 42) zatarcie śladów w systemie od razu po kradzieży.",
-    objective: "Znajdź treść wiadomości wysłanej po godzinie 04:00 rano (2026-02-12 04:00:00) przez nadawcę 13 do odbiorcy 42.",
-    requiredRows: [{ body: 'Ensure logs for Sector B are purged by morning.' }], maxRows: 1, rewardXP: 450,
-    hints: [
-      { id: 1, text: "Szukaj w tabeli messages, używając kilku warunków AND.", cost: 100 }, 
-      { id: 2, text: "WHERE sender_id = 13 AND receiver_id = 42 AND created_at > '2026-02-12 04:00:00'", cost: 400 }
-    ]
-  },
-
-  // --- ETAP 3 (Średniozaawansowany - Wzorce, Agregacja, Podstawy JOIN) ---
-  {
-    id: 7, title: "ECHOLOCATE", 
-    briefing: "Dyrektor zatuszował sprawę projektu o nazwie kodowej 'EchoLocate: Cyfrowy Strażnik Bioakustyki'. Sprawdźmy, czy w firmowej poczcie są jakieś inne wzmianki o tym projekcie.",
-    objective: "Odszukaj w systemie temat wiadomości, której treść zawiera słowo 'EchoLocate'.",
-    requiredRows: [{ subject: 'Project EchoLocate' }], maxRows: 1, rewardXP: 500, unlocksEvidence: 'EVD_ECHO_DOC',
-    hints: [
-      { id: 1, text: "Użyj operatora LIKE do szukania wzorców tekstowych.", cost: 100 }, 
-      { id: 2, text: "SELECT subject FROM messages WHERE body LIKE '%EchoLocate%'", cost: 500 }
-    ]
-  },
-  {
-    id: 8, title: "BRUTE FORCE", 
-    briefing: "Zanim GHOST wszedł do labu, ktoś z zewnątrz (lub z innego działu) agresywnie próbował dostać się do innej sekcji, wielokrotnie odbijając się od zabezpieczeń drzwiowych.",
-    objective: "Kto ma na koncie najwięcej odrzuconych prób dostępu? Podaj employee_id osoby z największą liczbą logów, gdzie access_granted = 0.",
+    id: 8, title: "THE IMPOSSIBLE TERMINAL", 
+    briefing: "Jeden z terminali NEXUS wygenerował setki zdarzeń w ciągu kilku minut, generując zasłonę dymną, gdy Martin wchodził do serwerowni. Ktoś wywołał sztuczny ruch.",
+    objective: "Kto próbował złamać zaporę? Podaj ID pracownika, na którego koncie zarejestrowano największą liczbę odrzuconych logowań (access_granted = 0).",
     requiredRows: [{ employee_id: 200 }], maxRows: 1, rewardXP: 600,
     hints: [
-      { id: 1, text: "Użyj GROUP BY employee_id w tabeli access_logs.", cost: 200 }, 
-      { id: 2, text: "Posortuj wyniki używając ORDER BY COUNT(*) DESC i użyj LIMIT 1.", cost: 400 }, 
-      { id: 3, text: "SELECT employee_id FROM access_logs WHERE access_granted = 0 GROUP BY employee_id ORDER BY COUNT(*) DESC LIMIT 1", cost: 1000 }
+      { id: 1, text: "Musisz zebrać odrzucone logi i pogrupować je względem identyfikatora pracownika.", cost: 150 }, 
+      { id: 2, text: "Zlicz zgrupowane wiersze i ułóż wyniki w porządku malejącym, by lider znalazł się na szczycie.", cost: 300 }, 
+      { id: 3, text: "Obetnij listę wyników do pierwszego rekordu.", cost: 450 }
     ]
   },
   {
-    id: 9, title: "CEL ATAKU", 
-    briefing: "Znamy ID hakera (200), ale to nam nic nie mówi, dopóki nie dowiemy się, gdzie próbował się dostać. Musimy połączyć dane z dwóch różnych tabel.",
-    objective: "Użyj operatora JOIN, aby połączyć access_logs i locations. Podaj nazwę lokacji, w której haker (ID z poziomu 8) miał zablokowane wejścia.",
+    id: 9, title: "THE EMPTY ROOM", 
+    briefing: "Znamy ID fałszywego terminala, ale to nam nic nie mówi, dopóki nie dowiemy się, gdzie trwał sztuczny atak. Zapisy monitoringu w tym miejscu pokazują... puste korytarze.",
+    objective: "Odczytaj nazwę lokacji z innej tabeli. Do jakiego pomieszczenia sfałszowana karta z poprzedniego poziomu miała najwięcej zablokowanych wejść?",
     requiredRows: [{ name: 'ARCHIVES_DEEP' }], maxRows: 1, rewardXP: 650, unlocksEvidence: 'EVD_ARCHIVE_LOG',
     hints: [
-      { id: 1, text: "Użyj JOIN łącząc klucz access_logs.location_id z locations.id.", cost: 400 }, 
-      { id: 2, text: "SELECT l.name FROM locations l JOIN access_logs a ON l.id = a.location_id WHERE a.employee_id = 200 LIMIT 1", cost: 1000 }
+      { id: 1, text: "Musisz połączyć dane z tabeli logów i lokalizacji w miejscu, gdzie zgadzają się ich identyfikatory miejsc.", cost: 150 }, 
+      { id: 2, text: "Stosuj aliasy (skróty) do tabel, aby móc precyzyjnie zażądać wyświetlenia kolumny z odpowiedniego źródła.", cost: 300 },
+      { id: 3, text: "Narzuć złączonym tabelom filtr sprawdzający ID intruza i status wejścia.", cost: 450 }
+    ]
+  },
+  {
+    id: 10, title: "THREE LIARS", 
+    briefing: "Dyrektorzy NEXUS mataczą w papierach. Elias Voss – CTO i brat zaginionego – twierdzi, że w noc zniknięcia ORACLE'a nie logował się do sieci korporacyjnej.",
+    objective: "To śledztwo wchodzi na wyższy szczebel. Wyciągnij login (username) Dyrektora Technicznego (CTO) firmy NEXUS.",
+    requiredRows: [{ username: 'evoss_cto' }], maxRows: 1, rewardXP: 700,
+    hints: [
+      { id: 1, text: "Sprawdź, jakie stanowiska (pos) zajmują pracownicy i poszukaj skrótu dyrektora ds. technologii.", cost: 250 }, 
+      { id: 2, text: "Użyj filtrowania, by wyciągnąć login osoby na tym szczeblu.", cost: 500 }
     ]
   },
 
-  // --- ETAP 4 (Zaawansowany - Subqueries: IN, EXISTS) ---
+  // --- AKT III: THE MIRROR ---
   {
-    id: 10, title: "MARTWA DUSZA", 
-    briefing: "Dyrektor prawdopodobnie używał w systemie fałszywych 'kont-słupów', by preparować dane. Musimy znaleźć tzw. martwą duszę – aktywne konto, które nigdy nie weszło do żadnego budynku.",
-    objective: "Wyciągnij username pracownika o statusie ACTIVE, który nie ma ani jednego wpisu w tabeli access_logs. Użyj NOT EXISTS lub NOT IN.",
-    requiredRows: [{ username: 'phantom_00' }], maxRows: 1, rewardXP: 700,
+    id: 11, title: "EXECUTIVE ACCESS", 
+    briefing: "CTO skłamał. Analiza autoryzacji systemowych wykazała, że to on osobiście wcisnął przycisk usunięcia głównych logów z nocy zniknięcia brata.",
+    objective: "Znajdź opis incydentu o statusie 'WARNING', który dokumentuje manualne wymuszenie czyszczenia bazy ('purge').",
+    requiredRows: [{ description: 'Manual purge of security logs initiated by executive override.' }], maxRows: 5, rewardXP: 800,
     hints: [
-      { id: 1, text: "Możesz użyć podzapytania: WHERE id NOT IN (SELECT employee_id FROM access_logs).", cost: 200 }, 
-      { id: 2, text: "Pamiętaj o dodaniu warunku status = 'ACTIVE' do głównego zapytania.", cost: 400 },
-      { id: 3, text: "SELECT username FROM employees WHERE status = 'ACTIVE' AND id NOT IN (SELECT employee_id FROM access_logs)", cost: 1000 }
+      { id: 1, text: "Przeszukaj incydenty ze statusem ostrzeżenia i poszukaj określonego w briefingu słowa.", cost: 250 }, 
+      { id: 2, text: "Wyciągnij samą kolumnę z opisem błędu.", cost: 500 }
     ]
   },
   {
-    id: 11, title: "WSPÓLNICY", 
-    briefing: "ORACLE nie działał sam. Zanim uciekł, wysyłał zaszyfrowane komunikaty osobom, które pomagały mu w demaskacji projektu EchoLocate.",
-    objective: "Znajdź imiona i nazwiska pracowników, którzy byli odbiorcami zaszyfrowanych maili od ORACLE'a.",
-    requiredRows: [{ full_name: 'Alan Grant' }], maxRows: 5, rewardXP: 800,
+    id: 12, title: "THE MISSING HOUR", 
+    briefing: "Mamy wyrwę w czasie między 23:47 a 00:31. ORACLE nie uciekł z danymi. Był przetrzymywany wewnątrz własnej serwerowni przez wewnętrzny oddział bezpieczeństwa.",
+    objective: "Zidentyfikuj oddział uderzeniowy. Użyj podzapytania, by wypisać imiona i nazwiska pracowników 'SECURITY', którzy logowali się do serwerowni nr 3.",
+    requiredRows: [{ full_name: 'Martin Vale' }], maxRows: 5, rewardXP: 850,
     hints: [
-      { id: 1, text: "Użyj operatora IN i podzapytania na tabeli messages.", cost: 200 }, 
-      { id: 2, text: "Główne zapytanie szuka w employees, podzapytanie zwraca receiver_id z messages.", cost: 400 },
-      { id: 3, text: "SELECT full_name FROM employees WHERE id IN (SELECT receiver_id FROM messages WHERE sender_id = 77 AND is_encrypted = 1)", cost: 1000 }
+      { id: 1, text: "Zapytanie bazowe to zwykłe wyciągnięcie pełnych imion pracowników ochrony.", cost: 250 }, 
+      { id: 2, text: "Wykorzystaj strukturę z operatorem upewniającym się, że ich ID znajduje się (IN) w wynikach z innej tabeli.", cost: 500 },
+      { id: 3, text: "Wewnętrzne podzapytanie musi zwracać ID pracowników, którzy weszli do lokacji nr 3 w logach dostępu.", cost: 750 }
     ]
   },
   {
-    id: 12, title: "UKRYTY DOSTĘP", 
-    briefing: "GHOST zarzeka się na zarządzie, że żaden dyrektor nie miał fizycznego wstępu do ORACLE_LAB, by nie kompromitować projektu. Musimy udowodnić mu kłamstwo i pokazać skale naruszeń.",
-    objective: "W jakich działach są kłamcy? Wypisz unikalne departamenty, z których jakikolwiek pracownik wszedł do ORACLE_LAB. Użyj operatora EXISTS.",
-    requiredRows: [{ department: 'EXECUTIVE' }, { department: 'SPECIAL_PROJECTS' }, { department: 'MAINTENANCE' }], maxRows: 5, rewardXP: 850,
+    id: 13, title: "CHAIN OF EVIDENCE", 
+    briefing: "Zaskakujący zwrot akcji. Martin Vale z ochrony nie był porywaczem. Ryzykując życie, otworzył serwerownię od wewnątrz, by umożliwić ucieczkę architektowi.",
+    objective: "Potwierdź tę hipotezę. Znajdź temat (subject) zaszyfrowanej wiadomości wysłanej przez Martina do ORACLE'a.",
+    requiredRows: [{ subject: 'Extraction route clear' }], maxRows: 1, rewardXP: 900, unlocksEvidence: 'EVD_CCTV_ALPHA',
     hints: [
-      { id: 1, text: "Zapytanie bazowe: SELECT DISTINCT department FROM employees e...", cost: 200 }, 
-      { id: 2, text: "Zastosuj korelację w EXISTS: EXISTS (SELECT 1 FROM access_logs a WHERE a.employee_id = e.id AND ...)", cost: 400 },
-      { id: 3, text: "SELECT DISTINCT department FROM employees e WHERE EXISTS (SELECT 1 FROM access_logs a WHERE a.employee_id = e.id AND a.location_id = 4 AND a.action_type = 'ENTER')", cost: 1000 }
-    ]
-  },
-
-  // --- ETAP 5 (Mistrzowski - Multi-JOIN) ---
-  {
-    id: 13, title: "KRET", 
-    briefing: "Poprzednie zapytanie ujawniło wydział MAINTENANCE w logach labu! Ktoś z ekipy sprzątającej na niskim szczeblu otworzył awaryjnie drzwi GHOSTOWI przed wyciekiem.",
-    objective: "Znajdź username pracownika sprzątającego (dział MAINTENANCE), który miał uprawnienia poniżej 3, a mimo to ma log wejścia do labu.",
-    requiredRows: [{ username: 'csmith_99' }], maxRows: 1, rewardXP: 900, unlocksEvidence: 'EVD_CCTV_ALPHA',
-    hints: [
-      { id: 1, text: "Połącz (JOIN) employees z access_logs.", cost: 200 }, 
-      { id: 2, text: "Musisz połączyć filtry dla obu tabel: e.department = 'MAINTENANCE', e.clearance_level < 3 oraz a.location_id = 4.", cost: 800 }
+      { id: 1, text: "Musisz połączyć dane co najmniej dwóch osób z tabeli wiadomości.", cost: 500 }, 
+      { id: 2, text: "Poszukaj odpowiedniego statusu szyfrowania oraz przyporządkuj nadawcę (Martin) i odbiorcę (ORACLE) na podstawie ich ID.", cost: 1000 }
     ]
   },
   {
-    id: 14, title: "KRYPTOGRAFIA", 
-    briefing: "Mamy kreta. ORACLE uciekł, ale zostawił dla swojego informatora (Alana Granta) klucz dostępu do zarchiwizowanych projektów. Tzw. 'Dead Man's Switch'.",
-    objective: "Podaj temat ostatniej chronologicznie zaszyfrowanej wiadomości wysłanej przez ORACLE.",
-    requiredRows: [{ subject: 'THE_TRUTH_IS_OUT' }], maxRows: 1, rewardXP: 1000, unlocksEvidence: 'EVD_DEAD_MAN',
+    id: 14, title: "PROJECT MIRROR", 
+    briefing: "Dlaczego CTO chciał pozbyć się głównego architekta NEXUS? ORACLE natrafił na kod 'PROJECT MIRROR' – system nielegalnie kopiujący i profilujący dane wszystkich klientów korporacji.",
+    objective: "Zdemaskuj głównych interesantów projektu. Odszukaj ID pracownika (nadawcy), który rozsyłał maile zatytułowane dokładnie jako 'PROJECT MIRROR'.",
+    requiredRows: [{ sender_id: 10 }], maxRows: 1, rewardXP: 1000, unlocksEvidence: 'EVD_DEAD_MAN',
     hints: [
-      { id: 1, text: "Szukaj w tabeli messages dla sender_id = 77.", cost: 200 }, 
-      { id: 2, text: "Użyj ORDER BY created_at DESC LIMIT 1, aby zdobyć najnowszą wiadomość.", cost: 800 }
+      { id: 1, text: "Wiadomości firmowe ukryte są w tabeli messages.", cost: 500 }, 
+      { id: 2, text: "Skup się na precyzyjnym filtrowaniu kolumny odpowiedzialnej za nagłówek komunikatu.", cost: 1000 }
     ]
   },
   {
-    id: 15, title: "RAPORT KOŃCOWY", 
-    briefing: "Mamy wszystko. Kod do archiwum udowodnił, że 'Cyfrowy Strażnik Bioakustyki' miał stać się bronią inwigilacyjną. Pozostało wygenerować czytelny dowód zdrady dla centrali NEXUS.",
-    objective: "Wyciągnij username nadawcy (jako 'sender'), username odbiorcy (jako 'receiver') oraz treść wiadomości zatytułowanej 'Wipe protocols'. Użyj Self-JOIN na odpowiedniej tabeli.",
-    requiredRows: [{ sender: 'ghost', receiver: 'admin_sys', body: 'Ensure logs for Sector B are purged by morning.' }], maxRows: 1, rewardXP: 2000,
+    id: 15, title: "ORACLE PROTOCOL", 
+    briefing: "Znalazłeś ostatni skrypt pozostawiony w kodzie przez zaginionego architekta. Zwykłe metody szukania kłamią, musisz zajrzeć za zasłonę. 'MIRROR to tylko przykrywka'.",
+    objective: "Odczytaj ostateczną, zaszyfrowaną instrukcję od ORACLE'a. Połącz tabele, by wyświetlić pełne imię nadawcy wiadomości oraz jej treść (zatytułowaną 'ORACLE PROTOCOL').",
+    requiredRows: [{ full_name: 'Adrian Voss', body: 'MIRROR IS NOT THE PROJECT. IT IS THE COVER. DO NOT TRUST NEXUS. FIND NODE_07.' }], maxRows: 1, rewardXP: 2000,
     hints: [
-      { id: 1, text: "To wymaga dwukrotnego użycia JOIN dla tabeli employees! Raz dla nadawcy, raz dla odbiorcy.", cost: 200 }, 
-      { id: 2, text: "Użyj aliasów: FROM messages m JOIN employees s ON m.sender_id = s.id JOIN employees r ON m.receiver_id = r.id", cost: 400 },
-      { id: 3, text: "SELECT s.username AS sender, r.username AS receiver, m.body FROM messages m JOIN employees s ON m.sender_id = s.id JOIN employees r ON m.receiver_id = r.id WHERE m.subject = 'Wipe protocols'", cost: 1000 }
+      { id: 1, text: "To zadanie wymaga złączenia tabeli pracowników i wiadomości po identyfikatorze nadawcy, by przypisać danej wiadomości pełne imię.", cost: 500 }, 
+      { id: 2, text: "Pamiętaj o dodaniu odpowiednich filtrów do tabeli wiadomości – interesuje Cię tylko konkretny, precyzyjny tytuł oraz zaszyfrowany status.", cost: 1000 },
+      { id: 3, text: "Zwróć jako wynik tylko złączoną kolumnę full_name i body.", cost: 1500 }
     ]
   }
 ];

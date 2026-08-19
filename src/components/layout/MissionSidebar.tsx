@@ -78,44 +78,50 @@ export const MissionSidebar = ({ onLog, onOpenEvidence, viewedLevel }: MissionSi
               <span className="font-mono text-[11px] tracking-widest text-[var(--text-secondary)] mb-1">
                 {isHistorical ? "HINTS (ARCHIVED):" : "AVAILABLE HINTS:"}
               </span>
-              {levelData.hints?.map(hint => {
+              {levelData.hints?.map((hint, index) => {
                 const isUsed = usedHints[viewedLevel]?.includes(hint.id);
                 const canAfford = score >= hint.cost; 
+                
+                // ZMIANA Z ETAPU 8D - Wymuszamy sekwencyjne kupowanie
+                const isPreviousUsed = index === 0 || usedHints[viewedLevel]?.includes(levelData.hints[index - 1].id);
+                const isLockedSequentially = !isPreviousUsed && !isHistorical;
 
                 return (
                   <button 
                     key={hint.id}
-                    disabled={isUsed || (!canAfford && !isUsed) || isHistorical} 
+                    disabled={isUsed || (!canAfford && !isUsed) || isHistorical || isLockedSequentially} 
                     onClick={() => {
-                      if (!isUsed && canAfford && !isHistorical) {
+                      if (!isUsed && canAfford && !isHistorical && !isLockedSequentially) {
                         applyHint(viewedLevel, hint.id, hint.cost);
                         onLog(`[SYSTEM] Hint used: -${hint.cost} XP`, 'warning');
-                      } else if (!canAfford && !isUsed) {
-                        onLog(`[SYSTEM] INSUFFICIENT XP. Wymagane: ${hint.cost} XP.`, 'error');
+                      } else if (!canAfford && !isUsed && !isLockedSequentially) {
+                        onLog(`[SYSTEM] INSUFFICIENT XP. Required: ${hint.cost} XP.`, 'error');
+                      } else if (isLockedSequentially) {
+                        onLog(`[SYSTEM] ACCESS DENIED. Unlock the previous hint first.`, 'error');
                       }
                     }}
                     className={`w-full flex items-center justify-between border px-3 py-2 transition-colors duration-200 ${
                       isUsed 
                         ? 'border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-main)] cursor-default' 
-                        : !canAfford || isHistorical
+                        : !canAfford || isHistorical || isLockedSequentially
                           ? 'border-red-900/30 bg-red-950/10 text-[var(--text-muted)] cursor-not-allowed opacity-70'
                           : 'border-[var(--border)] hover:border-[var(--accent-muted)] hover:bg-[var(--surface-2)] group cursor-pointer'
                     }`}
                   >
                     <div className="flex items-center gap-2 max-w-[80%]">
                       <Key className={`w-3.5 h-3.5 shrink-0 ${
-                        isUsed ? 'text-[var(--accent-yellow)]' : !canAfford || isHistorical ? 'text-[var(--error)] opacity-50' : 'text-[var(--text-muted)] group-hover:text-[var(--accent)]'
+                        isUsed ? 'text-[var(--accent-yellow)]' : !canAfford || isHistorical || isLockedSequentially ? 'text-[var(--error)] opacity-50' : 'text-[var(--text-muted)] group-hover:text-[var(--accent)]'
                       }`} />
                       <span className={`font-mono text-[11px] text-left truncate transition-colors ${
-                        isUsed ? 'text-[var(--text-main)] break-words whitespace-normal' : !canAfford || isHistorical ? 'text-[var(--text-muted)]' : 'text-[var(--text-secondary)] group-hover:text-[var(--text-main)]'
+                        isUsed ? 'text-[var(--text-main)] break-words whitespace-normal' : !canAfford || isHistorical || isLockedSequentially ? 'text-[var(--text-muted)]' : 'text-[var(--text-secondary)] group-hover:text-[var(--text-main)]'
                       }`}>
-                        {isUsed ? hint.text : `REQUEST HINT 0${hint.id}`}
+                        {isUsed ? hint.text : isLockedSequentially ? `[LOCKED] HINT 0${hint.id}` : `REQUEST HINT 0${hint.id}`}
                       </span>
                     </div>
                     {!isUsed && !isHistorical && (
-                      <span className={`font-mono text-[11px] shrink-0 ml-2 ${!canAfford ? 'text-[var(--error)]' : 'text-[var(--text-muted)]'}`}>
-                        -{hint.cost} XP
-                      </span>
+                       <span className={`font-mono text-[11px] shrink-0 ml-2 ${!canAfford ? 'text-[var(--error)]' : isLockedSequentially ? 'text-[var(--text-muted)] opacity-50' : 'text-[var(--text-muted)]'}`}>
+                       -{hint.cost} XP
+                     </span>
                     )}
                   </button>
                 )

@@ -10,7 +10,6 @@ function createPRNG(seed: number) {
 export const generateDatabaseSQL = (): string => {
   const random = createPRNG(42); 
   
-  // tworzenie schematu bazy danych
   let sql = "BEGIN TRANSACTION;\n";
 
   sql += `
@@ -60,13 +59,13 @@ export const generateDatabaseSQL = (): string => {
     );
   `;
 
-  // wstawianie danych do tabeli locations
+  // Wstawianie danych do tabeli locations
   const locations = [
     { id: 1, name: 'MAIN_LOBBY', sector: 'A', sec: 1 },
     { id: 2, name: 'SECURITY_HQ', sector: 'A', sec: 3 },
-    { id: 3, name: 'SERVER_ROOM_ALPHA', sector: 'B', sec: 4 },
+    { id: 3, name: 'SERVER_ROOM_03', sector: 'CORE', sec: 5 }, // IGŁA Lvl 2
     { id: 4, name: 'ORACLE_LAB', sector: 'B', sec: 5 },
-    { id: 5, name: 'ARCHIVES_DEEP', sector: 'C', sec: 4 },
+    { id: 5, name: 'ARCHIVES_DEEP', sector: 'C', sec: 4 }, // IGŁA Lvl 9
     { id: 6, name: 'EXECUTIVE_SUITE', sector: 'A', sec: 5 },
     { id: 7, name: 'R&D_LAB_1', sector: 'B', sec: 3 },
     { id: 8, name: 'R&D_LAB_2', sector: 'B', sec: 3 },
@@ -110,17 +109,21 @@ export const generateDatabaseSQL = (): string => {
     'Gonzalez', 'Harris', 'Clark', 'Lewis', 'Robinson', 'Walker', 'Perez', 'Hall', 'Young', 'Allen', 'King', 'Wright', 'Scott', 
     'Torres', 'Nguyen', 'Hill', 'Flores', 'Green', 'Adams', 'Nelson', 'Baker'];
 
-  // IGŁY -> kluczowi pracownicy
-  sql += `INSERT INTO employees VALUES (13, 'ghost', 'REDACTED', 'EXECUTIVE', 'Director', 5, 'ACTIVE', 6);\n`;
+  // IGŁY
+  sql += `INSERT INTO employees VALUES (10, 'evoss_cto', 'Elias Voss', 'EXECUTIVE', 'CTO', 5, 'ACTIVE', 6);\n`; // Lvl 10
+  sql += `INSERT INTO employees VALUES (13, 'mvale_13', 'Martin Vale', 'SECURITY', 'Operations', 5, 'ACTIVE', 2);\n`; // Lvl 5
+  sql += `INSERT INTO employees VALUES (77, 'oracle_01', 'Adrian Voss', 'SPECIAL_PROJECTS', 'Lead Architect', 5, 'ACTIVE', 3);\n`; // Lvl 1
+  sql += `INSERT INTO employees VALUES (200, 'hacker_200', 'Unknown', 'EXTERNAL', 'Contractor', 1, 'INACTIVE', 1);\n`; // Lvl 8
+  
+  // Pracownicy "tła" (dla utrudnienia wyszukiwań)
   sql += `INSERT INTO employees VALUES (42, 'admin_sys', 'Marcus Vance', 'IT_OPS', 'System Admin', 5, 'ACTIVE', 3);\n`;
-  sql += `INSERT INTO employees VALUES (77, 'oracle_01', 'REDACTED', 'SPECIAL_PROJECTS', 'Lead Analyst', 4, 'ACTIVE', 4);\n`;
-  sql += `INSERT INTO employees VALUES (99, 'csmith_99', 'Colin Smith', 'MAINTENANCE', 'Janitor', 1, 'ACTIVE', 10);\n`;
   sql += `INSERT INTO employees VALUES (105, 'agrant_105', 'Alan Grant', 'R&D', 'Lead Scientist', 3, 'ACTIVE', 7);\n`;
-  sql += `INSERT INTO employees VALUES (200, 'hacker_200', 'Unknown', 'EXTERNAL', 'Contractor', 1, 'INACTIVE', 1);\n`;
-  sql += `INSERT INTO employees VALUES (999, 'phantom_00', 'REDACTED', 'EXECUTIVE', 'Consultant', 5, 'ACTIVE', 6);\n`;
+  sql += `INSERT INTO employees VALUES (150, 'lisa_m', 'Lisa Monroe', 'HR', 'HR Specialist', 2, 'ACTIVE', 18);\n`;
+  sql += `INSERT INTO employees VALUES (175, 'james_k', 'James King', 'MAINTENANCE', 'Maintenance Lead', 2, 'ACTIVE', 10);\n`;
 
+  // Wypełniacz bazy
   for (let i = 1; i <= 250; i++) {
-    if ([13, 42, 77, 99, 105, 200, 999].includes(i)) continue; 
+    if ([10, 13, 42, 77, 105, 200].includes(i)) continue; 
 
     const fname = firstNames[Math.floor(random() * firstNames.length)];
     const lname = lastNames[Math.floor(random() * lastNames.length)];
@@ -132,14 +135,12 @@ export const generateDatabaseSQL = (): string => {
     sql += `INSERT INTO employees VALUES (${i}, '${username}', '${fname} ${lname}', '${dept}', 'Staff', ${clearance}, 'ACTIVE', ${locId});\n`;
   }
 
-  // generowanie logów dostępu z losowymi danymi
+  // Generowanie losowych logów dostępu
   let logId = 1;
   const startDate = new Date('2026-01-12T08:00:00Z').getTime();
 
-  for (let i = 0; i < 2500; i++) {
+  for (let i = 0; i < 1200; i++) {
     const empId = Math.floor(random() * 250) + 1;
-    if (empId === 999) continue;
-
     const locId = Math.floor(random() * 30) + 1;
     const timeOffset = Math.floor(random() * 30 * 24 * 60 * 60 * 1000); 
     const dateStr = new Date(startDate + timeOffset).toISOString().replace('T', ' ').substring(0, 19);
@@ -150,18 +151,18 @@ export const generateDatabaseSQL = (): string => {
     sql += `INSERT INTO access_logs VALUES (${logId++}, ${empId}, ${locId}, '${action}', '${dateStr}', ${granted});\n`;
   }
 
-  // IGŁY -> kluczowe wpisy w logach
-  sql += `INSERT INTO access_logs VALUES (${logId++}, 77, 4, 'EXIT', '2026-02-12 03:42:00', 1);\n`;
-  sql += `INSERT INTO access_logs VALUES (${logId++}, 13, 4, 'ENTER', '2026-02-12 03:17:00', 1);\n`;
-  sql += `INSERT INTO access_logs VALUES (${logId++}, 13, 4, 'EXIT', '2026-02-12 04:10:00', 1);\n`;
-  for(let j=0; j<65; j++) { 
-    sql += `INSERT INTO access_logs VALUES (${logId++}, 200, 5, 'ENTER', '2026-02-11 20:${j < 10 ? '0'+j : j}:00', 0);\n`;
+  // IGŁY -> LOGI DOSTĘPU (Zacieranie śladów i wejścia w nocy)
+  sql += `INSERT INTO access_logs VALUES (${logId++}, 77, 3, 'ENTER', '2026-02-12 23:47:00', 1);\n`; // Lvl 3: ORACLE wchodzi
+  sql += `INSERT INTO access_logs VALUES (${logId++}, 13, 3, 'ENTER', '2026-02-12 23:55:00', 1);\n`; // Lvl 12: Martin wchodzi
+  
+  let attackTime = new Date('2026-02-11T20:00:00Z').getTime();
+  for(let j=0; j<1290; j++) { 
+    attackTime += 2000; 
+    const dateStr = new Date(attackTime).toISOString().replace('T', ' ').substring(0, 19);
+    sql += `INSERT INTO access_logs VALUES (${logId++}, 200, 5, 'ENTER', '${dateStr}', 0);\n`; 
   }
-  sql += `INSERT INTO access_logs VALUES (${logId++}, 99, 4, 'ENTER', '2026-02-12 02:15:00', 1);\n`; 
-  sql += `INSERT INTO access_logs VALUES (${logId++}, 13, 3, 'ENTER', '2026-02-11 14:20:00', 1);\n`; 
-  sql += `INSERT INTO access_logs VALUES (${logId}, 77, 22, 'ENTER', '2026-02-12 03:45:00', 1);\n`; 
 
-  // wstawianie przykładowych wiadomości
+  // Losowe wiadomości
   const subjects = ['Meeting tomorrow', 'Weekly Report', 'Lunch?', 'Server reboot notice', 'Project Update', 'Welcome new hire', 'Invoice attached'];
   const bodies = [
     'Please review the attached documents.', 
@@ -173,7 +174,7 @@ export const generateDatabaseSQL = (): string => {
   ];
   
   let msgId = 1;
-  for (let i = 0; i < 500; i++) {
+  for (let i = 0; i < 370; i++) {
     const sId = Math.floor(random() * 250) + 1;
     const rId = Math.floor(random() * 250) + 1;
     const timeOffset = Math.floor(random() * 30 * 24 * 60 * 60 * 1000);
@@ -185,12 +186,26 @@ export const generateDatabaseSQL = (): string => {
     sql += `INSERT INTO messages VALUES (${msgId++}, ${sId}, ${rId}, '${dateStr}', '${sub}', '${bod}', ${isEnc});\n`;
   }
 
-  // IGŁY -> kluczowe wiadomości
-  sql += `INSERT INTO messages VALUES (${msgId++}, 105, 77, '2026-02-11 18:30:00', 'Project EchoLocate', 'EchoLocate: Cyfrowy Straznik Bioakustyki zostal skompromitowany. Zmieniaja go w bron. Uciekaj.', 1);\n`;
-  sql += `INSERT INTO messages VALUES (${msgId++}, 77, 105, '2026-02-12 03:40:00', 'THE_TRUTH_IS_OUT', 'Zabieram dane projektu. Uciekam z NEXUS. Kod do archiwum to ECH0_V4NCE.', 1);\n`;
-  sql += `INSERT INTO messages VALUES (${msgId}, 13, 42, '2026-02-12 04:15:00', 'Wipe protocols', 'Ensure logs for Sector B are purged by morning.', 1);\n`;
+  // IGŁY 
+  sql += `INSERT INTO messages VALUES (${msgId++}, 13, 42, '2026-02-12 22:00:00', 'Shift check-in', 'Starting my night shift in Sector CORE.', 0);\n`; // Lvl 6
+  sql += `INSERT INTO messages VALUES (${msgId++}, 77, 105, '2026-02-12 23:00:00', 'Backup', 'If you are reading this, do not trust the logs.', 1);\n`; // Lvl 7
+  sql += `INSERT INTO messages VALUES (${msgId++}, 13, 77, '2026-02-13 00:15:00', 'Extraction route clear', 'Move now. The corridors are clear.', 1);\n`; // Lvl 13
+  sql += `INSERT INTO messages VALUES (${msgId++}, 10, 42, '2026-02-10 09:00:00', 'PROJECT MIRROR', 'Ensure all data streams to the executive suite are active.', 1);\n`; // Lvl 14
+  sql += `INSERT INTO messages VALUES (${msgId++}, 77, 13, '2026-02-13 00:20:00', 'ORACLE PROTOCOL', 'MIRROR IS NOT THE PROJECT. IT IS THE COVER. DO NOT TRUST NEXUS. FIND NODE_07.', 1);\n`; // Lvl 15 Finał
 
-  // wstawianie przykładowych incydentów
+  for (let i = 0; i < 130; i++) {
+    const sId = Math.floor(random() * 250) + 1;
+    const rId = Math.floor(random() * 250) + 1;
+    const timeOffset = Math.floor(random() * 30 * 24 * 60 * 60 * 1000);
+    const dateStr = new Date(startDate + timeOffset).toISOString().replace('T', ' ').substring(0, 19);
+    const sub = subjects[Math.floor(random() * subjects.length)];
+    const bod = bodies[Math.floor(random() * bodies.length)];
+    const isEnc = random() > 0.9 ? 1 : 0; 
+
+    sql += `INSERT INTO messages VALUES (${msgId++}, ${sId}, ${rId}, '${dateStr}', '${sub}', '${bod}', ${isEnc});\n`;
+  }
+
+  // Losowe incydenty
   const severities = ['LOW', 'MEDIUM', 'HIGH'];
   const incidentDesc = [
     'HVAC system malfunction.',
@@ -202,7 +217,7 @@ export const generateDatabaseSQL = (): string => {
   ];
 
   let incId = 1;
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < 15; i++) {
     const locId = Math.floor(random() * 30) + 1;
     const timeOffset = Math.floor(random() * 30 * 24 * 60 * 60 * 1000);
     const dateStr = new Date(startDate + timeOffset).toISOString().replace('T', ' ').substring(0, 19);
@@ -212,9 +227,19 @@ export const generateDatabaseSQL = (): string => {
     sql += `INSERT INTO incidents VALUES (${incId++}, ${locId}, '${dateStr}', '${sev}', '${desc}');\n`;
   }
 
-  // IGŁY -> kluczowe incydenty
-  sql += `INSERT INTO incidents VALUES (${incId++}, 3, '2026-02-11 14:22:00', 'LOW', 'Temperature spike in Server Room Alpha.');\n`;
-  sql += `INSERT INTO incidents VALUES (${incId}, 4, '2026-02-12 03:45:00', 'CRITICAL', 'Unauthorized data extraction detected on terminal ORC-01.');\n`;
+  // IGŁY 
+  sql += `INSERT INTO incidents VALUES (${incId++}, 3, '2026-02-12 23:48:00', 'CRITICAL', 'CCTV feed corrupted. Signal lost.');\n`; // Lvl 4
+  sql += `INSERT INTO incidents VALUES (${incId++}, 3, '2026-02-13 00:31:00', 'WARNING', 'Manual purge of security logs initiated by executive override.');\n`; // Lvl 11
+
+   for (let i = 0; i < 35; i++) {
+    const locId = Math.floor(random() * 30) + 1;
+    const timeOffset = Math.floor(random() * 30 * 24 * 60 * 60 * 1000);
+    const dateStr = new Date(startDate + timeOffset).toISOString().replace('T', ' ').substring(0, 19);
+    const sev = severities[Math.floor(random() * severities.length)];
+    const desc = incidentDesc[Math.floor(random() * incidentDesc.length)];
+
+    sql += `INSERT INTO incidents VALUES (${incId++}, ${locId}, '${dateStr}', '${sev}', '${desc}');\n`;
+  }
 
   sql += "COMMIT;\n";
   return sql;

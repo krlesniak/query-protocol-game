@@ -10,7 +10,7 @@ export class LevelValidator {
       return { success: false, message: 'The query did not return any data.' };
     }
 
-    // sprawdzenie szumu (za dużo rzędów = złe filtrowanie)
+    // sprawdzenie szumu 
     if (maxRows && result.rows.length > maxRows) {
       return { 
         success: false, 

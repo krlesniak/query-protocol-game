@@ -31,7 +31,7 @@ interface MainLayoutProps {
 export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
   const { 
     currentLevel, queryAttempts, unlockedTables, completedQueries,
-    addScore, unlockTable, addEvidence, completeCurrentLevel, resetGame, incrementQueryAttempts 
+    addScore, unlockTable, addEvidence, completeCurrentLevel, incrementQueryAttempts 
   } = useGameStore();
 
   const [viewedLevel, setViewedLevel] = useState(currentLevel);
@@ -66,7 +66,6 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
   const historyIndex = useRef<number>(-1);
   const logIdCounter = useRef<number>(3);
   
-
   const currentQueryDraft = useRef(initialQuery); 
 
   useEffect(() => {
@@ -84,22 +83,6 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
   const addLog = (msg: string, type: 'info' | 'success' | 'error' | 'warning') => {
     setLogs((prev) => [{ id: logIdCounter.current++, time: new Date().toLocaleTimeString(), msg, type }, ...prev].slice(0, 50));
   };
-
-  const handleReset = () => {
-    if(window.confirm("WARNING: Are you sure you want to reset all investigation progress?")) {
-      resetGame();
-      
-      setViewedLevel(1);
-      setQuery(`-- Protocol LVL_01\n`);
-      currentQueryDraft.current = `-- Protocol LVL_01\n`;
-      
-      setResults([]);
-      setSqlError(null);
-      queryHistory.current = [];
-      addLog("[System] System rebooted. Progress wiped.", "warning");
-    }
-  };
-
 
   const handleNavigate = (dir: 'prev' | 'next') => {
     if (viewedLevel === currentLevel) {
@@ -120,12 +103,20 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
   const handleNextLevel = () => {
     setShowLevelUp(false);
     
-    const efficiencyBonus = queryAttempts <= 3 ? 50 : 0;
+    let efficiencyBonus = 0;
+    if (queryAttempts <= 5) efficiencyBonus = 50;
+    else if (queryAttempts <= 10) efficiencyBonus = 25;
+
     const totalReward = levelData.rewardXP + efficiencyBonus;
 
     addScore(totalReward);
     addLog(`[SYSTEM] Protocol completed. Reward: +${levelData.rewardXP} XP`, 'success');
-    if (efficiencyBonus > 0) addLog(`[SYSTEM] Efficiency Bonus (Attempts: ${queryAttempts}): +${efficiencyBonus} XP`, 'info');
+    
+    if (efficiencyBonus > 0) {
+      addLog(`[SYSTEM] Efficiency Bonus (Attempts: ${queryAttempts}): +${efficiencyBonus} XP`, 'info');
+    } else {
+      addLog(`[SYSTEM] High query attempt rate (${queryAttempts}). Efficiency Bonus denied.`, 'warning');
+    }
 
     if (levelData.unlocksTable) {
       unlockTable(levelData.unlocksTable);
@@ -143,7 +134,6 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
 
     completeCurrentLevel(query); 
 
-
     const nextLevel = currentLevel + 1;
     setViewedLevel(nextLevel);
     const initial = `-- Protocol LVL_${nextLevel.toString().padStart(2, '0')}\n`;
@@ -157,7 +147,6 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
     const startTime = performance.now();
     try {
       addLog(`Executing query...`, 'info');
-
 
       const lockedTables = Object.keys(TABLE_SCHEMA).filter(t => !unlockedTables.includes(t));
       const attemptedTable = lockedTables.find(t => new RegExp(`\\b${t}\\b`, 'i').test(sqlToRun));
@@ -239,7 +228,6 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
         { token: 'number', foreground: 'F0C674' },
         { token: 'number.sql', foreground: 'F0C674' },
 
-
         { token: 'operator', foreground: '88A4B8' },
         { token: 'operator.sql', foreground: '88A4B8' },
         
@@ -254,45 +242,24 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
     ],
     
     colors: {
-
         'editor.background': '#0D1217',
         'editor.foreground': '#C5D4E0',
-
-
         'editor.lineHighlightBackground': '#141B22',
-
         'editor.lineHighlightBorder': '#00000000',
-
-
         'editor.selectionBackground': '#1D3B53',
-
         'editor.inactiveSelectionBackground': '#152A3B',
-
-        
         'editorCursor.foreground': '#8BD49C',
-
-        
         'editorLineNumber.foreground': '#4C5966',
         'editorLineNumber.activeForeground': '#8BA2B5',
-
-
         'scrollbarSlider.background': '#212D38',
         'scrollbarSlider.hoverBackground': '#304152',
         'scrollbarSlider.activeBackground': '#3E556B',
-
-
         'editorIndentGuide.background': '#162029',
         'editorIndentGuide.activeBackground': '#2A3C4D',
-
-
         'editorBracketMatch.background': '#1A3B34',
         'editorBracketMatch.border': '#499373',
-
-
         'editor.findMatchBackground': '#435C3A',
         'editor.findMatchHighlightBackground': '#2C3D26',
-
-
         'editorWidget.background': '#10161C',
         'editorWidget.border': '#253340',
         'editorSuggestWidget.background': '#10161C',
@@ -339,7 +306,6 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
   return (
     <div className="relative h-screen w-full overflow-hidden bg-[var(--bg-base)] text-[var(--text-main)] font-sans selection:bg-[var(--accent)]/20 selection:text-[var(--accent-bright)]">
 
-
       <AnimatePresence>
         {toast && (
           <motion.div
@@ -356,7 +322,6 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
           </motion.div>
         )}
       </AnimatePresence>
-
 
       <AnimatePresence>
         {showLevelUp && (
@@ -477,7 +442,6 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
               className="bg-[var(--surface-1)] border border-[var(--border)] w-full max-w-5xl max-h-[90vh] flex flex-col shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden"
               onClick={e => e.stopPropagation()}
             >
-              {/* Header Schematu */}
               <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)] bg-[#131920]">
                 <div className="flex items-center gap-3">
                   <Database className="w-5 h-5 text-[var(--accent-bright)]" />
@@ -490,7 +454,6 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
                 </button>
               </div>
               
-              {/* Sekcja graficzna */}
               <div className="flex-1 bg-[#0a0d10] relative flex items-center justify-center p-8 min-h-[400px] overflow-auto">
                 <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
                 <img 
@@ -504,17 +467,13 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
         )}
       </AnimatePresence>
 
-      <Header onReset={handleReset} onReturnToMenu={onReturnToMenu} />
+      <Header onReturnToMenu={onReturnToMenu} />
 
       {/* MAIN AREA */}
       <div className="h-[calc(100vh-54px)] p-2 flex flex-col gap-2 min-h-0">
         <div className="flex-1 min-h-0 grid grid-cols-[225px_minmax(0,1fr)_300px] gap-2">
 
           <DatabaseSidebar newTableFlash={newTableFlash} onOpenSchema={() => setShowSchema(true)} />
-
-
-
-
 
           <main className="min-w-0 min-h-0 flex flex-col gap-2">
             
@@ -525,7 +484,6 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
                   <Terminal className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
                   <span className="text-[11px] tracking-widest text-[var(--text-secondary)]">SQL CONSOLE</span>
                 </div>
-
 
                 <div className="flex items-center gap-3">
                   {currentLevel > 1 && (
