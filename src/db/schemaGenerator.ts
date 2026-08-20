@@ -39,7 +39,7 @@ export const generateDatabaseSQL = (): string => {
       employee_id INTEGER NOT NULL,
       location_id INTEGER NOT NULL,
       action_type TEXT NOT NULL,
-      created_at TEXT NOT NULL,
+      created_at DATETIME NOT NULL,
       access_granted INTEGER NOT NULL,
       FOREIGN KEY (employee_id) REFERENCES employees(id),
       FOREIGN KEY (location_id) REFERENCES locations(id)
@@ -49,7 +49,7 @@ export const generateDatabaseSQL = (): string => {
       id INTEGER PRIMARY KEY,
       sender_id INTEGER NOT NULL,
       receiver_id INTEGER NOT NULL,
-      created_at TEXT NOT NULL,
+      created_at DATETIME NOT NULL,
       subject TEXT NOT NULL,
       body TEXT NOT NULL,
       is_encrypted INTEGER NOT NULL,
@@ -60,7 +60,7 @@ export const generateDatabaseSQL = (): string => {
     CREATE TABLE incidents (
       id INTEGER PRIMARY KEY,
       location_id INTEGER NOT NULL,
-      created_at TEXT NOT NULL,
+      created_at DATETIME NOT NULL,
       severity TEXT NOT NULL,
       description TEXT NOT NULL,
       FOREIGN KEY (location_id) REFERENCES locations(id)
@@ -72,7 +72,7 @@ export const generateDatabaseSQL = (): string => {
       triggered_by INTEGER NOT NULL,
       action TEXT NOT NULL,
       target TEXT NOT NULL,
-      created_at TEXT NOT NULL,
+      created_at DATETIME NOT NULL,
       FOREIGN KEY (employee_id) REFERENCES employees(id),
       FOREIGN KEY (triggered_by) REFERENCES employees(id)
     );
