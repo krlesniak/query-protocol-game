@@ -240,7 +240,7 @@ export const LEVELS: LevelDefinition[] = [
     id: 12,
     title: "EXECUTIVE ACCESS",
     briefing:
-      "W danych pojawia się Elias Voss — CTO NEXUS i brat ORACLE'a. Konto wykonawcze zostało użyte do operacji usunięcia logów bezpieczeństwa.",
+      "W danych pojawia się inny pracownik o nazwisku Voss — CTO NEXUS i brat ORACLE'a. Konto wykonawcze zostało użyte do operacji usunięcia logów bezpieczeństwa.",
     objective:
       "Znajdź pełne imię i nazwisko pracownika, którego konto wykonało operację purge na logach bezpieczeństwa.",
     requiredRows: [
