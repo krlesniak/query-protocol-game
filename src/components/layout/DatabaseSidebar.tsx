@@ -9,6 +9,9 @@ const TABLE_SCHEMA: Record<string, string[]> = {
   access_logs: ['id', 'employee_id', 'location_id', 'action_type', 'created_at', 'access_granted'],
   messages: ['id', 'sender_id', 'receiver_id', 'created_at', 'subject', 'body', 'is_encrypted'],
   incidents: ['id', 'location_id', 'created_at', 'severity', 'description'],
+  audit_logs: ['id', 'employee_id', 'triggered_by', 'action', 'target', 'created_at'],
+  internal_projects: ['id', 'project_code', 'lead_id'],
+  infrastructure_nodes: ['id', 'node_name', 'parent_id', 'linked_sibling_id'],
 };
 
 interface DatabaseSidebarProps {
@@ -102,7 +105,7 @@ export const DatabaseSidebar = ({ newTableFlash, onOpenSchema }: DatabaseSidebar
       <div className="mt-auto border-t border-[var(--border)] px-3 py-2 font-mono text-[11px] text-[var(--text-muted)] bg-[var(--bg-base)]">
         <div className="flex justify-between">
           <span>TABLES</span>
-          <span>{unlockedTables.length} / 5</span>
+          <span>{unlockedTables.length} / 8</span>
         </div>
         <div className="flex justify-between mt-1">
           <span>STATUS</span>

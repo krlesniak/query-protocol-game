@@ -18,170 +18,581 @@ export interface LevelDefinition {
 }
 
 export const LEVELS: LevelDefinition[] = [
-  // --- AKT I: THE DISAPPEARANCE ---
+
+  // ============================================================
+  // AKT I — THE DISAPPEARANCE
+  // SQL: SELECT → WHERE → ORDER BY → LIMIT → AND/OR
+  // ============================================================
+
   {
     id: 1,
     title: "FIRST CONTACT",
-    briefing: "Z systemu NEXUS zniknął Główny Architekt, Dr. Adrian Voss (pseudonim: ORACLE-01). Oficjalny raport głosi, że ukradł dane i uciekł, a jego profil został skasowany. Systemy korporacyjne często kłamią.",
-    objective: "Ustal aktualny status konta oraz pełne imię i nazwisko pracownika ukrywającego się pod loginem 'oracle_01'.",
-    requiredRows: [{ full_name: 'Adrian Voss', status: 'ACTIVE' }],
-    maxRows: 1, rewardXP: 150, unlocksTable: 'locations',
+    briefing:
+      "Główny architekt bezpieczeństwa NEXUS zniknął 48 godzin temu. Oficjalny komunikat mówi o kradzieży danych i ucieczce. Problem: jego profil nadal istnieje w wewnętrznej bazie pracowników.",
+    objective:
+      "Ustal pełne imię i nazwisko architekta o pseudonimie ORACLE oraz jego aktualny status w systemie.",
+    requiredRows: [
+      { full_name: "Adrian Voss", status: "ACTIVE" }
+    ],
+    maxRows: 1,
+    rewardXP: 150,
+    unlocksTable: "locations",
     hints: [
-      { id: 1, text: "Przeanalizuj tabelę pracowników (employees). Zastanów się, których kolumn potrzebujesz.", cost: 50 },
-      { id: 2, text: "Użyj filtrowania, by wyizolować tylko jeden konkretny pseudonim pracownika.", cost: 100 }
+      { id: 1, text: "Potrzebujesz tabeli employees oraz kolumn full_name i status.", cost: 50 },
+      { id: 2, text: "Wyfiltruj rekord, którego username odpowiada pseudonimowi ORACLE.", cost: 100 }
     ]
   },
   {
     id: 2,
-    title: "LAST LOGIN",
-    briefing: "Voss figuruje jako aktywny pracownik, mimo że oficjalnie 'zaginął'. Gdzieś musi być jego baza operacyjna. Dokumentacja HR skrywa ID jego domyślnego obszaru roboczego.",
-    objective: "Odnajdź dokładną nazwę lokacji oraz jej sektor, do której oficjalnie przypisany był zaginiony architekt.",
-    requiredRows: [{ name: 'SERVER_ROOM_03', sector: 'CORE' }],
-    maxRows: 1, rewardXP: 200, unlocksTable: 'access_logs', unlocksEvidence: 'EVD_ORACLE_LAB_LOC',
+    title: "LAST KNOWN LOCATION",
+    briefing:
+      "Profil ORACLE'a nadal oznaczony jest jako ACTIVE. W jego danych znajduje się identyfikator przypisanego obszaru roboczego. Jeśli ktoś chciał go znaleźć, właśnie tam powinien zacząć.",
+    objective:
+      "Odnajdź nazwę i sektor lokacji przypisanej do Adriana Vossa.",
+    requiredRows: [
+      { name: "SERVER_ROOM_03", sector: "CORE" }
+    ],
+    maxRows: 1,
+    rewardXP: 200,
+    unlocksTable: "access_logs",
+    unlocksEvidence: "EVD_ORACLE_LAB_LOC",
     hints: [
-      { id: 1, text: "Sprawdź, jakie ID lokacji przypisano do pracownika z poprzedniego poziomu.", cost: 50 },
-      { id: 2, text: "Przeszukaj nową tabelę lokacji pod kątem znalezionego wcześniej numeru ID.", cost: 100 }
+      { id: 1, text: "Najpierw znajdź location_id przypisane do ORACLE'a.", cost: 50 },
+      { id: 2, text: "Następnie odszukaj ten identyfikator w tabeli locations.", cost: 100 }
     ]
   },
   {
     id: 3,
     title: "NO EXIT",
-    briefing: "Znamy miejsce: SERVER_ROOM_03. Oficjalnie ORACLE opuścił budynek wieczorem. Problem w tym, że żadna kamera nie zarejestrowała jego wyjścia, a system zgłasza nieścisłości.",
-    objective: "Udowodnij kłamstwo. Odszukaj log potwierdzający pomyślne WEJŚCIE do tej serwerowni w dniu 12 lutego po godzinie 23:00.",
-    requiredRows: [{ action_type: 'ENTER', location_id: 3 }],
-    maxRows: 3, rewardXP: 300, unlocksTable: 'incidents', unlocksEvidence: 'EVD_SERVER_LOG_CONTRADICTION',
+    briefing:
+      "Wiemy już, gdzie ORACLE pracował. Teraz trzeba sprawdzić, co wydarzyło się tamtej nocy. W logach znajduje się wpis dotyczący wejścia do SERVER_ROOM_03.",
+    objective:
+      "Znajdź log potwierdzający wejście do SERVER_ROOM_03 po godzinie 23:00 dnia 12 lutego 2026.",
+    requiredRows: [
+      { action_type: "ENTER", location_id: 3 }
+    ],
+    maxRows: 3,
+    rewardXP: 300,
+    unlocksTable: "incidents",
+    unlocksEvidence: "EVD_SERVER_LOG_CONTRADICTION",
     hints: [
-      { id: 1, text: "Zbadaj tabelę logów dostępu. Musisz pogodzić ze sobą ID lokacji, konkretną akcję logowania oraz datę.", cost: 50 },
-      { id: 2, text: "Aby wymusić spełnienie wielu warunków naraz, połącz je operatorem logicznym.", cost: 100 },
-      { id: 3, text: "Czas w bazie zapisany jest tekstowo. Możesz szukać wpisów większych (późniejszych) niż '2026-02-12 23:00:00'.", cost: 150 }
+      { id: 1, text: "Potrzebujesz tabeli access_logs.", cost: 50 },
+      { id: 2, text: "Połącz warunki dotyczące lokalizacji, typu akcji i czasu.", cost: 100 },
+      { id: 3, text: "Czas jest zapisany jako tekst. Spróbuj znaleźć wpis późniejszy niż '2026-02-12 23:00:00'.", cost: 150 }
     ]
   },
   {
-    id: 4, title: "THE GHOST", 
-    briefing: "Ktoś wszedł do serwerowni o 23:47. Nagranie z kamer bezpieczeństwa to tylko uszkodzony plik wideo, na którym widać rozmytą sylwetkę. Ktoś wywołał błąd systemu celowo.",
-    objective: "Znajdź dokładny opis incydentu o statusie CRITICAL w owej serwerowni z tamtej nocy.",
-    requiredRows: [{ description: 'CCTV feed corrupted. Signal lost.' }], maxRows: 1, rewardXP: 350, unlocksTable: 'messages',
+    id: 4,
+    title: "THE GHOST",
+    briefing:
+      "O 23:47 ktoś wszedł do serwerowni. Kilka minut później monitoring przestał działać. System zarejestrował awarię jako krytyczny incydent.",
+    objective:
+      "Znajdź opis krytycznego incydentu dotyczącego monitoringu w SERVER_ROOM_03.",
+    requiredRows: [
+      { description: "CCTV feed corrupted. Signal lost." }
+    ],
+    maxRows: 1,
+    rewardXP: 350,
+    unlocksTable: "messages",
     hints: [
-      { id: 1, text: "Skoncentruj się na tabeli incydentów (incidents). Zidentyfikuj kolumny opisujące wagę błędu oraz cel.", cost: 100 }, 
-      { id: 2, text: "Odfiltruj wyniki tak, aby pokazać tylko krytyczne awarie z konkretnego pomieszczenia.", cost: 200 }
+      { id: 1, text: "Sprawdź tabelę incidents.", cost: 100 },
+      { id: 2, text: "Odfiltruj incydenty o statusie CRITICAL dotyczące SERVER_ROOM_03.", cost: 200 }
     ]
   },
   {
-    id: 5, title: "BORROWED IDENTITY", 
-    briefing: "Zidentyfikowałem anomalię w systemie autoryzacji. Karta ORACLE'a nie była używana przez niego. Została na czas ucieczki przypisana operacyjnie komuś z wewnątrz.",
-    objective: "Zdemaskuj 'ducha'. Znajdź pracownika działu operacji bezpieczeństwa (SECURITY), który dysponuje 5. poziomem uprawnień. Podaj jego pełne imię i nazwisko.",
-    requiredRows: [{ full_name: 'Martin Vale' }], maxRows: 1, rewardXP: 400, unlocksEvidence: 'EVD_GHOST_PROFILE',
+    id: 5,
+    title: "BORROWED IDENTITY",
+    briefing:
+      "Karta ORACLE'a została użyta po jego ostatnim potwierdzonym logowaniu. Nie wygląda na to, żeby używał jej sam. Ktoś wewnątrz NEXUS miał odpowiedni poziom dostępu.",
+    objective:
+      "Znajdź pracownika działu SECURITY posiadającego clearance_level równy 5.",
+    requiredRows: [
+      { full_name: "Martin Vale" }
+    ],
+    maxRows: 1,
+    rewardXP: 400,
+    unlocksEvidence: "EVD_GHOST_PROFILE",
     hints: [
-      { id: 1, text: "Zamiast wyciągać wszystkie dane, wypisz w zapytaniu tylko jedną konkretną kolumnę zawierającą dane osobowe.", cost: 100 }, 
-      { id: 2, text: "Znajdź osobę, która spełnia oba warunki działu i wysokiego poziomu zabezpieczeń (clearance_level).", cost: 200 }
-    ]
-  },
-
-  // --- AKT II: SOMEONE IS LYING ---
-  {
-    id: 6, title: "NIGHT SHIFT", 
-    briefing: "Martin Vale. Problem w tym, że w kadrach uparcie twierdzi, że tamtej nocy nie było go w budynku. Ktoś jednak sfałszował jego grafik.",
-    objective: "Znajdź treść wiadomości wysłanej przez Martina, która dowodzi, że pełnił wtedy nocną zmianę (szukaj słowa 'shift').",
-    requiredRows: [{ body: 'Starting my night shift in Sector CORE.' }], maxRows: 1, rewardXP: 450,
-    hints: [
-      { id: 1, text: "Ustal ID nadawcy, korzystając z wiedzy z poprzedniego zadania, a następnie przeszukaj jego wiadomości.", cost: 100 }, 
-      { id: 2, text: "Aby wyszukać fragment tekstu ukryty w dłuższym zdaniu, potrzebujesz mechanizmu wyszukiwania wzorców (często łączonego ze znakami %).", cost: 200 }
-    ]
-  },
-  {
-    id: 7, title: "DEAD MAN'S MESSAGE", 
-    briefing: "Zaczynamy grzebać za głęboko. System milczy, ale ORACLE był genialnym architektem – wiedział, że zostaną zmanipulowane logi, i ukrył komunikat w starych plikach poczty.",
-    objective: "Odszukaj wiadomość wysłaną przez samego ORACLE'a (ID 77), w której ostrzega, by nie ufać systemowi (szukaj słowa 'trust').",
-    requiredRows: [{ body: 'If you are reading this, do not trust the logs.' }], maxRows: 1, rewardXP: 500, unlocksEvidence: 'EVD_ECHO_DOC',
-    hints: [
-      { id: 1, text: "Podobnie jak poprzednio, szukasz specyficznego fragmentu tekstu u konkretnego nadawcy.", cost: 150 }, 
-      { id: 2, text: "Użyj znaku wieloznacznego przed i po szukanym słowie, aby upewnić się, że przechwycisz je w każdym kontekście.", cost: 300 }
-    ]
-  },
-  {
-    id: 8, title: "THE IMPOSSIBLE TERMINAL", 
-    briefing: "Jeden z terminali NEXUS wygenerował setki zdarzeń w ciągu kilku minut, generując zasłonę dymną, gdy Martin wchodził do serwerowni. Ktoś wywołał sztuczny ruch.",
-    objective: "Kto próbował złamać zaporę? Podaj ID pracownika, na którego koncie zarejestrowano największą liczbę odrzuconych logowań (access_granted = 0).",
-    requiredRows: [{ employee_id: 200 }], maxRows: 1, rewardXP: 600,
-    hints: [
-      { id: 1, text: "Musisz zebrać odrzucone logi i pogrupować je względem identyfikatora pracownika.", cost: 150 }, 
-      { id: 2, text: "Zlicz zgrupowane wiersze i ułóż wyniki w porządku malejącym, by lider znalazł się na szczycie.", cost: 300 }, 
-      { id: 3, text: "Obetnij listę wyników do pierwszego rekordu.", cost: 450 }
-    ]
-  },
-  {
-    id: 9, title: "THE EMPTY ROOM", 
-    briefing: "Znamy ID fałszywego terminala, ale to nam nic nie mówi, dopóki nie dowiemy się, gdzie trwał sztuczny atak. Zapisy monitoringu w tym miejscu pokazują... puste korytarze.",
-    objective: "Odczytaj nazwę lokacji z innej tabeli. Do jakiego pomieszczenia sfałszowana karta z poprzedniego poziomu miała najwięcej zablokowanych wejść?",
-    requiredRows: [{ name: 'ARCHIVES_DEEP' }], maxRows: 1, rewardXP: 650, unlocksEvidence: 'EVD_ARCHIVE_LOG',
-    hints: [
-      { id: 1, text: "Musisz połączyć dane z tabeli logów i lokalizacji w miejscu, gdzie zgadzają się ich identyfikatory miejsc.", cost: 150 }, 
-      { id: 2, text: "Stosuj aliasy (skróty) do tabel, aby móc precyzyjnie zażądać wyświetlenia kolumny z odpowiedniego źródła.", cost: 300 },
-      { id: 3, text: "Narzuć złączonym tabelom filtr sprawdzający ID intruza i status wejścia.", cost: 450 }
-    ]
-  },
-  {
-    id: 10, title: "THREE LIARS", 
-    briefing: "Dyrektorzy NEXUS mataczą w papierach. Elias Voss – CTO i brat zaginionego – twierdzi, że w noc zniknięcia ORACLE'a nie logował się do sieci korporacyjnej.",
-    objective: "To śledztwo wchodzi na wyższy szczebel. Wyciągnij login (username) Dyrektora Technicznego (CTO) firmy NEXUS.",
-    requiredRows: [{ username: 'evoss_cto' }], maxRows: 1, rewardXP: 700,
-    hints: [
-      { id: 1, text: "Sprawdź, jakie stanowiska (pos) zajmują pracownicy i poszukaj skrótu dyrektora ds. technologii.", cost: 250 }, 
-      { id: 2, text: "Użyj filtrowania, by wyciągnąć login osoby na tym szczeblu.", cost: 500 }
+      { id: 1, text: "Potrzebujesz tylko danych pracowników z działu SECURITY.", cost: 100 },
+      { id: 2, text: "Dodaj drugi warunek dotyczący clearance_level.", cost: 200 }
     ]
   },
 
-  // --- AKT III: THE MIRROR ---
+  // ============================================================
+  // AKT II — SOMEONE IS LYING
+  // SQL: LIKE → UNION → INTERSECT → EXCEPT → JOIN → GROUP BY
+  // ============================================================
+
   {
-    id: 11, title: "EXECUTIVE ACCESS", 
-    briefing: "CTO skłamał. Analiza autoryzacji systemowych wykazała, że to on osobiście wcisnął przycisk usunięcia głównych logów z nocy zniknięcia brata.",
-    objective: "Znajdź opis incydentu o statusie 'WARNING', który dokumentuje manualne wymuszenie czyszczenia bazy ('purge').",
-    requiredRows: [{ description: 'Manual purge of security logs initiated by executive override.' }], maxRows: 5, rewardXP: 800,
+    id: 6,
+    title: "NIGHT SHIFT",
+    briefing:
+      "Martin Vale twierdzi, że tamtej nocy nie było go w budynku. Jego grafik również wygląda podejrzanie. W skrzynce wiadomości znaleziono jednak ślad jego obecności.",
+    objective:
+      "Znajdź wiadomość Martina zawierającą informację o rozpoczęciu nocnej zmiany.",
+    requiredRows: [
+      { body: "Starting my night shift in Sector CORE." }
+    ],
+    maxRows: 1,
+    rewardXP: 450,
     hints: [
-      { id: 1, text: "Przeszukaj incydenty ze statusem ostrzeżenia i poszukaj określonego w briefingu słowa.", cost: 250 }, 
-      { id: 2, text: "Wyciągnij samą kolumnę z opisem błędu.", cost: 500 }
+      { id: 1, text: "Znajdź wiadomości należące do Martina.", cost: 100 },
+      { id: 2, text: "Szukasz konkretnego fragmentu tekstu, więc przyda Ci się operator LIKE i znak %.", cost: 200 }
     ]
   },
   {
-    id: 12, title: "THE MISSING HOUR", 
-    briefing: "Mamy wyrwę w czasie między 23:47 a 00:31. ORACLE nie uciekł z danymi. Był przetrzymywany wewnątrz własnej serwerowni przez wewnętrzny oddział bezpieczeństwa.",
-    objective: "Zidentyfikuj oddział uderzeniowy. Użyj podzapytania, by wypisać imiona i nazwiska pracowników 'SECURITY', którzy logowali się do serwerowni nr 3.",
-    requiredRows: [{ full_name: 'Martin Vale' }], maxRows: 5, rewardXP: 850,
+    id: 7,
+    title: "DEAD MAN'S MESSAGE",
+    briefing:
+      "Martin nie jest jedyną osobą, która zostawiła ślad. ORACLE przewidział, że ktoś może manipulować logami. Zostawił wiadomość, ale nie w miejscu, którego normalnie szukałby administrator.",
+    objective:
+      "Znajdź wiadomość ORACLE'a zawierającą ostrzeżenie, aby nie ufać logom.",
+    requiredRows: [
+      { body: "If you are reading this, do not trust the logs." }
+    ],
+    maxRows: 1,
+    rewardXP: 500,
+    unlocksEvidence: "EVD_ECHO_DOC",
     hints: [
-      { id: 1, text: "Zapytanie bazowe to zwykłe wyciągnięcie pełnych imion pracowników ochrony.", cost: 250 }, 
-      { id: 2, text: "Wykorzystaj strukturę z operatorem upewniającym się, że ich ID znajduje się (IN) w wynikach z innej tabeli.", cost: 500 },
-      { id: 3, text: "Wewnętrzne podzapytanie musi zwracać ID pracowników, którzy weszli do lokacji nr 3 w logach dostępu.", cost: 750 }
+      { id: 1, text: "Wiadomość znajduje się w tabeli messages.", cost: 150 },
+      { id: 2, text: "Użyj LIKE '%trust%' aby znaleźć ostrzeżenie ukryte w tekście.", cost: 300 }
     ]
   },
   {
-    id: 13, title: "CHAIN OF EVIDENCE", 
-    briefing: "Zaskakujący zwrot akcji. Martin Vale z ochrony nie był porywaczem. Ryzykując życie, otworzył serwerownię od wewnątrz, by umożliwić ucieczkę architektowi.",
-    objective: "Potwierdź tę hipotezę. Znajdź temat (subject) zaszyfrowanej wiadomości wysłanej przez Martina do ORACLE'a.",
-    requiredRows: [{ subject: 'Extraction route clear' }], maxRows: 1, rewardXP: 900, unlocksEvidence: 'EVD_CCTV_ALPHA',
+    id: 8,
+    title: "CROSS-REFERENCE",
+    briefing:
+      "Brak raportów nocnej zmiany zmusza nas do wyciągania wniosków. Ktoś z ochrony musiał być na miejscu i koordynować akcję. Poszukajmy części wspólnej dwóch tabel.",
+    objective:
+      "Znajdź identyfikatory osób (employee_id), które fizycznie WESZŁY do SERVER_ROOM_03 (z access_logs) ORAZ figurowały jako nadawcy jakiejkolwiek wiadomości (z messages). Użyj operatora INTERSECT.",
+    requiredRows: [
+      { employee_id: 13 }
+    ],
+    maxRows: 5,
+    rewardXP: 600,
     hints: [
-      { id: 1, text: "Musisz połączyć dane co najmniej dwóch osób z tabeli wiadomości.", cost: 500 }, 
-      { id: 2, text: "Poszukaj odpowiedniego statusu szyfrowania oraz przyporządkuj nadawcę (Martin) i odbiorcę (ORACLE) na podstawie ich ID.", cost: 1000 }
+      { id: 1, text: "Pierwsze zapytanie szuka employee_id w access_logs dla location_id = 3.", cost: 150 },
+      { id: 2, text: "Drugie zapytanie po słowie INTERSECT wyciąga sender_id z tabeli messages.", cost: 300 },
+      { id: 3, text: "System zwróci tylko tych pracowników, którzy pojawili się w wynikach obu tych zapytań naraz.", cost: 450 }
     ]
   },
   {
-    id: 14, title: "PROJECT MIRROR", 
-    briefing: "Dlaczego CTO chciał pozbyć się głównego architekta NEXUS? ORACLE natrafił na kod 'PROJECT MIRROR' – system nielegalnie kopiujący i profilujący dane wszystkich klientów korporacji.",
-    objective: "Zdemaskuj głównych interesantów projektu. Odszukaj ID pracownika (nadawcy), który rozsyłał maile zatytułowane dokładnie jako 'PROJECT MIRROR'.",
-    requiredRows: [{ sender_id: 10 }], maxRows: 1, rewardXP: 1000, unlocksEvidence: 'EVD_DEAD_MAN',
+    id: 9,
+    title: "THE GHOST IN THE MACHINE",
+    briefing:
+      "Spójrzmy na logi w poszukiwaniu anomalii. Prawdziwy intruz w sieci firmowej zostawia ślady, ale często brakuje mu pomyślnego uwierzytelnienia. Ustalmy, kto atakował drzwi, ale nigdy nie wszedł do środka.",
+    objective:
+      "Znajdź ID osób, które mają w systemie odrzucone logowania (access_granted = 0), wykluczając (EXCEPT) wszystkie osoby, którym kiedykolwiek przyznano dostęp (access_granted = 1).",
+    requiredRows: [
+      { employee_id: 200 }
+    ],
+    maxRows: 1,
+    rewardXP: 650,
+    unlocksEvidence: "EVD_ARCHIVE_LOG",
     hints: [
-      { id: 1, text: "Wiadomości firmowe ukryte są w tabeli messages.", cost: 500 }, 
-      { id: 2, text: "Skup się na precyzyjnym filtrowaniu kolumny odpowiedzialnej za nagłówek komunikatu.", cost: 1000 }
+      { id: 1, text: "Porównujesz ze sobą dwa zapytania do tej samej tabeli: access_logs.", cost: 150 },
+      { id: 2, text: "Z lewej strony EXCEPT szukaj employee_id z dostępem równym 0.", cost: 300 },
+      { id: 3, text: "Z prawej strony EXCEPT wstaw podzapytanie szukające pracowników z dostępem równym 1.", cost: 450 }
     ]
   },
   {
-    id: 15, title: "ORACLE PROTOCOL", 
-    briefing: "Znalazłeś ostatni skrypt pozostawiony w kodzie przez zaginionego architekta. Zwykłe metody szukania kłamią, musisz zajrzeć za zasłonę. 'MIRROR to tylko przykrywka'.",
-    objective: "Odczytaj ostateczną, zaszyfrowaną instrukcję od ORACLE'a. Połącz tabele, by wyświetlić pełne imię nadawcy wiadomości oraz jej treść (zatytułowaną 'ORACLE PROTOCOL').",
-    requiredRows: [{ full_name: 'Adrian Voss', body: 'MIRROR IS NOT THE PROJECT. IT IS THE COVER. DO NOT TRUST NEXUS. FIND NODE_07.' }], maxRows: 1, rewardXP: 2000,
+    id: 10,
+    title: "THE IMPOSSIBLE TERMINAL",
+    briefing:
+      "Jeden terminal wygenerował setki odrzuconych prób logowania w ciągu kilku minut. To nie wygląda jak zwykły błąd użytkownika. Ktoś próbował stworzyć zasłonę dymną.",
+    objective:
+      "Znajdź employee_id osoby posiadającej największą liczbę odrzuconych prób logowania.",
+    requiredRows: [
+      { employee_id: 200 }
+    ],
+    maxRows: 1,
+    rewardXP: 700,
     hints: [
-      { id: 1, text: "To zadanie wymaga złączenia tabeli pracowników i wiadomości po identyfikatorze nadawcy, by przypisać danej wiadomości pełne imię.", cost: 500 }, 
-      { id: 2, text: "Pamiętaj o dodaniu odpowiednich filtrów do tabeli wiadomości – interesuje Cię tylko konkretny, precyzyjny tytuł oraz zaszyfrowany status.", cost: 1000 },
-      { id: 3, text: "Zwróć jako wynik tylko złączoną kolumnę full_name i body.", cost: 1500 }
+      { id: 1, text: "Najpierw odfiltruj odrzucone próby logowania.", cost: 250 },
+      { id: 2, text: "Pogrupuj wyniki według employee_id i policz liczbę prób.", cost: 500 },
+      { id: 3, text: "Posortuj wynik malejąco i ogranicz go do pierwszego rekordu.", cost: 600 }
+    ]
+  },
+
+  // ============================================================
+  // AKT III — THE MIRROR
+  // ============================================================
+
+  {
+    id: 11,
+    title: "THREE LIARS",
+    briefing:
+      "Porównanie danych wejściowych, wiadomości i grafików pokazuje kilka sprzeczności. Jedna z osób znajduje się znacznie wyżej w strukturze NEXUS.",
+    objective:
+      "Znajdź pracowników, którzy mają więcej niż jeden wpis dostępu do SERVER_ROOM_03 podczas nocy zaginięcia.",
+    requiredRows: [
+      { employee_id: 10 }
+    ],
+    maxRows: 5,
+    rewardXP: 800,
+    hints: [
+      { id: 1, text: "Połącz access_logs z lokalizacją SERVER_ROOM_03.", cost: 250 },
+      { id: 2, text: "Pogrupuj logi według employee_id.", cost: 500 },
+      { id: 3, text: "Potrzebujesz warunku na grupę, który sprawdzi liczbę wpisów większą niż 1. Użyj HAVING.", cost: 650 }
+    ]
+  },
+  {
+    id: 12,
+    title: "EXECUTIVE ACCESS",
+    briefing:
+      "W danych pojawia się Elias Voss — CTO NEXUS i brat ORACLE'a. Konto wykonawcze zostało użyte do operacji usunięcia logów bezpieczeństwa.",
+    objective:
+      "Znajdź pełne imię i nazwisko pracownika, którego konto wykonało operację purge na logach bezpieczeństwa.",
+    requiredRows: [
+      { full_name: "Elias Voss" }
+    ],
+    maxRows: 1,
+    rewardXP: 850,
+    unlocksEvidence: "EVD_EXECUTIVE_PURGE",
+    hints: [
+      { id: 1, text: "Operacja purge znajduje się w danych systemowych.", cost: 250 },
+      { id: 2, text: "Połącz log operacji z tabelą employees.", cost: 500 },
+      { id: 3, text: "Potrzebujesz JOIN po identyfikatorze pracownika.", cost: 750 }
+    ]
+  },
+  {
+    id: 13,
+    title: "THE MISSING HOUR",
+    briefing:
+      "Między 23:47 a 00:31 istnieje dokładnie 44-minutowa luka. ORACLE nie wyszedł z budynku. Ktoś z ochrony wszedł wtedy do SERVER_ROOM_03.",
+    objective:
+      "Znajdź wszystkich pracowników SECURITY, którzy weszli do SERVER_ROOM_03 w czasie brakującej godziny.",
+    requiredRows: [
+      { full_name: "Martin Vale" }
+    ],
+    maxRows: 5,
+    rewardXP: 900,
+    hints: [
+      { id: 1, text: "Połącz employees z access_logs.", cost: 500 },
+      { id: 2, text: "Najpierw wyfiltruj pracowników działu SECURITY.", cost: 1000 },
+      { id: 3, text: "Możesz wykorzystać podzapytanie zwracające employee_id osób obecnych w SERVER_ROOM_03.", cost: 1200 }
+    ]
+  },
+  {
+    id: 14,
+    title: "CHAIN OF EVIDENCE",
+    briefing:
+      "Martin Vale przestaje wyglądać jak porywacz. Wszystko wskazuje na to, że pomagał ORACLE'owi. W wiadomościach znajduje się zaszyfrowana rozmowa między nimi.",
+    objective:
+      "Znajdź temat wiadomości wysłanej przez Martina bezpośrednio do ORACLE'a.",
+    requiredRows: [
+      { subject: "Extraction route clear" }
+    ],
+    maxRows: 1,
+    rewardXP: 1000,
+    unlocksEvidence: "EVD_CCTV_ALPHA",
+    hints: [
+      { id: 1, text: "Potrzebujesz dwóch identyfikatorów: nadawcy i odbiorcy.", cost: 500 },
+      { id: 2, text: "Połącz dane pracowników z tabelą messages i ogranicz wynik do Martina oraz ORACLE'a.", cost: 1000 }
+    ]
+  },
+  {
+    id: 15,
+    title: "PROJECT MIRROR",
+    briefing:
+      "Zwykły SELECT to za mało, by udowodnić winę zarządu przed centralą. Wiemy o PROJECT MIRROR, ale musimy powiązać ten projekt z dyrektywą czyszczenia logów.",
+    objective:
+      "Użyj JOIN i podzapytania. Znajdź pełne imię nadawcy (jako sender) oraz odbiorcy (jako receiver) wiadomości 'PROJECT MIRROR', ale TYLKO jeśli ten sam nadawca wywołał incydent (purge) ze statusem 'WARNING' w SERVER_ROOM_03.",
+    requiredRows: [
+      { sender: "Elias Voss", receiver: "Marcus Vance" }
+    ],
+    maxRows: 1,
+    rewardXP: 1100,
+    unlocksEvidence: "EVD_DEAD_MAN",
+    unlocksTable: "audit_logs",
+    hints: [
+      { id: 1, text: "Będziesz potrzebował tabel: messages, employees, access_logs oraz incidents.", cost: 500 },
+      { id: 2, text: "Użyj aliasów (np. e1 dla nadawcy, e2 dla odbiorcy).", cost: 1000 },
+      { id: 3, text: "W klauzuli WHERE dla nadawcy użyj podzapytania (IN lub =), które szuka pracownika powiązanego z lokacją nr 3 i incydentem 'WARNING'.", cost: 1500 }
+    ]
+  },
+
+  // ============================================================
+  // AKT IV — ORACLE'S LAST QUERY
+  // ============================================================
+
+  {
+    id: 16,
+    title: "THE MISSING HOUR",
+    briefing:
+      "W danych brakuje fragmentu historii. Część rekordów została usunięta, ale nie wszystkie systemy zostały wyczyszczone. Musimy zrekonstruować wydarzenia między 23:47 a 00:31.",
+    objective:
+      "Znajdź pracownika, który był obecny w SERVER_ROOM_03 podczas całej brakującej sekwencji zdarzeń.",
+    requiredRows: [
+      { full_name: "Martin Vale" }
+    ],
+    maxRows: 3,
+    rewardXP: 1200,
+    unlocksTable: "internal_projects",
+    hints: [
+      { id: 1, text: "Porównaj pierwsze i ostatnie zdarzenie każdego pracownika.", cost: 700 },
+      { id: 2, text: "Przyda Ci się grupowanie danych według employee_id.", cost: 1400 },
+      { id: 3, text: "Sprawdź, kto spełnia jednocześnie warunek pierwszego i ostatniego zdarzenia.", cost: 2100 }
+    ]
+  },
+  {
+    id: 17,
+    title: "THE COVER",
+    briefing:
+      "MIRROR nie był jedynym projektem. Część z nich została oficjalnie sklasyfikowana (utajniona) w logach audytu, ale jeden wciąż umyka procedurom. Musimy go namierzyć.",
+    objective:
+      "Znajdź kody projektów (project_code z internal_projects), które NIE zostały sklasyfikowane – czyli odrzuć (EXCEPT) te, których nazwy pojawiają się jako 'target' w tabeli audit_logs.",
+    requiredRows: [
+      { project_code: "NODE_07" }
+    ],
+    maxRows: 10,
+    rewardXP: 1300,
+    unlocksTable: "infrastructure_nodes",
+    hints: [
+      { id: 1, text: "Użyjesz dwóch tabel: internal_projects oraz audit_logs.", cost: 700 },
+      { id: 2, text: "Z lewej strony EXCEPT wyciągnij project_code, a z prawej target.", cost: 1400 },
+      { id: 3, text: "Zapytanie zwróci projekt, który istnieje, ale brakuje go w audycie.", cost: 2100 }
+    ]
+  },
+  {
+    id: 18,
+    title: "NODE_07",
+    briefing:
+      "Nazwa NODE_07 pojawia się tylko raz. To identyfikator ukrytego węzła w hierarchii infrastruktury NEXUS.",
+    objective:
+      "Prześledź hierarchię infrastruktury od głównego węzła do NODE_07 i znajdź pełną ścieżkę połączeń w tabeli infrastructure_nodes.",
+    requiredRows: [
+      { node_name: "NODE_07" }
+    ],
+    maxRows: 20,
+    rewardXP: 1500,
+    unlocksEvidence: "EVD_NODE_07",
+    hints: [
+      { id: 1, text: "Każdy węzeł posiada identyfikator swojego rodzica.", cost: 700 },
+      { id: 2, text: "Musisz wielokrotnie przechodzić od dziecka do rodzica.", cost: 1400 },
+      { id: 3, text: "SQLite pozwala wykonywać takie przejście za pomocą WITH RECURSIVE.", cost: 2100 }
+    ]
+  },
+  {
+    id: 19,
+    title: "THE NETWORK",
+    briefing:
+      "Struktura sieci to drzewo. Jeśli ukryty serwer faktycznie istnieje, musi znajdować się na samym końcu łańcucha jako 'ślepy' punkt docelowy, a nie przekaźnik.",
+    objective:
+      "Znajdź ID węzłów w infrastructure_nodes, które są punktami końcowymi – to znaczy ich ID NIE występuje w kolumnie parent_id żadnego innego węzła. Użyj EXCEPT.",
+    requiredRows: [
+      { id: 5 }
+    ],
+    maxRows: 20,
+    rewardXP: 1600,
+    hints: [
+      { id: 1, text: "Porównujesz ze sobą dwa zapytania z tej samej tabeli infrastructure_nodes.", cost: 700 },
+      { id: 2, text: "W pierwszym zapytaniu wyciągasz zwykłe id węzłów.", cost: 1400 },
+      { id: 3, text: "W drugim wyciągasz kolumnę parent_id. Użyj EXCEPT pomiędzy nimi.", cost: 2100 }
+    ]
+  },
+  {
+    id: 20,
+    title: "THE FALSE TRAIL",
+    briefing:
+      "Zarząd celowo stworzył konkurencyjne tropy. Połączmy logi z audytem, aby wyłuskać winnego z całej listy ochroniarzy i pracowników.",
+    objective:
+      "Znajdź ID pracownika, który: wywołał operację w audycie (jako triggered_by w audit_logs) INTERSECT fizycznie wszedł do SERVER_ROOM_03 (z access_logs) EXCEPT ma zablokowane wejścia (access_granted=0 w access_logs).",
+    requiredRows: [
+      { triggered_by: 10 }
+    ],
+    maxRows: 5,
+    rewardXP: 1700,
+    hints: [
+      { id: 1, text: "Musisz użyć trzech zapytań połączonych operatorami.", cost: 700 },
+      { id: 2, text: "SELECT triggered_by FROM audit_logs INTERSECT SELECT employee_id FROM access_logs WHERE ...", cost: 1400 },
+      { id: 3, text: "Na samym końcu dopisz EXCEPT SELECT employee_id FROM access_logs WHERE access_granted = 0", cost: 2100 }
+    ]
+  },
+  {
+    id: 21,
+    title: "THE TRAP",
+    briefing:
+      "Przechodzimy do ofensywy. Zamiast tylko czytać dane, musimy aktywnie złapać tych, którzy je usuwają. Ktoś z zarządu regularnie czyści tabelę wiadomości. Czas zastawić pułapkę.",
+    objective:
+      "Napisz CREATE TRIGGER o nazwie 'ghost_tracker', po (AFTER) usunięciu (DELETE) na tabeli 'messages'. Trigger ma logować do tabeli 'audit_logs': (employee_id = OLD.sender_id, triggered_by = OLD.sender_id, action = 'DELETE_MSG', target = OLD.subject).",
+    requiredRows: [], 
+    maxRows: 0,
+    rewardXP: 1800,
+    unlocksEvidence: "EVD_AUDIT_TRAIL",
+    hints: [
+      { id: 1, text: "Składnia: CREATE TRIGGER nazwa AFTER DELETE ON tabela BEGIN ... END;", cost: 500 },
+      { id: 2, text: "Wewnątrz bloku wykonaj INSERT INTO audit_logs (employee_id, triggered_by, action, target) VALUES (...);", cost: 1000 },
+      { id: 3, text: "Aby odnieść się do usuniętych danych, użyj np. OLD.sender_id.", cost: 1500 }
+    ]
+  },
+  {
+    id: 22,
+    title: "WHO PULLED THE TRIGGER",
+    briefing:
+      "Pułapka zadziałała. Mamy zapisy usuniętych danych (DELETE) dotyczących ORACLE'a, ale sprawca próbuje się ukryć. Musimy skrzyżować dane z audytu z fizycznymi anomaliami dostępu.",
+    objective:
+      "Użyj CTE. Wyciągnij pełne imię osoby, która usunęła target 'oracle_01', pod warunkiem, że ta sama osoba znajduje się w Top 3 pracowników z największą liczbą odrzuconych wejść (access_granted = 0) w systemie.",
+    requiredRows: [
+      { full_name: "Elias Voss" }
+    ],
+    maxRows: 1,
+    rewardXP: 1900,
+    hints: [
+      { id: 1, text: "Najpierw stwórz CTE grupujące odrzucone logi po id z ORDER BY ... DESC LIMIT 3.", cost: 700 },
+      { id: 2, text: "W głównym zapytaniu połącz employees z audit_logs szukając akcji 'DELETE' na targecie 'oracle_01'.", cost: 1400 },
+      { id: 3, text: "Na końcu głównego zapytania dodaj warunek upewniający się, że ID pracownika znajduje się w wynikach Twojego CTE.", cost: 2100 }
+    ]
+  },
+  {
+    id: 23,
+    title: "THE HIDDEN ARCHIVE",
+    briefing:
+      "Baza ukrywa kłamstwa dyrekcji. Musimy użyć zaawansowanej eliminacji zbiorów, by znaleźć ten jeden temat wiadomości, który spina cały spisek.",
+    objective:
+      "Wydobądź tematy (subject) zaszyfrowanych wiadomości, a następnie wyeliminuj z nich (EXCEPT) te, które wysłała dyrekcja (department = 'EXECUTIVE'), ORAZ wyeliminuj te, których odbiorcą był dział IT (department = 'IT_OPS').",
+    requiredRows: [
+      { subject: "ORACLE PROTOCOL" }
+    ],
+    maxRows: 2,
+    rewardXP: 2000,
+    hints: [
+      { id: 1, text: "Twój cel wymaga złączenia trzech zapytań (SELECT subject ...) połączonych dwoma operatorami EXCEPT.", cost: 800 },
+      { id: 2, text: "W pierwszym zapytaniu wyciągnij po prostu tematy gdzie is_encrypted = 1.", cost: 1600 },
+      { id: 3, text: "Drugie i trzecie zapytanie musi posiadać JOIN z tabelą employees (odpowiednio po nadawcy i odbiorcy), aby odfiltrować działy.", cost: 2400 }
+    ]
+  },
+
+  {
+    id: 24,
+    title: "THE BLOODLINE",
+    briefing:
+      "Hierarchia NODE_07 prowadzi jeszcze głębiej. Każdy węzeł ma rodzica, ale część węzłów ma również powiązania boczne (linked_sibling_id).",
+    objective:
+      "Znajdź wszystkie węzły znajdujące się na ścieżce prowadzącej od węzła 'ORACLE_NODE' w górę. Zwróć kolumnę node_name.",
+    requiredRows: [
+      { node_name: "ORACLE_NODE" }
+    ],
+    maxRows: 50,
+    rewardXP: 2200,
+    hints: [
+      { id: 1, text: "Potrzebujesz ponownie przejść przez hierarchię zależności infrastructure_nodes.", cost: 800 },
+      { id: 2, text: "WITH RECURSIVE pozwoli Ci odwiedzać kolejne poziomy.", cost: 1600 },
+      { id: 3, text: "Uwzględnij w złączeniu rekurencyjnym warunek OR na kolumnę linked_sibling_id.", cost: 2400 }
+    ]
+  },
+  {
+    id: 25,
+    title: "THE REAL ARCHITECT",
+    briefing:
+      "Zarząd zaciera ślady. Musimy udowodnić bez cienia wątpliwości, kto kieruje MIRROR, wykluczając fałszywe tropy zszargane błędami logowania.",
+    objective:
+      "Wyciągnij pełne imię nadawcy wiadomości 'PROJECT MIRROR', KTÓRY jednocześnie: ma clearance = 5 ORAZ NIE MA ani jednego odrzuconego wejścia (access_granted = 0) w logach. Użyj NOT EXISTS.",
+    requiredRows: [
+      { full_name: "Elias Voss" }
+    ],
+    maxRows: 1,
+    rewardXP: 2500,
+    hints: [
+      { id: 1, text: "Zacznij od złączenia wiadomości z pracownikami.", cost: 800 },
+      { id: 2, text: "Zamiast łączyć access_logs bezpośrednio, użyj podzapytania skorelowanego z klauzulą NOT EXISTS.", cost: 1600 },
+      { id: 3, text: "NOT EXISTS (SELECT 1 FROM access_logs a WHERE a.employee_id = e.id AND a.access_granted = 0).", cost: 2400 }
+    ]
+  },
+
+  // ============================================================
+  // AKT V — THE TRUTH
+  // ============================================================
+
+  {
+    id: 26,
+    title: "THE SECOND ORACLE",
+    briefing:
+      "W systemie istnieją ślady drugiego użytkownika, cyfrowego 'cienia', który niemal idealnie naśladował logowania ORACLE'a. Znajdźmy go.",
+    objective:
+      "Znajdź użytkownika (username), którego profil operacyjny logowań pokrywa się w ilości akcji z oryginalnym kontem oracle_01.",
+    requiredRows: [
+      { username: "oracle_shadow" }
+    ],
+    maxRows: 10,
+    rewardXP: 2700,
+    hints: [
+      { id: 1, text: "Wykorzystaj CTE do zliczenia logów oryginalnego oracle_01.", cost: 800 },
+      { id: 2, text: "Zbuduj zapytanie grupujące logi pozostałych pracowników.", cost: 1600 },
+      { id: 3, text: "W klauzuli HAVING przyrównaj COUNT(*) do ilości wyników z Twojego podzapytania CTE.", cost: 2400 }
+    ]
+  },
+  {
+    id: 27,
+    title: "THE RANKING",
+    briefing:
+      "Tylko kilka osób miało ciągły fizyczny dostęp do MIRROR_CORE. Potrzebujemy ustalić bezwzględnego lidera wejść do tego węzła.",
+    objective:
+      "Znajdź osobę zajmującą pierwsze miejsce w rankingu ilości dostępu do lokacji 'MIRROR_CORE'. Zwróć tylko jej full_name.",
+    requiredRows: [
+      { full_name: "Elias Voss" }
+    ],
+    maxRows: 1,
+    rewardXP: 3000,
+    hints: [
+      { id: 1, text: "Musisz zliczyć logi wejść dla lokacji 31.", cost: 800 },
+      { id: 2, text: "Wykorzystaj funkcję okienkową RANK() OVER (ORDER BY COUNT(*) DESC).", cost: 1600 },
+      { id: 3, text: "Całość opakuj w zewnętrzne zapytanie, odfiltrowując rekord gdzie ranga = 1.", cost: 2400 }
+    ]
+  },
+  {
+    id: 28,
+    title: "THE ANOMALY",
+    briefing:
+      "Aktywność jednego administratora (w audit_logs) radykalnie różni się od średniej dla całego zespołu. Namierzmy go analitycznie.",
+    objective:
+      "Oblicz średnią ilość operacji audytu na pracownika, a następnie znajdź tego (username), którego ilość logów najbardziej odstaje od tej średniej (użyj funkcji ABS).",
+    requiredRows: [
+      { username: "evoss_cto" }
+    ],
+    maxRows: 5,
+    rewardXP: 3200,
+    hints: [
+      { id: 1, text: "Utwórz CTE sumujące ilość wpisów na każdego użytkownika w audit_logs.", cost: 800 },
+      { id: 2, text: "Utwórz drugie CTE wyliczające średnią wartość (AVG) z pierwszego CTE.", cost: 1600 },
+      { id: 3, text: "W głównym zapytaniu posortuj wyniki używając ORDER BY ABS(ilosc - srednia) DESC LIMIT 1.", cost: 2400 }
+    ]
+  },
+  {
+    id: 29,
+    title: "ORACLE'S LAST FOOTSTEP",
+    briefing:
+      "Zbliżamy się do finału. Ostatni wpis o wyjściu ORACLE'a (EXIT) z budynku to zmyłka. Gdzie naprawdę znajdował się na moment przed tym, zanim sfabrykowano ten log?",
+    objective:
+      "Wykorzystaj funkcję ROW_NUMBER() wewnątrz CTE. Znajdź dokładną nazwę lokacji (name z locations), w której ORACLE zarejestrował swoje PRZEDOSTATNIE zdarzenie chronologicznie w access_logs.",
+    requiredRows: [
+      { name: "SERVER_ROOM_03" }
+    ],
+    maxRows: 1,
+    rewardXP: 4000,
+    hints: [
+      { id: 1, text: "Stwórz CTE pobierające logi ORACLE'a posortowane po dacie (ORDER BY created_at DESC).", cost: 1000 },
+      { id: 2, text: "Dodaj do kolumn CTE funkcję ROW_NUMBER() OVER (ORDER BY created_at DESC).", cost: 2000 },
+      { id: 3, text: "W zewnętrznym zapytaniu odfiltruj wiersz, w którym wartość tej funkcji wynosi 2.", cost: 3000 }
+    ]
+  },
+  {
+    id: 30,
+    title: "THE LAST QUERY",
+    briefing:
+      "Dotarłeś do końca. Wszystko, czego potrzebowałeś, znajduje się w bazie. NEXUS próbował ukryć prawdę, ORACLE próbował ją ujawnić.",
+    objective:
+      "Odtwórz ostatnie zapytanie ORACLE'a. Wynik musi składać się z trzech kolumn: 'full_name' powiązane z oracle_01, 'node_name' odpowiadające węzłowi NODE_07, oraz 'controller' zawierające pełne imię CTO NEXUS.",
+    requiredRows: [
+      { full_name: "Adrian Voss", node_name: "NODE_07", controller: "Elias Voss" }
+    ],
+    maxRows: 1,
+    rewardXP: 5000,
+    unlocksEvidence: "EVD_FINAL_PROTOCOL",
+    hints: [
+      { id: 1, text: "Finał wymaga podzapytań skalarnych (SELECT ... AS) dla każdej kolumny wynikowej osobno.", cost: 1000 },
+      { id: 2, text: "Pierwsza kolumna: (SELECT full_name FROM employees WHERE username = 'oracle_01') AS full_name", cost: 2000 },
+      { id: 3, text: "Skonstruuj pozostałe dwie kolumny (dla node_name i controller) w dokładnie ten sam sposób w jednej linijce.", cost: 3000 }
     ]
   }
 ];

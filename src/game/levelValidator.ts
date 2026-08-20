@@ -1,11 +1,18 @@
 export class LevelValidator {
   static validate(
-    result: { columns: string[]; rows: Record<string, unknown>[] },
+    result: { columns: string[]; rows: Record<string, unknown>[] } | null,
     requiredRows: Record<string, unknown>[],
     maxRows?: number
   ): { success: boolean; message: string } {
     
-    // sprawdzenie czy w ogóle są wyniki
+    if (requiredRows.length === 0) {
+      if (!result || result.rows.length === 0) {
+        return { success: true, message: 'Operation completed successfully.' };
+      }
+      return { success: false, message: 'Expected modification of the database (DDL/DML), but the query returned data rows.' };
+    }
+
+    // sprawdzenie czy w ogóle są wyniki dla standardowych SELECTów
     if (!result || result.rows.length === 0) {
       return { success: false, message: 'The query did not return any data.' };
     }
@@ -17,7 +24,6 @@ export class LevelValidator {
         message: `Excessive information noise detected (${result.rows.length} results returned). Think again and isolate evidence.`
       };
     }
-
 
     const expectedColumns = Object.keys(requiredRows[0]);
     if (result.columns.length !== expectedColumns.length) {

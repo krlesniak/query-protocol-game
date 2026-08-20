@@ -22,6 +22,9 @@ const TABLE_SCHEMA: Record<string, string[]> = {
   access_logs: ['id', 'employee_id', 'location_id', 'action_type', 'created_at', 'access_granted'],
   messages: ['id', 'sender_id', 'receiver_id', 'created_at', 'subject', 'body', 'is_encrypted'],
   incidents: ['id', 'location_id', 'created_at', 'severity', 'description'],
+  audit_logs: ['id', 'employee_id', 'triggered_by', 'action', 'target', 'created_at'],
+  internal_projects: ['id', 'project_code', 'lead_id'],
+  infrastructure_nodes: ['id', 'node_name', 'parent_id', 'linked_sibling_id'],
 };
 
 interface MainLayoutProps {
@@ -118,12 +121,25 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
       addLog(`[SYSTEM] High query attempt rate (${queryAttempts}). Efficiency Bonus denied.`, 'warning');
     }
 
+    
+    // if (levelData.unlocksTable) {
+    //   unlockTable(levelData.unlocksTable);
+    //   setNewTableFlash(levelData.unlocksTable);
+    //   addLog(`[NEW ASSET] New table unlocked: ${levelData.unlocksTable.toUpperCase()}`, 'warning');
+    //   setTimeout(() => setNewTableFlash(null), 3000);
+    // }
     if (levelData.unlocksTable) {
-      unlockTable(levelData.unlocksTable);
-      setNewTableFlash(levelData.unlocksTable);
-      addLog(`[NEW ASSET] New table unlocked: ${levelData.unlocksTable.toUpperCase()}`, 'warning');
+      const tablesToUnlock = Array.isArray(levelData.unlocksTable) 
+        ? levelData.unlocksTable 
+        : [levelData.unlocksTable];
+      tablesToUnlock.forEach(table => {
+        unlockTable(table);
+        addLog(`[NEW ASSET] New table unlocked: ${table.toUpperCase()}`, 'warning');
+      });
+      setNewTableFlash(tablesToUnlock[0]);
       setTimeout(() => setNewTableFlash(null), 3000);
     }
+    
     if (levelData.unlocksEvidence) {
       addEvidence(levelData.unlocksEvidence);
       const evData = EVIDENCE_DB[levelData.unlocksEvidence];
@@ -158,6 +174,15 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
         return; 
       }
 
+      const forbiddenKeywords = /\b(INSERT|UPDATE|DELETE|DROP|ALTER|TRUNCATE|REPLACE|CREATE)\b/i;
+
+      if (levelData.requiredRows.length > 0 && forbiddenKeywords.test(sqlToRun)) {
+        addLog(`[ACCESS DENIED] Write operations are locked.`, 'error');
+        setSqlError(`SECURITY OVERRIDE: INSUFFICIENT PRIVILEGES. ACCOUNT RESTRICTED TO READ-ONLY MODE (SELECT).`);
+        setResults([]);
+        return; 
+      }
+
       const res = dbService.execute(sqlToRun);
       
       if (viewedLevel === currentLevel) {
@@ -176,28 +201,29 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
       setResults(res);
       setSqlError(null);
 
-      const rowCount = res.length > 0 ? res[0].values.length : 0;
+      const parsedResult = res.length > 0 ? {
+        columns: res[0].columns,
+        rows: res[0].values.map(row => {
+          const rowObj: Record<string, unknown> = {};
+          res[0].columns.forEach((col, i) => rowObj[col] = row[i]);
+          return rowObj;
+        })
+      } : { columns: [], rows: [] };
+
+      const rowCount = parsedResult.rows.length;
       addLog(`Query executed successfully: ${rowCount} rows found (${timeMs}ms)`, 'success');
 
-      if (res.length > 0) {
-        const parsedResult = {
-          columns: res[0].columns,
-          rows: res[0].values.map(row => {
-            const rowObj: Record<string, unknown> = {};
-            res[0].columns.forEach((col, i) => rowObj[col] = row[i]);
-            return rowObj;
-          })
-        };
-        const validation = LevelValidator.validate(parsedResult, levelData.requiredRows, levelData.maxRows);
+      const validation = LevelValidator.validate(parsedResult, levelData.requiredRows, levelData.maxRows);
 
-        if (validation.success) {
-          if (viewedLevel === currentLevel) {
-            addLog(`[SYSTEM] LEVEL COMPLETED: ${levelData.title}`, 'success');
-            setShowLevelUp(true);
-          } else {
-            addLog(`[SYSTEM] ARCHIVE QUERY VERIFIED: Saved query is working correctly.`, 'success');
-          }
+      if (validation.success) {
+        if (viewedLevel === currentLevel) {
+          addLog(`[SYSTEM] LEVEL COMPLETED: ${levelData.title}`, 'success');
+          setShowLevelUp(true);
         } else {
+          addLog(`[SYSTEM] ARCHIVE QUERY VERIFIED: Saved query is working correctly.`, 'success');
+        }
+      } else {
+        if (levelData.requiredRows.length > 0 || parsedResult.rows.length > 0) {
           addLog(`[ANALYZE DENIED] ${validation.message}`, 'warning');
         }
       }
@@ -213,42 +239,36 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
   const handleEditorDidMount: OnMount = (editor, monaco) => {
     editorRef.current = editor;
 
-    monaco.editor.defineTheme('obsidian-custom-theme', {
-    base: 'vs-dark',
-    inherit: true,
-
-    rules: [
-        { token: 'keyword', foreground: '8BD49C', fontStyle: 'bold' },
-        { token: 'keyword.sql', foreground: '8BD49C', fontStyle: 'bold' },
+    monaco.editor.defineTheme('nexus-graphite', {
+      base: 'vs-dark',
+      inherit: true,
+      rules: [
+        { token: 'keyword', foreground: '5D8F6C', fontStyle: 'bold' },
+        { token: 'keyword.sql', foreground: '5D8F6C', fontStyle: 'bold' },
         { token: 'identifier', foreground: 'D1D9E0' },
         { token: 'identifier.sql', foreground: 'D1D9E0' },
-        { token: 'string', foreground: 'C77DFF' },
-        { token: 'string.sql', foreground: 'C77DFF' },
-        { token: 'string.quote.sql', foreground: 'C77DFF' },
+        { token: 'string', foreground: 'A37C58' },
+        { token: 'string.sql', foreground: 'A37C58' },
+        { token: 'string.quote.sql', foreground: 'A37C58' },
         { token: 'number', foreground: 'F0C674' },
         { token: 'number.sql', foreground: 'F0C674' },
-
         { token: 'operator', foreground: '88A4B8' },
         { token: 'operator.sql', foreground: '88A4B8' },
-        
         { token: 'comment', foreground: '7A8B99', fontStyle: 'italic' },
         { token: 'comment.sql', foreground: '7A8B99', fontStyle: 'italic' },
-        
         { token: 'delimiter', foreground: '9BA8B5' },
         { token: 'delimiter.sql', foreground: '9BA8B5' },
-
         { token: 'constant', foreground: 'E59B76' },
         { token: 'constant.sql', foreground: 'E59B76' },
-    ],
-    
-    colors: {
-        'editor.background': '#0D1217',
+      ],
+      colors: {
+        'editor.background': '#0F1115',
         'editor.foreground': '#C5D4E0',
         'editor.lineHighlightBackground': '#141B22',
         'editor.lineHighlightBorder': '#00000000',
         'editor.selectionBackground': '#1D3B53',
         'editor.inactiveSelectionBackground': '#152A3B',
-        'editorCursor.foreground': '#8BD49C',
+        'editorCursor.foreground': '#5D8F6C',
         'editorLineNumber.foreground': '#4C5966',
         'editorLineNumber.activeForeground': '#8BA2B5',
         'scrollbarSlider.background': '#212D38',
@@ -267,9 +287,9 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
         'editorSuggestWidget.selectedBackground': '#192C3D',
         'editorHoverWidget.background': '#10161C',
         'editorHoverWidget.border': '#253340',
-    }
+      }
     });
-    monaco.editor.setTheme('obsidian-custom-theme');
+    monaco.editor.setTheme('nexus-graphite');
 
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
       handleRunQuery(editor.getValue());
@@ -446,7 +466,7 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
                 <div className="flex items-center gap-3">
                   <Database className="w-5 h-5 text-[var(--accent-bright)]" />
                   <span className="font-mono text-[12px] text-[var(--accent-bright)] tracking-[0.2em] font-bold">
-                    NEXUS_OS // DATABASE SCHEMA V{Math.min(unlockedTables.length, 5)}.0
+                    NEXUS_OS // DATABASE SCHEMA V{Math.min(unlockedTables.length, 8)}.0
                   </span>
                 </div>
                 <button onClick={() => setShowSchema(false)} className="text-[var(--text-muted)] hover:text-white transition-colors bg-[var(--surface-2)] p-1 rounded-sm">
@@ -457,7 +477,7 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
               <div className="flex-1 bg-[#0a0d10] relative flex items-center justify-center p-8 min-h-[400px] overflow-auto">
                 <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
                 <img 
-                  src={`/assets/schema/schema${Math.min(unlockedTables.length, 5)}.png`} 
+                  src={`/assets/schema/schema${Math.min(unlockedTables.length, 8)}.png`} 
                   alt="Database Schema" 
                   className="max-w-full max-h-full object-contain relative z-10 border border-white/5 shadow-2xl"
                 />
@@ -471,11 +491,11 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
 
       {/* MAIN AREA */}
       <div className="h-[calc(100vh-54px)] p-2 flex flex-col gap-2 min-h-0">
-        <div className="flex-1 min-h-0 grid grid-cols-[225px_minmax(0,1fr)_300px] gap-2">
+        <div className="flex-1 min-h-0 flex flex-col lg:grid lg:grid-cols-[225px_minmax(0,1fr)_300px] gap-2 overflow-y-auto lg:overflow-hidden">
 
           <DatabaseSidebar newTableFlash={newTableFlash} onOpenSchema={() => setShowSchema(true)} />
 
-          <main className="min-w-0 min-h-0 flex flex-col gap-2">
+          <main className="min-w-0 min-h-[500px] lg:min-h-0 flex flex-col gap-2 shrink-0 lg:shrink">
             
             <section className="flex-1 min-h-0 flex flex-col border border-[var(--border)] bg-[var(--surface-1)] focus-within:border-[var(--accent-muted)] transition-colors duration-200 overflow-hidden">
               <div className="h-11 border-b border-[var(--border)] flex items-center justify-between px-4 shrink-0">
@@ -515,7 +535,7 @@ export const MainLayout = ({ onReturnToMenu }: MainLayoutProps) => {
                   >
                     <Play className="w-3.5 h-3.5 fill-current" />
                     RUN
-                    <span className="text-[var(--text-muted)]">CTRL+ENTER</span>
+                    <span className="hidden sm:inline text-[var(--text-muted)]">CTRL+ENTER</span>
                   </motion.button>
                 </div>
               </div>
