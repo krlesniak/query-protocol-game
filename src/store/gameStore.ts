@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware';
 interface GameState {
   currentLevel: number;
   score: number;
+  hasSeenIntro: boolean;
   unlockedTables: string[];
   collectedEvidence: string[];
   completedLevels: number[];
@@ -18,6 +19,7 @@ interface GameState {
   completeLevel: (levelId: number) => void;
   completeCurrentLevel: (successfulQuery: string) => void; 
   resetGame: () => void;
+  setHasSeenIntro: () => void;
   
   applyHint: (levelId: number, hintId: number, cost: number) => void;
   incrementQueryAttempts: () => void;
@@ -30,6 +32,7 @@ interface GameState {
 const initialState = {
   currentLevel: 1,
   score: 200,
+  hasSeenIntro: false,
   unlockedTables: ['employees'],
   collectedEvidence: [],
   completedLevels: [],
@@ -101,6 +104,8 @@ export const useGameStore = create<GameState>()(
       incrementQueryAttempts: () => set((state) => ({ queryAttempts: state.queryAttempts + 1 })),
 
       resetGame: () => set(initialState),
+
+      setHasSeenIntro: () => set({ hasSeenIntro: true }),
 
       isTableUnlocked: (tableName: string) => get().unlockedTables.includes(tableName),
       hasEvidence: (evidenceId: string) => get().collectedEvidence.includes(evidenceId),

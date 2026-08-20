@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { MainLayout } from './components/layout/MainLayout';
+import { IntroCinematic } from './components/intro/IntroCinematic'; 
 import { dbService } from './db/DatabaseService';
 import { useGameStore } from './store/gameStore';
 import { Terminal, AlertTriangle, ChevronRight } from 'lucide-react';
@@ -7,14 +8,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { generateDatabaseSQL } from './db/schemaGenerator';
 import './index.css';
 
-type AppState = 'booting' | 'menu' | 'playing';
+type AppState = 'booting' | 'menu' | 'intro' | 'playing';
 
 function App() {
   const [appState, setAppState] = useState<AppState>('booting');
   const [progress, setProgress] = useState(0);
   const [showResetWarning, setShowResetWarning] = useState(false);
 
-  const { currentLevel, score, collectedEvidence, resetGame } = useGameStore();
+  const { currentLevel, score, collectedEvidence, resetGame, hasSeenIntro, setHasSeenIntro } = useGameStore();
   const hasProgress = currentLevel > 1 || score > 0 || collectedEvidence.length > 0;
 
   useEffect(() => {
@@ -50,19 +51,27 @@ function App() {
 
   const handleContinue = () => setAppState('playing');
 
+  const startGameFlow = () => {
+    if (!hasSeenIntro) {
+      setAppState('intro');
+    } else {
+      setAppState('playing');
+    }
+  };
+
   const handleNewGame = () => {
     if (hasProgress) {
       setShowResetWarning(true);
     } else {
       resetGame();
-      setAppState('playing');
+      startGameFlow();
     }
   };
 
   const confirmReset = () => {
     resetGame();
     setShowResetWarning(false);
-    setAppState('playing');
+    startGameFlow();
   };
 
   const totalBlocks = 20;
@@ -71,7 +80,6 @@ function App() {
   return (
     <div className="h-screen w-full bg-[var(--bg-base)] flex items-center justify-center font-mono selection:bg-transparent overflow-hidden">
       
-      {/* AnimatePresence mode="wait" czeka aż stara animacja się skończy przed załadowaniem nowej */}
       <AnimatePresence mode="wait">
         {appState === 'booting' && (
           <motion.div 
@@ -152,6 +160,23 @@ function App() {
           </motion.div>
         )}
 
+        {/* EKRAN INTRA */}
+        {appState === 'intro' && (
+          <motion.div 
+            key="intro"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="w-full h-full"
+          >
+            <IntroCinematic onComplete={() => {
+              setHasSeenIntro();
+              setAppState('playing');
+            }} />
+          </motion.div>
+        )}
+
         {appState === 'playing' && (
           <motion.div 
             key="playing"
@@ -161,7 +186,6 @@ function App() {
             transition={{ duration: 0.5 }}
             className="w-full h-full"
           >
-            {/* Przekazujemy funkcję powrotu do MainLayout */}
             <MainLayout onReturnToMenu={() => setAppState('menu')} />
           </motion.div>
         )}
