@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { dbService } from '../../db/DatabaseService';
 import type { QueryExecResult } from 'sql.js';
 import { AnimatePresence } from 'framer-motion';
+import { FolderLock } from 'lucide-react';
 
 import { useGameStore } from '../../store/gameStore';
 import { LevelValidator } from '../../game/levelValidator';
@@ -16,8 +17,10 @@ import { ToastNotification } from '../ui/ToastNotification';
 import { LevelUpModal } from '../ui/LevelUpModal';
 import { EvidenceModal } from '../ui/EvidenceModal';
 import { SchemaModal } from '../ui/SchemaModal';
+import { CaseFileModal } from '../ui/CaseFileModal';
 import { SqlEditor } from '../editor/SqlEditor';
 import { SqlResults } from '../terminal/SqlResults';
+import { TableInspectorModal } from '../ui/TableInspectorModal';
 
 const TABLE_SCHEMA: Record<string, string[]> = {
   employees: ['id', 'username', 'full_name', 'department', 'pos', 'clearance_level', 'status', 'assigned_location_id'],
@@ -31,7 +34,19 @@ const TABLE_SCHEMA: Record<string, string[]> = {
 };
 
 export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) => {
-  const { currentLevel, queryAttempts, unlockedTables, completedQueries, addScore, unlockTable, addEvidence, completeCurrentLevel, incrementQueryAttempts } = useGameStore();
+  const { 
+    currentLevel, 
+    queryAttempts, 
+    unlockedTables, 
+    completedQueries, 
+    addScore, 
+    unlockTable, 
+    addEvidence, 
+    completeCurrentLevel, 
+    incrementQueryAttempts,
+    incrementFailedQueries,
+    incrementPlayTime
+  } = useGameStore();
 
   const [viewedLevel, setViewedLevel] = useState(currentLevel);
   const levelData = LEVELS.find(l => l.id === viewedLevel) || LEVELS[LEVELS.length - 1];
@@ -48,9 +63,11 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
   
   const [showLevelUp, setShowLevelUp] = useState(false); 
   const [selectedEvidence, setSelectedEvidence] = useState<string | null>(null);
+  const [showCaseFile, setShowCaseFile] = useState(false); 
   const [newTableFlash, setNewTableFlash] = useState<string | null>(null);
   const [toast, setToast] = useState<{ title: string; desc: string } | null>(null);
-  const [showSchema, setShowSchema] = useState(false); 
+  const [showSchema, setShowSchema] = useState(false);
+  const [inspectedTable, setInspectedTable] = useState<string | null>(null); // NOWE
 
   const [logs, setLogs] = useState<LogEntry[]>([
     { id: 1, time: new Date().toLocaleTimeString(), msg: 'NEXUS_OS connection initialized', type: 'info' },
@@ -61,10 +78,19 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
   const currentQueryDraft = useRef(initialQuery); 
 
   useEffect(() => {
+    const timer = setInterval(() => {
+      incrementPlayTime();
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [incrementPlayTime]);
+
+  useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setSelectedEvidence(null);
         setShowSchema(false);
+        setShowCaseFile(false); 
+        setInspectedTable(null);
       }
     };
     window.addEventListener('keydown', handleEsc);
@@ -121,6 +147,8 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
   };
 
   const handleRunQuery = (sqlToRun: string) => {
+    if (viewedLevel === currentLevel) incrementQueryAttempts();
+    
     const startTime = performance.now();
     try {
       addLog(`Executing query...`, 'info');
@@ -129,6 +157,7 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
       const attemptedTable = lockedTables.find(t => new RegExp(`\\b${t}\\b`, 'i').test(sqlToRun));
       
       if (attemptedTable) {
+        if (viewedLevel === currentLevel) incrementFailedQueries();
         addLog(`[ACCESS DENIED] Attempted access to locked table '${attemptedTable}'.`, 'error');
         setSqlError(`SECURITY OVERRIDE: Access to table '${attemptedTable}' is denied. Level up to unlock.`);
         setResults([]);
@@ -137,6 +166,7 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
 
       const forbiddenKeywords = /\b(INSERT|UPDATE|DELETE|DROP|ALTER|TRUNCATE|REPLACE|CREATE)\b/i;
       if (levelData.requiredRows.length > 0 && forbiddenKeywords.test(sqlToRun)) {
+        if (viewedLevel === currentLevel) incrementFailedQueries();
         addLog(`[ACCESS DENIED] Write operations are locked.`, 'error');
         setSqlError(`SECURITY OVERRIDE: INSUFFICIENT PRIVILEGES. ACCOUNT RESTRICTED TO READ-ONLY MODE (SELECT).`);
         setResults([]);
@@ -144,7 +174,6 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
       }
 
       const res = dbService.execute(sqlToRun);
-      if (viewedLevel === currentLevel) incrementQueryAttempts();
 
       const timeMs = Math.round(performance.now() - startTime);
       setExecTime(timeMs);
@@ -171,11 +200,15 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
         } else {
           addLog(`[SYSTEM] ARCHIVE QUERY VERIFIED`, 'success');
         }
-      } else if (levelData.requiredRows.length > 0 || parsedResult.rows.length > 0) {
-        addLog(`[ANALYZE DENIED] ${validation.message}`, 'warning');
+      } else {
+        if (viewedLevel === currentLevel) incrementFailedQueries();
+        if (levelData.requiredRows.length > 0 || parsedResult.rows.length > 0) {
+          addLog(`[ANALYZE DENIED] ${validation.message}`, 'warning');
+        }
       }
 
     } catch (error: unknown) {
+      if (viewedLevel === currentLevel) incrementFailedQueries();
       setResults([]);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setSqlError(errorMessage);
@@ -189,22 +222,38 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
       <AnimatePresence>
         {toast && <ToastNotification title={toast.title} desc={toast.desc} />}
         {showLevelUp && <LevelUpModal rewardXP={levelData.rewardXP} onNext={handleNextLevel} onClose={() => setShowLevelUp(false)} />}
+        {showCaseFile && <CaseFileModal onClose={() => setShowCaseFile(false)} onOpenEvidence={setSelectedEvidence} />}
         {selectedEvidence && <EvidenceModal evidenceId={selectedEvidence} onClose={() => setSelectedEvidence(null)} />}
         {showSchema && <SchemaModal tableCount={unlockedTables.length} onClose={() => setShowSchema(false)} />}
+        {inspectedTable && <TableInspectorModal tableName={inspectedTable} onClose={() => setInspectedTable(null)} />}
       </AnimatePresence>
 
       <Header onReturnToMenu={onReturnToMenu} />
 
       <div className="h-[calc(100vh-54px)] p-2 flex flex-col gap-2 min-h-0">
         <div className="flex-1 min-h-0 flex flex-col lg:grid lg:grid-cols-[225px_minmax(0,1fr)_300px] gap-2 overflow-y-auto lg:overflow-hidden">
-          <DatabaseSidebar newTableFlash={newTableFlash} onOpenSchema={() => setShowSchema(true)} />
+          <DatabaseSidebar 
+            newTableFlash={newTableFlash} 
+            onOpenSchema={() => setShowSchema(true)} 
+            onInspectTable={(tableName) => setInspectedTable(tableName)}
+          />
 
           <main className="min-w-0 min-h-[500px] lg:min-h-0 flex flex-col gap-2 shrink-0 lg:shrink">
             <SqlEditor query={query} setQuery={setQuery} onRunQuery={handleRunQuery} viewedLevel={viewedLevel} currentLevel={currentLevel} onNavigate={handleNavigate} />
             <SqlResults results={results} sqlError={sqlError} execTime={execTime} />
           </main>
 
-          <MissionSidebar onLog={addLog} onOpenEvidence={setSelectedEvidence} viewedLevel={viewedLevel} />
+          <div className="flex flex-col gap-2 min-h-0 shrink-0 lg:shrink">
+            <button 
+              onClick={() => setShowCaseFile(true)}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#131920] border border-[var(--border)] hover:border-[var(--accent-muted)] hover:bg-[var(--surface-2)] text-[var(--accent-bright)] transition-all font-mono text-[11px] tracking-[0.2em] uppercase shadow-sm shrink-0"
+            >
+              <FolderLock className="w-4 h-4" />
+              CASE FILE
+            </button>
+            <MissionSidebar onLog={addLog} onOpenEvidence={setSelectedEvidence} viewedLevel={viewedLevel} />
+          </div>
+
         </div>
 
         <SystemLog logs={logs} />

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Database, Lock, ChevronRight, Network } from 'lucide-react';
+import { Database, Lock, ChevronRight, Network, Eye } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -17,9 +17,10 @@ const TABLE_SCHEMA: Record<string, string[]> = {
 interface DatabaseSidebarProps {
   newTableFlash: string | null;
   onOpenSchema: () => void;
+  onInspectTable: (tableName: string) => void;
 }
 
-export const DatabaseSidebar = ({ newTableFlash, onOpenSchema }: DatabaseSidebarProps) => {
+export const DatabaseSidebar = ({ newTableFlash, onOpenSchema, onInspectTable }: DatabaseSidebarProps) => {
   const { unlockedTables } = useGameStore();
   const [expandedTables, setExpandedTables] = useState<string[]>(['employees']);
 
@@ -59,14 +60,24 @@ export const DatabaseSidebar = ({ newTableFlash, onOpenSchema }: DatabaseSidebar
                 animate={isNew ? { backgroundColor: 'var(--surface-2)' } : {}}
                 transition={{ duration: 0.2 }}
                 onClick={() => toggleTable(tableName)}
-                className={`flex items-center gap-1.5 px-2 py-2 border-l-2 cursor-pointer transition-colors ${isNew ? 'border-[var(--accent-bright)] text-[var(--accent-bright)]' : 'border-[var(--border)] hover:border-[var(--accent)] hover:bg-[var(--surface-2)] text-[var(--text-main)]'}`}
+                className={`flex items-center gap-1.5 px-2 py-2 border-l-2 cursor-pointer transition-colors group ${isNew ? 'border-[var(--accent-bright)] text-[var(--accent-bright)]' : 'border-[var(--border)] hover:border-[var(--accent)] hover:bg-[var(--surface-2)] text-[var(--text-main)]'}`}
               >
                 <ChevronRight className={`w-3 h-3 text-[var(--text-secondary)] transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} />
                 <span>{tableName}</span>
-                {isNew ? (
-                  <span className="ml-auto text-[9px] text-[var(--accent-bright)]">NEW</span>
-                ) : (
-                  <span className="ml-auto text-[10px] text-[var(--text-muted)]">TABLE</span>
+                
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onInspectTable(tableName);
+                  }}
+                  className="ml-auto opacity-0 group-hover:opacity-100 p-1 hover:bg-[var(--surface-3)] rounded-sm transition-all text-[var(--text-secondary)] hover:text-[var(--accent-bright)]"
+                  title="Inspect Data"
+                >
+                  <Eye className="w-3 h-3" />
+                </button>
+
+                {!isExpanded && isNew && (
+                  <span className="ml-1 text-[9px] text-[var(--accent-bright)]">NEW</span>
                 )}
               </motion.div>
 

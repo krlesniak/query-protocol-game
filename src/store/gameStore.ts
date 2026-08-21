@@ -9,8 +9,15 @@ interface GameState {
   collectedEvidence: string[];
   completedLevels: number[];
   usedHints: Record<number, number[]>;
-  queryAttempts: number;
+  
+  // Próby dla obecnego poziomu
+  queryAttempts: number; 
   completedQueries: Record<number, string>; 
+
+  totalQueryAttempts: number;
+  failedQueries: number;
+  playTime: number; 
+  gameCompleted: boolean;
 
   addScore: (points: number) => void;
   setCurrentLevel: (level: number) => void;
@@ -23,6 +30,9 @@ interface GameState {
   
   applyHint: (levelId: number, hintId: number, cost: number) => void;
   incrementQueryAttempts: () => void;
+  incrementFailedQueries: () => void;
+  incrementPlayTime: () => void;
+  setGameCompleted: () => void;
 
   isTableUnlocked: (tableName: string) => boolean;
   hasEvidence: (evidenceId: string) => boolean;
@@ -39,6 +49,11 @@ const initialState = {
   usedHints: {},
   queryAttempts: 0,
   completedQueries: {},
+  
+  totalQueryAttempts: 0,
+  failedQueries: 0,
+  playTime: 0,
+  gameCompleted: false,
 };
 
 export const useGameStore = create<GameState>()(
@@ -85,7 +100,7 @@ export const useGameStore = create<GameState>()(
             completedLevels: newCompletedLevels,
             completedQueries: { ...state.completedQueries, [state.currentLevel]: successfulQuery },
             currentLevel: state.currentLevel + 1,
-            queryAttempts: 0, 
+            queryAttempts: 0, // Reset lokalnych prób
           };
         }),
 
@@ -101,7 +116,21 @@ export const useGameStore = create<GameState>()(
         }
         return state; 
       }),
-      incrementQueryAttempts: () => set((state) => ({ queryAttempts: state.queryAttempts + 1 })),
+
+      incrementQueryAttempts: () => set((state) => ({ 
+        queryAttempts: state.queryAttempts + 1,
+        totalQueryAttempts: state.totalQueryAttempts + 1
+      })),
+
+      incrementFailedQueries: () => set((state) => ({
+        failedQueries: state.failedQueries + 1
+      })),
+
+      incrementPlayTime: () => set((state) => ({
+        playTime: state.playTime + 1
+      })),
+
+      setGameCompleted: () => set({ gameCompleted: true }),
 
       resetGame: () => set(initialState),
 

@@ -7,33 +7,33 @@ export class LevelValidator {
     
     if (requiredRows.length === 0) {
       if (!result || result.rows.length === 0) {
-        return { success: true, message: 'Operation completed successfully.' };
+        return { success: true, message: 'QUERY EXECUTED. DATABASE MODIFIED.' };
       }
-      return { success: false, message: 'Expected modification of the database (DDL/DML), but the query returned data rows.' };
+      return { success: false, message: 'QUERY REJECTED. ERROR: EXPECTED DDL/DML, RECEIVED DATA ROWS.' };
     }
 
-    // sprawdzenie czy w ogóle są wyniki dla standardowych SELECTów
+    // Sprawdzenie, czy zapytanie w ogóle zwróciło dane
     if (!result || result.rows.length === 0) {
-      return { success: false, message: 'The query did not return any data.' };
+      return { success: false, message: 'QUERY REJECTED. ERROR: EMPTY_RESULT_SET. No data matched the criteria.' };
     }
 
-    // sprawdzenie szumu 
     if (maxRows && result.rows.length > maxRows) {
       return { 
         success: false, 
-        message: `Excessive information noise detected (${result.rows.length} results returned). Think again and isolate evidence.`
+        message: `QUERY REJECTED. ERROR: EXCESSIVE_NOISE. Expected max ${maxRows} rows, received ${result.rows.length}. Isolate the evidence.`
       };
     }
 
+    // Weryfikacja dokładnej liczby kolumn
     const expectedColumns = Object.keys(requiredRows[0]);
     if (result.columns.length !== expectedColumns.length) {
       return { 
         success: false, 
-        message: 'The number of columns returned does not match the expected number of columns for this investigation (expected: ' + expectedColumns.length + ', got: ' + result.columns.length + ').'
+        message: `QUERY REJECTED. ERROR: COLUMN_MISMATCH. Expected ${expectedColumns.length} columns, received ${result.columns.length}.`
       };
     }
 
-    // sprawdzenie konkretnych wartości
+    // Sprawdzenie poprawności wyników
     for (const requiredRow of requiredRows) {
       const matchFound = result.rows.some((resultRow) => {
         return Object.entries(requiredRow).every(([key, value]) => {
@@ -44,11 +44,11 @@ export class LevelValidator {
       if (!matchFound) {
         return { 
           success: false, 
-          message: 'The data returned does not contain key evidence for this investigation or the conditions are incorrect.' 
+          message: 'QUERY EXECUTED. ACCESS DENIED. Result does not match case parameters.' 
         };
       }
     }
 
-    return { success: true, message: 'Dane uwierzytelnione.' };
+    return { success: true, message: 'EVIDENCE VERIFIED. ACCESS GRANTED.' };
   }
 }

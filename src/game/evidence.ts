@@ -1,84 +1,111 @@
-export interface EvidenceDef {
+export interface Evidence {
   id: string;
   title: string;
-  description: string; 
-  type: 'DOCUMENT' | 'IMAGE' | 'LOG' | 'UNKNOWN';
-  imagePath: string; 
-  storyDescription: string; 
-  sourceLevel: number; 
+  type: string;
+  sourceLevel: number;
+  description: string;
+  storyDescription: string;
+  imagePath: string;
 }
 
-export const EVIDENCE_DB: Record<string, EvidenceDef> = {
-  'EVD_ORACLE_LAB_LOC': {
-    id: 'EVD_ORACLE_LAB_LOC', 
-    title: 'LOKALIZACJA PROJEKTU ORACLE', 
-    type: 'DOCUMENT',
-    description: 'Wpis z rejestru HR potwierdzający przeniesienie obiektu "ORACLE" do sektora podziemnego -2.',
-    imagePath: '/assets/evidence/evidence_001.png',
-    storyDescription: 'Dokument z departamentu kadr (HR). Zmiana przydziału oznaczona klauzulą "ŚCIŚLE TAJNE". ORACLE-01 został nagle odcięty od głównego zespołu i przeniesiony do izolowanego podziemnego sektora B bez oficjalnego wytłumaczenia.',
-    sourceLevel: 2
+export const EVIDENCE_DB: Record<string, Evidence> = {
+  "EVD_ORACLE_LAB_LOC": {
+    id: "EVD_ORACLE_LAB_LOC",
+    title: "SERVER ROOM 03 SCHEMATIC",
+    type: "BLUEPRINT",
+    sourceLevel: 2,
+    description: "Map of the Core Sector indicating Oracle's workspace.",
+    storyDescription: "Workspace assignment confirms ORACLE operated directly from SERVER_ROOM_03. This is a highly restricted zone. Why would the Chief Security Architect isolate himself down here instead of the Executive floors?",
+    imagePath: "/assets/evidence/evd_lab_loc.jpg"
   },
-  'EVD_SERVER_LOG_CONTRADICTION': {
-    id: 'EVD_SERVER_LOG_CONTRADICTION', 
-    title: 'LOGI SERWEROWNI: SPRZECZNOŚĆ', 
-    type: 'LOG',
-    description: 'Surowy wyciąg z logów systemu drzwi. Ktoś z wysokimi uprawnieniami wszedł tam pod osłoną nocy.',
-    imagePath: '/assets/evidence/evidence_002.png',
-    storyDescription: 'Zapisy z logów bazy danych śluz nie kłamią. Osoba z autoryzacją wysokiego szczebla zignorowała protokoły nocne i weszła do strefy laboratoryjnej. Oficjalny raport administratora sieci został sfałszowany, by ukryć ten ruch.',
-    sourceLevel: 3
+  "EVD_SERVER_LOG_CONTRADICTION": {
+    id: "EVD_SERVER_LOG_CONTRADICTION",
+    title: "ACCESS LOG CONTRADICTION",
+    type: "SYSTEM LOG",
+    sourceLevel: 3,
+    description: "Discrepancy found in physical access vs system logs.",
+    storyDescription: "The official report says ORACLE left the building. But the physical door logs prove someone entered his lab late at night and never triggered the exit sensors. The official narrative is a lie.",
+    imagePath: "/assets/evidence/evd_server_log.jpg"
   },
-  'EVD_INCIDENT_REPORT': {
-    id: 'EVD_INCIDENT_REPORT', 
-    title: 'RAPORT INCYDENTU: WYCIEK', 
-    type: 'LOG',
-    description: 'Baza zgłosiła krytyczną kradzież danych z głównego terminala ORC-01. Poziom bezpieczeństwa: CZERWONY.',
-    imagePath: '/assets/evidence/evidence_003.png',
-    storyDescription: 'Zautomatyzowany raport systemu bezpieczeństwa NEXUS. Główny terminal laboratoryjny (ORC-01) odnotował masowy transfer danych na niezidentyfikowany nośnik zewnętrzny. System wyzwolił alarm "CRITICAL", po czym został natychmiastowo wyciszony z poziomu konsoli administracyjnej.',
-    sourceLevel: 4
+  "EVD_GHOST_PROFILE": {
+    id: "EVD_GHOST_PROFILE",
+    title: "MARTIN VALE PROFILE",
+    type: "PERSONNEL FILE",
+    sourceLevel: 5,
+    description: "Security clearance level 5 personnel file.",
+    storyDescription: "Martin Vale. High-level security operative. His credentials were used near the lab around the time of the disappearance. He has the clearance to bypass the cameras, but does he have the motive?",
+    imagePath: "/assets/evidence/evd_ghost_profile.jpg"
   },
-  'EVD_GHOST_PROFILE': {
-    id: 'EVD_GHOST_PROFILE', 
-    title: 'PROFIL: GHOST (DYREKTOR)', 
-    type: 'DOCUMENT',
-    description: 'Teczka osobowa. Odtajniono pozycję: Dyrektor Projektów Wykonawczych (Executive). Clearance Level 5.',
-    imagePath: '/assets/evidence/evidence_004.png',
-    storyDescription: 'Odtajniona teczka osobowa. "GHOST" to dyrektor operacyjny z najwyższymi uprawnieniami (Clearance Level 5). Posiada pełną władzę nad systemami monitoringu i procedurami bezpieczeństwa. Wewnątrz korporacyjnej drabinki jest praktycznie nietykalny.',
-    sourceLevel: 5
+  "EVD_ECHO_DOC": {
+    id: "EVD_ECHO_DOC",
+    title: "ORACLE'S WARNING",
+    type: "ENCRYPTED MESSAGE",
+    sourceLevel: 7,
+    description: "A hidden message fragment found in the database.",
+    storyDescription: "«If you are reading this, do not trust the logs.»\n\nORACLE knew they were coming for him. He intentionally left breadcrumbs in the database structure itself. He knew someone like me would look.",
+    imagePath: "/assets/evidence/evd_echo_doc.jpg"
   },
-  'EVD_ECHO_DOC': {
-    id: 'EVD_ECHO_DOC', 
-    title: 'AKTA: PROJECT ECHOLOCATE', 
-    type: 'DOCUMENT',
-    description: 'Cyfrowy Strażnik Bioakustyki. Projekt początkowo służył do monitorowania ekosystemów, ale dyrekcja NEXUS zleciła jego modyfikację pod inwigilację.',
-    imagePath: '/assets/evidence/evidence_005.png',
-    storyDescription: 'Fragment odzyskanej specyfikacji technicznej "EchoLocate". Algorytmy bioakustyczne, pierwotnie zaprojektowane do szczytnego celu analizy gatunków w dżungli, zostały potajemnie przeprogramowane. Teraz miały analizować ludzkie tętno, oddech i poziom stresu przez mikrofony w smartfonach. Narzędzie masowej inwigilacji.',
-    sourceLevel: 7
+  "EVD_ARCHIVE_LOG": {
+    id: "EVD_ARCHIVE_LOG",
+    title: "THE SMOKESCREEN",
+    type: "TRAFFIC ANALYSIS",
+    sourceLevel: 9,
+    description: "Analysis of failed authentication attempts.",
+    storyDescription: "Hundreds of failed login attempts from a single ghost terminal. It's a classic smokescreen. Someone generated a massive amount of noise in the access logs to hide a single, surgical entry into the server room.",
+    imagePath: "/assets/evidence/evd_archive_log.jpg"
   },
-  'EVD_ARCHIVE_LOG': {
-    id: 'EVD_ARCHIVE_LOG', 
-    title: 'RAPORT ZABEZPIECZEŃ ARCHIWUM', 
-    type: 'LOG',
-    description: 'Logi wskazują na ponad 60 prób włamania do głębokiego archiwum za pomocą wygasłego identyfikatora dostawcy.',
-    imagePath: '/assets/evidence/evidence_006.png',
-    storyDescription: 'Ślady agresywnego, siłowego ataku brute-force na serwery głębokiego archiwum. Ktoś z zewnątrz lub używający fałszywego konta testował luki w zabezpieczeniach NEXUS, prawdopodobnie w celu dywersji tuż przed głównym incydentem kradzieży w Sektorze B.',
-    sourceLevel: 9
+  "EVD_EXECUTIVE_PURGE": {
+    id: "EVD_EXECUTIVE_PURGE",
+    title: "EXECUTIVE PURGE ORDER",
+    type: "AUDIT TRAIL",
+    sourceLevel: 12,
+    description: "Record of a manual deletion of security logs.",
+    storyDescription: "Elias Voss. CTO of Nexus and ORACLE's own brother. Elias used his executive override to manually purge the security logs from the night of the incident. This isn't just a cover-up; it's a family betrayal.",
+    imagePath: "/assets/evidence/evd_exec_purge.jpg"
   },
-  'EVD_CCTV_ALPHA': {
-    id: 'EVD_CCTV_ALPHA', 
-    title: 'ZRZUT Z KAMERY: SERVER ROOM ALPHA', 
-    type: 'IMAGE',
-    description: 'Niewyraźna klatka z kamery przemysłowej. Mężczyzna w garniturze dyrektora ingeruje w panel klimatyzacji na sekundy przed skokiem temperatury.',
-    imagePath: '/assets/evidence/evidence_007.png',
-    storyDescription: 'Wydobyta klatka z uszkodzonego nagrania monitoringu. Analiza obrazu ujawnia Dyrektora majstrującego przy głównym panelu wentylacyjnym. Skok temperatury w serwerowni był celowym sabotażem, mającym najprawdopodobniej wykurzyć ORACLE\'a z jego laboratorium pod pretekstem ewakuacji.',
-    sourceLevel: 13
+  "EVD_CCTV_ALPHA": {
+    id: "EVD_CCTV_ALPHA",
+    title: "EXTRACTION ROUTE",
+    type: "COMMUNICATION INTERCEPT",
+    sourceLevel: 14,
+    description: "Message intercept between Vale and ORACLE.",
+    storyDescription: "«Extraction route clear.»\n\nMartin Vale wasn't hunting ORACLE. He was helping him escape. The security operative smuggled the Architect out right under the Executive board's noses.",
+    imagePath: "/assets/evidence/evd_cctv_alpha.jpg"
   },
-  'EVD_DEAD_MAN': {
-    id: 'EVD_DEAD_MAN', 
-    title: 'ZASZYFROWANY KLUCZ (DEAD MAN)', 
-    type: 'DOCUMENT',
-    description: 'Ciąg znaków ECH0_V4NCE. ORACLE uciekł, by udostępnić kod źródłowy projektu opinii publicznej. Zdemaskował spisek na najwyższym szczeblu NEXUS.',
-    imagePath: '/assets/evidence/evidence_008.png',
-    storyDescription: 'Ostatnia przechwycona wiadomość od ORACLE\'a. Klucz deszyfrujący "ECH0_V4NCE" otwiera ukrytą partycję, na której zdeponowano cały kod źródłowy zbrojonej wersji EchoLocate. Ujawnienie tych danych opinii publicznej ostatecznie zniszczy dyrekcję NEXUS i oczyści ORACLE\'a z zarzutów.',
-    sourceLevel: 14
+  "EVD_DEAD_MAN": {
+    id: "EVD_DEAD_MAN",
+    title: "PROJECT MIRROR EXPOSED",
+    type: "CLASSIFIED MEMO",
+    sourceLevel: 15,
+    description: "Intercepted communication confirming Project Mirror.",
+    storyDescription: "PROJECT MIRROR. An unsanctioned, highly illegal data-harvesting operation run by Elias Voss. ORACLE found out about it and was about to blow the whistle. That's why he had to disappear.",
+    imagePath: "/assets/evidence/evd_dead_man.jpg"
+  },
+  "EVD_NODE_07": {
+    id: "EVD_NODE_07",
+    title: "NODE 07 ARCHITECTURE",
+    type: "NETWORK DIAGRAM",
+    sourceLevel: 18,
+    description: "Map of the hidden infrastructure node.",
+    storyDescription: "A completely off-the-books server cluster buried deep within the Nexus network topology. This is where PROJECT MIRROR lives. This is the beating heart of the conspiracy.",
+    imagePath: "/assets/evidence/evd_node_07.jpg"
+  },
+  "EVD_AUDIT_TRAIL": {
+    id: "EVD_AUDIT_TRAIL",
+    title: "THE TRIGGER TRAP",
+    type: "DATABASE TRIGGER LOG",
+    sourceLevel: 21,
+    description: "Results of the manual trigger injection.",
+    storyDescription: "The trap worked. We caught the executives actively trying to delete references to ORACLE in real-time. We now have undeniable proof of evidence tampering at the highest level.",
+    imagePath: "/assets/evidence/evd_audit_trail.jpg"
+  },
+  "EVD_FINAL_PROTOCOL": {
+    id: "EVD_FINAL_PROTOCOL",
+    title: "ORACLE'S KEY",
+    type: "DECRYPTED PAYLOAD",
+    sourceLevel: 30,
+    description: "The final piece of the puzzle.",
+    storyDescription: "I have it. The exact parameters needed to shut down Project Mirror and expose Elias Voss. ORACLE didn't just leave a trail; he left a weapon. Now I just need to pull the trigger.",
+    imagePath: "/assets/evidence/evd_final_protocol.jpg"
   }
 };
