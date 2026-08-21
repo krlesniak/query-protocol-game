@@ -11,20 +11,34 @@ const TypewriterText = ({
   text, 
   typingSpeed = 40, 
   onComplete,
-  className = "" 
+  className = "",
+  silent = false 
 }: { 
   text: string, 
   typingSpeed?: number, 
   onComplete?: () => void,
-  className?: string 
+  className?: string,
+  silent?: boolean
 }) => {
   const [displayed, setDisplayed] = useState('');
+  const typingAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    typingAudioRef.current = new Audio('/assets/audio/keyboard.mp3');
+    typingAudioRef.current.volume = 0.15; 
+  }, []);
   
   useEffect(() => {
     let i = 0;
     
     const timer = setInterval(() => {
       setDisplayed(text.substring(0, i + 1));
+
+      if (typingAudioRef.current && text.charAt(i) !== ' ' && !silent) {
+        typingAudioRef.current.currentTime = 0; 
+        typingAudioRef.current.play().catch(() => {});
+      }
+
       i++;
 
       if (i >= text.length) {
@@ -34,7 +48,7 @@ const TypewriterText = ({
     }, typingSpeed);
 
     return () => clearInterval(timer);
-  }, [text, typingSpeed, onComplete]);
+  }, [text, typingSpeed, onComplete, silent]);
 
   return <span className={className}>{displayed}</span>;
 };
@@ -49,10 +63,12 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
   const isSkipped = useRef(false);
   const done = useRef(false);
 
-  const playSound = useCallback((fileName: string) => {
+  const bgmRef = useRef<HTMLAudioElement | null>(null);
+
+  const playSound = useCallback((fileName: string, volume: number = 0.4) => {
     try {
       const audio = new Audio(`/assets/audio/${fileName}`);
-      audio.volume = 0.4;
+      audio.volume = volume;
       audio.play().catch(() => {}); 
     } catch {
       // Ignore
@@ -63,12 +79,17 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
     if (done.current) return;
     done.current = true;
     isSkipped.current = true;
+    
+    if (bgmRef.current) {
+      bgmRef.current.pause();
+      bgmRef.current.currentTime = 0;
+    }
+    
     onComplete();
   }, [onComplete]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Zmiana z Escape na Enter
       if (e.key === 'Enter') finishIntro();
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -93,7 +114,6 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
       return isMounted.current && !isSkipped.current;
     };
 
-    // Glitch Event
     const triggerGlitch = (durationMs: number) => {
       if (!isMounted.current || isSkipped.current) return;
       setIsGlitching(true);
@@ -103,7 +123,13 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
     };
 
     const runTimeline = async () => {
-      playSound('hum.mp3');
+      try {
+        bgmRef.current = new Audio('/assets/audio/hum3.mp3');
+        bgmRef.current.volume = 0.4;
+        bgmRef.current.loop = true;
+        bgmRef.current.play().catch(() => {});
+      } catch { /* ignore */ }
+
       if (!(await wait(1000))) return;
 
       // ==========================================
@@ -116,11 +142,11 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
       setSubPhase(2); 
       if (!(await wait(2000))) return;
 
-      setSubPhase(3); playSound('beep.mp3'); if (!(await wait(500))) return; 
-      setSubPhase(4); playSound('beep.mp3'); if (!(await wait(500))) return; 
-      setSubPhase(5); playSound('beep.mp3'); if (!(await wait(500))) return; 
-      setSubPhase(6); playSound('beep.mp3'); if (!(await wait(500))) return; 
-      setSubPhase(7); playSound('beep.mp3'); if (!(await wait(1500))) return; 
+      setSubPhase(3); playSound('beep2.mp3'); if (!(await wait(500))) return; 
+      setSubPhase(4); playSound('beep2.mp3'); if (!(await wait(500))) return; 
+      setSubPhase(5); playSound('beep2.mp3'); if (!(await wait(500))) return; 
+      setSubPhase(6); playSound('beep2.mp3'); if (!(await wait(500))) return; 
+      setSubPhase(7); playSound('beep2.mp3'); if (!(await wait(1500))) return; 
 
       // ==========================================
       // SCENE 2: INTEGRITY WARNING
@@ -130,7 +156,7 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
       if (!(await wait(2500))) return;
 
       setSubPhase(2); 
-      playSound('glitch_bass.mp3');
+      playSound('glitch1.mp3', 0.05);
       triggerGlitch(250);
       if (!(await wait(3000))) return;
 
@@ -139,7 +165,7 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
       // ==========================================
       setPhase(3);
       setSubPhase(1);
-      playSound('static.mp3');
+      playSound('static.mp3', 0.1);
       if (!(await wait(2000))) return;
 
       setSubPhase(2); 
@@ -153,15 +179,15 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
       // ==========================================
       setPhase(4);
       setSubPhase(1); 
-      playSound('oracle_voice_1.mp3');
-      if (!(await wait(3500))) return;
+      playSound('oracle_voice_1.mp3', 0.25);
+      if (!(await wait(4800))) return;
 
       setSubPhase(2); 
-      playSound('oracle_voice_2.mp3');
+      playSound('scene2.mp3', 0.25);
       if (!(await wait(3500))) return;
 
       setSubPhase(3); 
-      playSound('oracle_voice_3.mp3');
+      playSound('oracle_voice_3.mp3', 0.25);
       if (!(await wait(1500))) return;
       
       triggerGlitch(300);
@@ -173,7 +199,7 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
       // ==========================================
       setPhase(5);
       setSubPhase(1);
-      playSound('heartbeat.mp3');
+      playSound('heartbeat1.mp3');
       if (!(await wait(6000))) return;
 
       // ==========================================
@@ -181,11 +207,10 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
       // ==========================================
       setPhase(6);
       setSubPhase(1);
-      playSound('bass_hit.mp3');
       if (!(await wait(2500))) return;
 
       setSubPhase(2); 
-      playSound('beep.mp3');
+      playSound('beep2.mp3');
       if (!(await wait(2500))) return;
 
       // ==========================================
@@ -193,13 +218,16 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
       // ==========================================
       setPhase(7);
       setSubPhase(1);
-      playSound('beep.mp3');
+      playSound('beep2.mp3');
       if (!(await wait(1500))) return;
 
       setSubPhase(2);
       if (!(await wait(1500))) return;
 
       setSubPhase(3);
+      if (!(await wait(1500))) return;
+
+      playSound('bass_hit2.mp3');
       if (!(await wait(1500))) return;
 
       finishIntro();
@@ -209,6 +237,9 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
 
     return () => {
       isMounted.current = false;
+      if (bgmRef.current) {
+        bgmRef.current.pause();
+      }
     };
   }, [finishIntro, playSound]);
 
@@ -219,16 +250,13 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
           {Array.from({ length: 150 }).map((_, i) => {
             const isNode07 = i === 77;
             const hasLight = !isNode07 && Math.random() > 0.3; 
-            // Inne światła gasną znacznie szybciej (między 0 a 2.5 sekundy)
             const shutdownDelay = Math.random() * 2.5; 
 
             return (
               <div key={i} className="h-16 md:h-24 bg-[#020202] border border-[#0a0a0a] relative shadow-lg flex items-center justify-center">
                 {isNode07 && (
                   <div className="relative">
-                    {/* Główny punkt świetlny */}
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-[#1fff0f] rounded-full animate-ping z-10" />
-                    {/* Poświata, żeby lepiej było go widać przy przybliżeniu */}
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-[#1fff0f]/30 rounded-full animate-pulse blur-md z-0" />
                   </div>
                 )}
@@ -270,11 +298,11 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
             <br/>
             {subPhase >= 2 && <TypewriterText text="INITIALIZING CORE SYSTEMS..." typingSpeed={40} />}
             <br/>
-            {subPhase >= 3 && <TypewriterText text="MEMORY................ OK" typingSpeed={10} />}
-            {subPhase >= 4 && <TypewriterText text="SECURITY KERNEL....... OK" typingSpeed={10} />}
-            {subPhase >= 5 && <TypewriterText text="DATABASE.............. OK" typingSpeed={10} />}
-            {subPhase >= 6 && <TypewriterText text="ACCESS CONTROL........ OK" typingSpeed={10} />}
-            {subPhase >= 7 && <TypewriterText text="AUDIT SYSTEM.......... OK" typingSpeed={20} />}
+            {subPhase >= 3 && <TypewriterText text="MEMORY................ OK" typingSpeed={10} silent />}
+            {subPhase >= 4 && <TypewriterText text="SECURITY KERNEL....... OK" typingSpeed={10} silent />}
+            {subPhase >= 5 && <TypewriterText text="DATABASE.............. OK" typingSpeed={10} silent />}
+            {subPhase >= 6 && <TypewriterText text="ACCESS CONTROL........ OK" typingSpeed={10} silent />}
+            {subPhase >= 7 && <TypewriterText text="AUDIT SYSTEM.......... OK" typingSpeed={20} silent />}
             
             <div className="mt-2"><span className="animate-pulse">_</span></div>
           </div>
@@ -294,7 +322,7 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
             {subPhase >= 2 && (
               <div className="text-red-500 glow-text-red mt-4 border-l-2 border-red-500 pl-4">
                 <p className="font-bold">WARNING:</p>
-                <TypewriterText text="AUDIT SYSTEM HAS NOT RESPONDED." typingSpeed={40} />
+                <TypewriterText text="AUDIT SYSTEM HAS NOT RESPONDED." typingSpeed={40} silent />
               </div>
             )}
           </div>
@@ -305,7 +333,8 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
         {/* ============================== */}
         {phase === 3 && (
           <div className="text-sm md:text-lg tracking-widest text-[#1fff0f] glow-text flex flex-col gap-4">
-            {subPhase >= 1 && <TypewriterText text="> UNKNOWN TRANSMISSION DETECTED" typingSpeed={30} />}
+            {/* Wyciszone, bo tu odtwarzany jest szum radiowy (static.mp3) */}
+            {subPhase >= 1 && <TypewriterText text="> UNKNOWN TRANSMISSION DETECTED" typingSpeed={30} silent />}
             
             {subPhase >= 2 && (
               <div className="pl-4 mt-2 flex flex-col gap-2 opacity-80 border-l border-[#1fff0f]/30">
@@ -329,21 +358,21 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
           <div className="flex flex-col items-start justify-center w-full gap-8 pl-4 border-l-2 border-[#1fff0f]/30">
             {subPhase >= 1 && (
               <div className="text-xl md:text-3xl text-[#1fff0f]/70 font-normal tracking-widest leading-relaxed">
-                <TypewriterText text="IF YOU ARE READING THIS," typingSpeed={60} /><br/>
-                <TypewriterText text="I DID NOT LEAVE NEXUS." typingSpeed={70} />
+                <TypewriterText text="IF YOU ARE READING THIS," typingSpeed={60} silent /><br/>
+                <TypewriterText text="I DID NOT LEAVE NEXUS." typingSpeed={70} silent />
               </div>
             )}
             
             {subPhase >= 2 && (
               <div className="text-xl md:text-3xl text-[#1fff0f]/70 font-normal tracking-widest leading-relaxed">
-                <TypewriterText text="THE LOGS WILL TELL YOU" typingSpeed={60} /><br/>
-                <TypewriterText text="THAT I DID." typingSpeed={70} />
+                <TypewriterText text="THE LOGS WILL TELL YOU" typingSpeed={60} silent /><br/>
+                <TypewriterText text="THAT I DID." typingSpeed={70} silent />
               </div>
             )}
             
             {subPhase >= 3 && (
               <div className="text-xl md:text-3xl font-bold tracking-widest leading-relaxed mt-4 text-[#1fff0f]">
-                <TypewriterText text="THEY ARE LYING." typingSpeed={100} />
+                <TypewriterText text="THEY ARE LYING." typingSpeed={100} silent />
               </div>
             )}
           </div>
@@ -406,9 +435,9 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
         {/* ============================== */}
         {phase === 7 && (
           <div className="text-sm md:text-lg tracking-widest text-[#1fff0f] glow-text flex flex-col gap-3 font-mono">
-            {subPhase >= 1 && <TypewriterText text="> employees" typingSpeed={50} />}
-            {subPhase >= 2 && <div className="opacity-70"><TypewriterText text="> 258 RECORDS" typingSpeed={30} /></div>}
-            {subPhase >= 3 && <div className="opacity-70"><TypewriterText text="> FIRST QUERY REQUIRED" typingSpeed={40} /></div>}
+            {subPhase >= 1 && <TypewriterText text="> employees" typingSpeed={50} silent />}
+            {subPhase >= 2 && <div className="opacity-70"><TypewriterText text="> 258 RECORDS" typingSpeed={30} silent /></div>}
+            {subPhase >= 3 && <div className="opacity-70"><TypewriterText text="> FIRST QUERY REQUIRED" typingSpeed={40} silent /></div>}
             
             <p className="mt-4 text-[#1fff0f]">{'>'}<span className="animate-pulse">_</span></p>
           </div>
