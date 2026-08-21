@@ -21,6 +21,7 @@ import { CaseFileModal } from '../ui/CaseFileModal';
 import { SqlEditor } from '../editor/SqlEditor';
 import { SqlResults } from '../terminal/SqlResults';
 import { TableInspectorModal } from '../ui/TableInspectorModal';
+import { ActTransition } from '../ui/ActTransition';
 
 const TABLE_SCHEMA: Record<string, string[]> = {
   employees: ['id', 'username', 'full_name', 'department', 'pos', 'clearance_level', 'status', 'assigned_location_id'],
@@ -39,6 +40,7 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
     queryAttempts, 
     unlockedTables, 
     completedQueries, 
+    completedLevels,
     addScore, 
     unlockTable, 
     addEvidence, 
@@ -67,7 +69,10 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
   const [newTableFlash, setNewTableFlash] = useState<string | null>(null);
   const [toast, setToast] = useState<{ title: string; desc: string } | null>(null);
   const [showSchema, setShowSchema] = useState(false);
-  const [inspectedTable, setInspectedTable] = useState<string | null>(null); // NOWE
+  const [inspectedTable, setInspectedTable] = useState<string | null>(null);
+  const [activeTransition, setActiveTransition] = useState<number | null>(
+    currentLevel === 1 && completedLevels.length === 0 ? 0 : null
+  );
 
   const [logs, setLogs] = useState<LogEntry[]>([
     { id: 1, time: new Date().toLocaleTimeString(), msg: 'NEXUS_OS connection initialized', type: 'info' },
@@ -138,6 +143,16 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
 
     completeCurrentLevel(query); 
     const nextLevel = currentLevel + 1;
+    
+    // Sprawdzamy akty: 5, 10, 15, 20, 25, 29
+    if ([5, 10, 15, 20, 25, 29].includes(currentLevel)) {
+      setActiveTransition(currentLevel);
+    } else {
+      proceedToLevel(nextLevel);
+    }
+  };
+
+  const proceedToLevel = (nextLevel: number) => {
     setViewedLevel(nextLevel);
     const initial = `-- Protocol LVL_${nextLevel.toString().padStart(2, '0')}\n`;
     setQuery(initial);
@@ -220,12 +235,27 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
     <div className="relative h-screen w-full overflow-hidden bg-[var(--bg-base)] text-[var(--text-main)] font-sans selection:bg-[var(--accent)]/20 selection:text-[var(--accent-bright)]">
 
       <AnimatePresence>
-        {toast && <ToastNotification title={toast.title} desc={toast.desc} />}
-        {showLevelUp && <LevelUpModal rewardXP={levelData.rewardXP} onNext={handleNextLevel} onClose={() => setShowLevelUp(false)} />}
-        {showCaseFile && <CaseFileModal onClose={() => setShowCaseFile(false)} onOpenEvidence={setSelectedEvidence} />}
-        {selectedEvidence && <EvidenceModal evidenceId={selectedEvidence} onClose={() => setSelectedEvidence(null)} />}
-        {showSchema && <SchemaModal tableCount={unlockedTables.length} onClose={() => setShowSchema(false)} />}
-        {inspectedTable && <TableInspectorModal tableName={inspectedTable} onClose={() => setInspectedTable(null)} />}
+        {toast && <ToastNotification key="toast" title={toast.title} desc={toast.desc} />}
+        
+        {activeTransition !== null && (
+          <ActTransition 
+            key="act-transition" 
+            levelCompleted={activeTransition} 
+            onComplete={() => {
+              const finishedLevel = activeTransition;
+              setActiveTransition(null);
+              if (finishedLevel > 0) {
+                proceedToLevel(finishedLevel + 1); 
+              }
+            }} 
+          />
+        )}
+        
+        {showLevelUp && <LevelUpModal key="levelup" rewardXP={levelData.rewardXP} onNext={handleNextLevel} onClose={() => setShowLevelUp(false)} />}
+        {showCaseFile && <CaseFileModal key="casefile" onClose={() => setShowCaseFile(false)} onOpenEvidence={setSelectedEvidence} />}
+        {selectedEvidence && <EvidenceModal key="evidence" evidenceId={selectedEvidence} onClose={() => setSelectedEvidence(null)} />}
+        {showSchema && <SchemaModal key="schema" tableCount={unlockedTables.length} onClose={() => setShowSchema(false)} />}
+        {inspectedTable && <TableInspectorModal key="inspector" tableName={inspectedTable} onClose={() => setInspectedTable(null)} />}
       </AnimatePresence>
 
       <Header onReturnToMenu={onReturnToMenu} />

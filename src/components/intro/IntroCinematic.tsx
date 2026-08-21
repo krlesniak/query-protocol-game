@@ -228,7 +228,7 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
       if (!(await wait(1500))) return;
 
       playSound('bass_hit2.mp3');
-      if (!(await wait(1500))) return;
+      if (!(await wait(100))) return;
 
       finishIntro();
     };

@@ -6,11 +6,10 @@
 `SELECT full_name, status FROM employees WHERE username = 'oracle_01';`
 
 **LVL 2:**
-`SELECT name, sector FROM locations WHERE id = 4;` 
-*(Zakładając, że przypisane ID to 4)*
+`SELECT name, sector FROM locations WHERE id = 3;`
 
 **LVL 3:**
-`SELECT action_type, location_id FROM access_logs WHERE location_id = 3 AND action_type = 'ENTER' AND created_at > '2026-02-12 23:00:00';`
+`SELECT action_type, location_id FROM access_logs WHERE location_id = 3 AND action_type = 'ENTER' AND created_at BETWEEN '2026-02-12 23:00:00' AND '2026-02-12 23:59:59';`
 
 **LVL 4:**
 `SELECT description FROM incidents WHERE location_id = 3 AND severity = 'CRITICAL';`
@@ -23,13 +22,13 @@
 `SELECT body FROM messages WHERE sender_id = (SELECT id FROM employees WHERE full_name = 'Martin Vale') AND body LIKE '%shift%';`
 
 **LVL 7:**
-`SELECT body FROM messages WHERE sender_id = 77 AND body LIKE '%trust%';`
+`SELECT body FROM messages WHERE sender_id = 77 AND body LIKE 'If you are reading this%';`
 
 **LVL 8:**
-`SELECT employee_id FROM access_logs WHERE action_type = 'ENTER' INTERSECT SELECT employee_id FROM night_shift;`
+`SELECT employee_id FROM access_logs WHERE location_id = 3 AND action_type = 'ENTER' INTERSECT SELECT sender_id FROM messages;`
 
 **LVL 9:**
-`SELECT employee_id FROM access_logs EXCEPT SELECT employee_id FROM night_shift;`
+`SELECT employee_id FROM access_logs WHERE access_granted = 0 EXCEPT SELECT employee_id FROM access_logs WHERE access_granted = 1;`
 
 **LVL 10:**
 `SELECT employee_id FROM access_logs WHERE access_granted = 0 GROUP BY employee_id ORDER BY COUNT(*) DESC LIMIT 1;`
@@ -61,19 +60,19 @@
 `WITH RECURSIVE node_path AS (SELECT id, node_name, parent_id FROM infrastructure_nodes WHERE node_name = 'NODE_07' UNION ALL SELECT n.id, n.node_name, n.parent_id FROM infrastructure_nodes n JOIN node_path p ON n.id = p.parent_id) SELECT node_name FROM node_path;`
 
 **LVL 19:**
-`SELECT id FROM infrastructure_nodes EXCEPT SELECT parent_id FROM infrastructure_nodes;`
+`SELECT id FROM infrastructure_nodes EXCEPT SELECT parent_id FROM infrastructure_nodes WHERE parent_id IS NOT NULL;`
 
 **LVL 20:**
 `SELECT triggered_by FROM audit_logs INTERSECT SELECT employee_id FROM access_logs WHERE location_id = 3 AND action_type = 'ENTER' EXCEPT SELECT employee_id FROM access_logs WHERE access_granted = 0;`
 
 **LVL 21:**
-`CREATE TRIGGER ghost_tracker AFTER DELETE ON messages BEGIN INSERT INTO shadow_archive VALUES (OLD.id, OLD.subject, OLD.sender_id); END;`
+`CREATE TRIGGER ghost_tracker AFTER DELETE ON messages BEGIN INSERT INTO audit_logs (employee_id, triggered_by, action, target, created_at) VALUES (OLD.sender_id, OLD.sender_id, 'DELETE_MSG', OLD.subject, datetime('now')); END;`
 
 **LVL 22:**
 `WITH top_hackers AS (SELECT employee_id FROM access_logs WHERE access_granted = 0 GROUP BY employee_id ORDER BY COUNT(*) DESC LIMIT 3) SELECT e.full_name FROM employees e JOIN audit_logs a ON e.id = a.triggered_by WHERE a.target = 'oracle_01' AND a.action = 'DELETE' AND e.id IN (SELECT employee_id FROM top_hackers);`
 
 **LVL 23:**
-`WITH missing_records AS (SELECT record_id FROM hidden_archive EXCEPT SELECT record_id FROM official_db EXCEPT SELECT record_id FROM backup_db) SELECT m.record_id FROM missing_records m JOIN hidden_archive h ON m.record_id = h.record_id JOIN employees e ON h.creator_id = e.id WHERE e.status = 'INACTIVE';`
+`SELECT subject FROM messages WHERE is_encrypted = 1 EXCEPT SELECT m.subject FROM messages m JOIN employees e ON m.sender_id = e.id WHERE e.department = 'EXECUTIVE' EXCEPT SELECT m.subject FROM messages m JOIN employees e ON m.receiver_id = e.id WHERE e.department = 'IT_OPS';`
 
 **LVL 24:**
 `WITH RECURSIVE bloodline AS (SELECT id, node_name, parent_id FROM infrastructure_nodes WHERE node_name = 'ORACLE_NODE' UNION ALL SELECT n.id, n.node_name, n.parent_id FROM infrastructure_nodes n JOIN bloodline b ON n.id = b.parent_id OR n.id = b.linked_sibling_id) SELECT node_name FROM bloodline;`
