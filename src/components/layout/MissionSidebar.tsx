@@ -3,6 +3,7 @@ import { useGameStore } from '../../store/gameStore';
 import { LEVELS } from '../../game/levels';
 import { EVIDENCE_DB } from '../../game/evidence';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSound } from '../../hooks/useSound';
 
 interface MissionSidebarProps {
   onLog: (msg: string, type: 'info' | 'success' | 'error' | 'warning') => void;
@@ -15,6 +16,10 @@ export const MissionSidebar = ({ onLog, onOpenEvidence, viewedLevel }: MissionSi
   const levelData = LEVELS.find(l => l.id === viewedLevel) || LEVELS[LEVELS.length - 1];
   
   const isHistorical = viewedLevel < currentLevel;
+
+  // --- AUDIO HOOKS ---
+  const { play: playBuz } = useSound('buy.mp3', { volume: 0.15});
+  const { play: playError } = useSound('glitch1.mp3', { volume: 0.03 });
 
   const getEvidenceIcon = (type: string) => {
     switch(type) {
@@ -82,7 +87,6 @@ export const MissionSidebar = ({ onLog, onOpenEvidence, viewedLevel }: MissionSi
                 const isUsed = usedHints[viewedLevel]?.includes(hint.id);
                 const canAfford = score >= hint.cost; 
                 
-                // ZMIANA Z ETAPU 8D - Wymuszamy sekwencyjne kupowanie
                 const isPreviousUsed = index === 0 || usedHints[viewedLevel]?.includes(levelData.hints[index - 1].id);
                 const isLockedSequentially = !isPreviousUsed && !isHistorical;
 
@@ -92,11 +96,14 @@ export const MissionSidebar = ({ onLog, onOpenEvidence, viewedLevel }: MissionSi
                     disabled={isUsed || (!canAfford && !isUsed) || isHistorical || isLockedSequentially} 
                     onClick={() => {
                       if (!isUsed && canAfford && !isHistorical && !isLockedSequentially) {
+                        playBuz();
                         applyHint(viewedLevel, hint.id, hint.cost);
                         onLog(`[SYSTEM] Hint used: -${hint.cost} XP`, 'warning');
                       } else if (!canAfford && !isUsed && !isLockedSequentially) {
+                        playError();
                         onLog(`[SYSTEM] INSUFFICIENT XP. Required: ${hint.cost} XP.`, 'error');
                       } else if (isLockedSequentially) {
+                        playError();
                         onLog(`[SYSTEM] ACCESS DENIED. Unlock the previous hint first.`, 'error');
                       }
                     }}

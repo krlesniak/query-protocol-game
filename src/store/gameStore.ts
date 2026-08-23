@@ -10,7 +10,6 @@ interface GameState {
   completedLevels: number[];
   usedHints: Record<number, number[]>;
   
-  // Próby dla obecnego poziomu
   queryAttempts: number; 
   completedQueries: Record<number, string>; 
 
@@ -18,6 +17,7 @@ interface GameState {
   failedQueries: number;
   playTime: number; 
   gameCompleted: boolean;
+  soundEnabled: boolean;
 
   addScore: (points: number) => void;
   setCurrentLevel: (level: number) => void;
@@ -27,6 +27,7 @@ interface GameState {
   completeCurrentLevel: (successfulQuery: string) => void; 
   resetGame: () => void;
   setHasSeenIntro: () => void;
+  toggleSound: () => void;
   
   applyHint: (levelId: number, hintId: number, cost: number) => void;
   incrementQueryAttempts: () => void;
@@ -54,6 +55,7 @@ const initialState = {
   failedQueries: 0,
   playTime: 0,
   gameCompleted: false,
+  soundEnabled: true,
 };
 
 export const useGameStore = create<GameState>()(
@@ -100,7 +102,7 @@ export const useGameStore = create<GameState>()(
             completedLevels: newCompletedLevels,
             completedQueries: { ...state.completedQueries, [state.currentLevel]: successfulQuery },
             currentLevel: state.currentLevel + 1,
-            queryAttempts: 0, // Reset lokalnych prób
+            queryAttempts: 0,
           };
         }),
 
@@ -132,9 +134,10 @@ export const useGameStore = create<GameState>()(
 
       setGameCompleted: () => set({ gameCompleted: true }),
 
-      resetGame: () => set(initialState),
+      resetGame: () => set({ ...initialState, soundEnabled: get().soundEnabled }),
 
       setHasSeenIntro: () => set({ hasSeenIntro: true }),
+      toggleSound: () => set((state) => ({ soundEnabled: !state.soundEnabled })),
 
       isTableUnlocked: (tableName: string) => get().unlockedTables.includes(tableName),
       hasEvidence: (evidenceId: string) => get().collectedEvidence.includes(evidenceId),

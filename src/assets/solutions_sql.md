@@ -22,10 +22,10 @@
 `SELECT body FROM messages WHERE sender_id = (SELECT id FROM employees WHERE full_name = 'Martin Vale') AND body LIKE '%shift%';`
 
 **LVL 7:**
-`SELECT body FROM messages WHERE sender_id = 77 AND body LIKE 'If you are reading this%';`
+`SELECT body FROM messages WHERE sender_id = 77 AND body LIKE '%trust%';`
 
 **LVL 8:**
-`SELECT employee_id FROM access_logs WHERE location_id = 3 AND action_type = 'ENTER' INTERSECT SELECT sender_id FROM messages;`
+`SELECT employee_id FROM access_logs WHERE location_id = 3 AND action_type = 'ENTER' AND created_at LIKE '2026-02-12%' INTERSECT SELECT sender_id FROM messages;`
 
 **LVL 9:**
 `SELECT employee_id FROM access_logs WHERE access_granted = 0 EXCEPT SELECT employee_id FROM access_logs WHERE access_granted = 1;`

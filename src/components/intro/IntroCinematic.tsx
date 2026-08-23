@@ -12,21 +12,17 @@ const TypewriterText = ({
   typingSpeed = 40, 
   onComplete,
   className = "",
-  silent = false 
+  silent = false,
+  onTypeSound
 }: { 
   text: string, 
   typingSpeed?: number, 
   onComplete?: () => void,
   className?: string,
-  silent?: boolean
+  silent?: boolean,
+  onTypeSound?: () => void
 }) => {
   const [displayed, setDisplayed] = useState('');
-  const typingAudioRef = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    typingAudioRef.current = new Audio('/assets/audio/keyboard.mp3');
-    typingAudioRef.current.volume = 0.15; 
-  }, []);
   
   useEffect(() => {
     let i = 0;
@@ -34,9 +30,8 @@ const TypewriterText = ({
     const timer = setInterval(() => {
       setDisplayed(text.substring(0, i + 1));
 
-      if (typingAudioRef.current && text.charAt(i) !== ' ' && !silent) {
-        typingAudioRef.current.currentTime = 0; 
-        typingAudioRef.current.play().catch(() => {});
+      if (text.charAt(i) !== ' ' && !silent && onTypeSound) {
+        onTypeSound();
       }
 
       i++;
@@ -48,7 +43,7 @@ const TypewriterText = ({
     }, typingSpeed);
 
     return () => clearInterval(timer);
-  }, [text, typingSpeed, onComplete, silent]);
+  }, [text, typingSpeed, onComplete, silent, onTypeSound]);
 
   return <span className={className}>{displayed}</span>;
 };
@@ -64,12 +59,24 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
   const done = useRef(false);
 
   const bgmRef = useRef<HTMLAudioElement | null>(null);
+  const keyboardAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const playSound = useCallback((fileName: string, volume: number = 0.4) => {
     try {
       const audio = new Audio(`/assets/audio/${fileName}`);
       audio.volume = volume;
       audio.play().catch(() => {}); 
+    } catch {
+      // Ignore
+    }
+  }, []);
+
+  const playKeyboardSound = useCallback(() => {
+    try {
+      if (keyboardAudioRef.current) {
+        keyboardAudioRef.current.currentTime = 0;
+        keyboardAudioRef.current.play().catch(() => {});
+      }
     } catch {
       // Ignore
     }
@@ -83,6 +90,9 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
     if (bgmRef.current) {
       bgmRef.current.pause();
       bgmRef.current.currentTime = 0;
+    }
+    if (keyboardAudioRef.current) {
+      keyboardAudioRef.current.pause();
     }
     
     onComplete();
@@ -108,6 +118,9 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
     isSkipped.current = false;
     done.current = false;
 
+    keyboardAudioRef.current = new Audio('/assets/audio/keyboard.mp3');
+    keyboardAudioRef.current.volume = 0.15;
+
     const wait = async (ms: number) => {
       if (!isMounted.current || isSkipped.current) return false;
       await delay(ms);
@@ -132,9 +145,7 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
 
       if (!(await wait(1000))) return;
 
-      // ==========================================
-      // SCENE 1: NEXUS_OS BOOT (0:00 - 0:05)
-      // ==========================================
+      // SCENE 1
       setPhase(1);
       setSubPhase(1); 
       if (!(await wait(1500))) return;
@@ -148,9 +159,7 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
       setSubPhase(6); playSound('beep2.mp3'); if (!(await wait(500))) return; 
       setSubPhase(7); playSound('beep2.mp3'); if (!(await wait(1500))) return; 
 
-      // ==========================================
-      // SCENE 2: INTEGRITY WARNING
-      // ==========================================
+      // SCENE 2
       setPhase(2);
       setSubPhase(1); 
       if (!(await wait(2500))) return;
@@ -160,9 +169,7 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
       triggerGlitch(250);
       if (!(await wait(3000))) return;
 
-      // ==========================================
-      // SCENE 3: UNKNOWN SIGNAL
-      // ==========================================
+      // SCENE 3
       setPhase(3);
       setSubPhase(1);
       playSound('static.mp3', 0.1);
@@ -174,9 +181,7 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
       setSubPhase(3); 
       if (!(await wait(2500))) return;
 
-      // ==========================================
-      // SCENE 4: ORACLE MESSAGE
-      // ==========================================
+      // SCENE 4
       setPhase(4);
       setSubPhase(1); 
       playSound('oracle_voice_1.mp3', 0.25);
@@ -194,17 +199,13 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
       playSound('bass_hit.mp3');
       if (!(await wait(2000))) return;
 
-      // ==========================================
-      // SCENE 5: THE TROP & SERVER ROOM 
-      // ==========================================
+      // SCENE 5
       setPhase(5);
       setSubPhase(1);
       playSound('heartbeat1.mp3');
       if (!(await wait(6000))) return;
 
-      // ==========================================
-      // SCENE 6: GRANTED 
-      // ==========================================
+      // SCENE 6
       setPhase(6);
       setSubPhase(1);
       if (!(await wait(2500))) return;
@@ -213,9 +214,7 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
       playSound('beep2.mp3');
       if (!(await wait(2500))) return;
 
-      // ==========================================
-      // SCENE 7: TRANSITION TO SQL
-      // ==========================================
+      // SCENE 7
       setPhase(7);
       setSubPhase(1);
       playSound('beep2.mp3');
@@ -237,9 +236,8 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
 
     return () => {
       isMounted.current = false;
-      if (bgmRef.current) {
-        bgmRef.current.pause();
-      }
+      if (bgmRef.current) bgmRef.current.pause();
+      if (keyboardAudioRef.current) keyboardAudioRef.current.pause();
     };
   }, [finishIntro, playSound]);
 
@@ -277,26 +275,22 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
     );
   };
 
-  const isUnstableScene = phase === 4
+  const isUnstableScene = phase === 4;
 
   return (
     <div className="fixed inset-0 z-[999] bg-black text-[#1fff0f] font-mono overflow-hidden select-none flex flex-col items-center justify-center p-8">
       
-      {/* EFEKTY WIZUALNE */}
       <div className="pointer-events-none absolute inset-0 z-50 crt-overlay opacity-20 mix-blend-overlay"></div>
       <div className="pointer-events-none absolute inset-0 z-40 scanlines"></div>
       <div className="pointer-events-none absolute inset-0 z-30 vignette shadow-[inset_0_0_150px_rgba(0,0,0,0.95)]"></div>
 
       <div className={`relative z-10 w-full max-w-3xl text-left h-full flex flex-col justify-center transition-all ${isGlitching ? 'hacker-glitch' : ''} ${isUnstableScene ? 'unstable-system' : ''}`}>
         
-        {/* ============================== */}
-        {/* SCENE 1: BOOT                  */}
-        {/* ============================== */}
         {phase === 1 && (
           <div className="text-sm md:text-base tracking-widest text-[#1fff0f]/80 glow-text flex flex-col gap-1">
-            {subPhase >= 1 && <TypewriterText text="NEXUS_OS v7.4.1" typingSpeed={30} />}
+            {subPhase >= 1 && <TypewriterText text="NEXUS_OS v7.4.1" typingSpeed={30} onTypeSound={playKeyboardSound} />}
             <br/>
-            {subPhase >= 2 && <TypewriterText text="INITIALIZING CORE SYSTEMS..." typingSpeed={40} />}
+            {subPhase >= 2 && <TypewriterText text="INITIALIZING CORE SYSTEMS..." typingSpeed={40} onTypeSound={playKeyboardSound} />}
             <br/>
             {subPhase >= 3 && <TypewriterText text="MEMORY................ OK" typingSpeed={10} silent />}
             {subPhase >= 4 && <TypewriterText text="SECURITY KERNEL....... OK" typingSpeed={10} silent />}
@@ -308,15 +302,12 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
           </div>
         )}
 
-        {/* ============================== */}
-        {/* SCENE 2: SYSTEM INTEGRITY      */}
-        {/* ============================== */}
         {phase === 2 && (
           <div className="text-sm md:text-lg tracking-widest text-[#1fff0f] glow-text flex flex-col gap-6">
             <div>
-              {subPhase >= 1 && <TypewriterText text="LAST SYSTEM INTEGRITY CHECK" typingSpeed={40} />}
+              {subPhase >= 1 && <TypewriterText text="LAST SYSTEM INTEGRITY CHECK" typingSpeed={40} onTypeSound={playKeyboardSound} />}
               <br/>
-              {subPhase >= 1 && <span className="opacity-70"><TypewriterText text="47 HOURS AGO" typingSpeed={50} /></span>}
+              {subPhase >= 1 && <span className="opacity-70"><TypewriterText text="47 HOURS AGO" typingSpeed={50} onTypeSound={playKeyboardSound} /></span>}
             </div>
             
             {subPhase >= 2 && (
@@ -328,32 +319,25 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
           </div>
         )}
 
-        {/* ============================== */}
-        {/* SCENE 3: UNKNOWN TRANSMISSION  */}
-        {/* ============================== */}
         {phase === 3 && (
           <div className="text-sm md:text-lg tracking-widest text-[#1fff0f] glow-text flex flex-col gap-4">
-            {/* Wyciszone, bo tu odtwarzany jest szum radiowy (static.mp3) */}
             {subPhase >= 1 && <TypewriterText text="> UNKNOWN TRANSMISSION DETECTED" typingSpeed={30} silent />}
             
             {subPhase >= 2 && (
               <div className="pl-4 mt-2 flex flex-col gap-2 opacity-80 border-l border-[#1fff0f]/30">
-                <TypewriterText text="SOURCE: ORACLE_01" typingSpeed={20} />
-                <TypewriterText text="ENCRYPTION: █████████████" typingSpeed={10} />
+                <TypewriterText text="SOURCE: ORACLE_01" typingSpeed={20} onTypeSound={playKeyboardSound} />
+                <TypewriterText text="ENCRYPTION: █████████████" typingSpeed={10} silent />
               </div>
             )}
 
             {subPhase >= 3 && (
               <div className="mt-6 animate-pulse opacity-70">
-                <TypewriterText text="DECRYPTION..." typingSpeed={80} />
+                <TypewriterText text="DECRYPTION..." typingSpeed={80} silent />
               </div>
             )}
           </div>
         )}
 
-        {/* ============================== */}
-        {/* SCENE 4: ORACLE MESSAGE        */}
-        {/* ============================== */}
         {phase === 4 && (
           <div className="flex flex-col items-start justify-center w-full gap-8 pl-4 border-l-2 border-[#1fff0f]/30">
             {subPhase >= 1 && (
@@ -378,9 +362,6 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
           </div>
         )}
 
-        {/* ============================== */}
-        {/* SCENE 5: SERVER ROOM / TROP    */}
-        {/* ============================== */}
         {phase === 5 && (
           <>
             {renderServerRoom()}
@@ -388,7 +369,7 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
               <div>
                 <p className="opacity-50 mb-2 font-mono">{'>>'} LAST KNOWN LOCATION</p>
                 <div className="text-xl md:text-2xl text-[#1fff0f]">
-                  <TypewriterText text="SERVER_ROOM_03" typingSpeed={40} />
+                  <TypewriterText text="SERVER_ROOM_03" typingSpeed={40} onTypeSound={playKeyboardSound} />
                 </div>
                 <p className="mt-2 opacity-50 font-mono">TIMESTAMP: 23:47:00</p>
               </div>
@@ -396,29 +377,26 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
               <div>
                 <p className="opacity-50 mb-2 font-mono">{'>>'} RELATED NODE:</p>
                 <div className="text-2xl md:text-3xl font-bold text-[#1fff0f]">
-                  <TypewriterText text="NODE_07" typingSpeed={80} />
+                  <TypewriterText text="NODE_07" typingSpeed={80} onTypeSound={playKeyboardSound} />
                 </div>
               </div>
 
               <div className="text-red-500/80 mt-4 text-xs font-bold border border-red-500/30 p-2 inline-block w-max">
-                <TypewriterText text="[TRANSMISSION TERMINATED]" typingSpeed={30} />
+                <TypewriterText text="[TRANSMISSION TERMINATED]" typingSpeed={30} silent />
               </div>
             </div>
           </>
         )}
 
-        {/* ============================== */}
-        {/* SCENE 6: INVESTIGATION GRANTED */}
-        {/* ============================== */}
         {phase === 6 && (
           <div className="text-sm md:text-lg tracking-widest text-[#1fff0f]/80 flex flex-col gap-6 mt-12 border-l-2 border-[#1fff0f]/30 pl-6">
             <div>
-              <TypewriterText text="NEXUS INTERNAL INVESTIGATION" typingSpeed={30} className="opacity-50 block" />
-              <TypewriterText text="CASE #ORACLE-01" typingSpeed={30} className="opacity-50 block" />
+              <TypewriterText text="NEXUS INTERNAL INVESTIGATION" typingSpeed={30} className="opacity-50 block" onTypeSound={playKeyboardSound} />
+              <TypewriterText text="CASE #ORACLE-01" typingSpeed={30} className="opacity-50 block" onTypeSound={playKeyboardSound} />
             </div>
             
             <div className="mt-8">
-              <TypewriterText text="AUTHORIZED INVESTIGATOR DETECTED." typingSpeed={40} className="text-[#1fff0f] block" />
+              <TypewriterText text="AUTHORIZED INVESTIGATOR DETECTED." typingSpeed={40} className="text-[#1fff0f] block" onTypeSound={playKeyboardSound} />
             </div>
 
             {subPhase >= 2 && (
@@ -430,12 +408,9 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
           </div>
         )}
 
-        {/* ============================== */}
-        {/* SCENE 7: TRANSITION TO SQL     */}
-        {/* ============================== */}
         {phase === 7 && (
           <div className="text-sm md:text-lg tracking-widest text-[#1fff0f] glow-text flex flex-col gap-3 font-mono">
-            {subPhase >= 1 && <TypewriterText text="> employees" typingSpeed={50} silent />}
+            {subPhase >= 1 && <TypewriterText text="> employees" typingSpeed={50} onTypeSound={playKeyboardSound} />}
             {subPhase >= 2 && <div className="opacity-70"><TypewriterText text="> 258 RECORDS" typingSpeed={30} silent /></div>}
             {subPhase >= 3 && <div className="opacity-70"><TypewriterText text="> FIRST QUERY REQUIRED" typingSpeed={40} silent /></div>}
             
@@ -445,7 +420,6 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
 
       </div>
 
-      {/* SKIP BUTTON */}
       {showSkip && (
         <button 
           onClick={finishIntro}
@@ -455,7 +429,6 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
         </button>
       )}
 
-      {/* STYLE CSS */}
       <style>{`
         .crt-overlay {
           background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
@@ -484,7 +457,6 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
           text-shadow: 0 0 12px rgba(255, 0, 0, 0.6);
         }
         
-        /* Mroczna serwerownia Node_07 */
         .server-room-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
@@ -496,12 +468,10 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
           to { transform: scale(1.3) translateY(5%); }
         }
         
-        /* Gaśnięcie świateł serwerów */
         @keyframes shutdown-light {
           to { opacity: 0; visibility: hidden; }
         }
         
-        /* Rzadki, uderzający glitch hakerski */
         .hacker-glitch {
           animation: hard-glitch 0.2s linear infinite;
         }
@@ -510,11 +480,10 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
           20% { transform: translate(-10px, 5px) skewX(-15deg); filter: drop-shadow(-5px 0 red) drop-shadow(5px 0 cyan); }
           40% { transform: translate(10px, -5px) skewX(10deg); filter: invert(20%) hue-rotate(90deg); }
           60% { transform: translate(-5px, 2px) skewX(-5deg); filter: drop-shadow(5px 0 magenta); }
-          80% { transform: translate(5px, -2px) skewX(5deg); filter: none; }
+          80% { transform: translate(5px, -2px) skewX(-5deg); filter: none; }
           100% { transform: translate(0) skewX(0deg); filter: none; }
         }
 
-        /* Ciągłe drżenie ekranu w scenach 4,5,6 */
         .unstable-system {
            animation: unstable-shake 3s infinite;
         }

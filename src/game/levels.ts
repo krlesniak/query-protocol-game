@@ -110,8 +110,8 @@ export const LEVELS: LevelDefinition[] = [
     maxRows: 1,
     rewardXP: 450,
     hints: [
-      { id: 1, text: "Znajdź wiadomości należące do Martina.", cost: 100 },
-      { id: 2, text: "Szukasz konkretnego fragmentu tekstu, więc przyda Ci się operator LIKE i znak %.", cost: 200 }
+      { id: 1, text: "Znajdź wiadomości należące do Martina.", cost: 200 },
+      { id: 2, text: "Szukasz konkretnego fragmentu tekstu, więc przyda Ci się operator LIKE i znak %.", cost: 400 }
     ]
   },
   {
@@ -125,8 +125,8 @@ export const LEVELS: LevelDefinition[] = [
     rewardXP: 500,
     unlocksEvidence: "EVD_ECHO_DOC",
     hints: [
-      { id: 1, text: "Wiadomość znajduje się w tabeli messages.", cost: 150 },
-      { id: 2, text: "Użyj LIKE '%trust%' aby znaleźć ostrzeżenie ukryte w tekście.", cost: 300 }
+      { id: 1, text: "Wiadomość znajduje się w tabeli messages.", cost: 200 },
+      { id: 2, text: "Użyj LIKE '%trust%' aby znaleźć ostrzeżenie ukryte w tekście.", cost: 400 }
     ]
   },
   {
@@ -142,9 +142,9 @@ export const LEVELS: LevelDefinition[] = [
     maxRows: 5,
     rewardXP: 600,
     hints: [
-      { id: 1, text: "Ogranicz access_logs do lokacji 3 oraz daty '2026-02-12%' i typu 'ENTER'.", cost: 150 },
-      { id: 2, text: "Użyj operatora INTERSECT połączonego z zapytaniem o sender_id z tabeli messages.", cost: 300 },
-      { id: 3, text: "Gotowa składnia: SELECT employee_id FROM access_logs WHERE location_id = 3 AND action_type = 'ENTER' AND created_at LIKE '2026-02-12%' INTERSECT SELECT sender_id FROM messages;", cost: 450 }
+      { id: 1, text: "Ogranicz access_logs do lokacji 3 oraz daty '2026-02-12%' i typu 'ENTER'.", cost: 200 },
+      { id: 2, text: "Użyj operatora INTERSECT połączonego z zapytaniem o sender_id z tabeli messages.", cost: 400 },
+      { id: 3, text: "Gotowa składnia: SELECT employee_id FROM access_logs WHERE warunek_1 AND warunek_2 AND warunek_3 INTERSECT SELECT sender_id FROM messages;", cost: 600 }
     ]
   },
   {
@@ -157,23 +157,23 @@ export const LEVELS: LevelDefinition[] = [
     rewardXP: 650,
     unlocksEvidence: "EVD_ARCHIVE_LOG",
     hints: [
-      { id: 1, text: "Porównujesz ze sobą dwa zapytania do tej samej tabeli: access_logs.", cost: 150 },
-      { id: 2, text: "Z lewej strony EXCEPT szukaj employee_id z dostępem równym 0.", cost: 300 },
-      { id: 3, text: "Z prawej strony EXCEPT wstaw podzapytanie szukające pracowników z dostępem równym 1.", cost: 450 }
+      { id: 1, text: "Porównujesz ze sobą dwa zapytania do tej samej tabeli: access_logs.", cost: 200 },
+      { id: 2, text: "Z lewej strony EXCEPT szukaj employee_id z dostępem równym 0.", cost: 400 },
+      { id: 3, text: "Z prawej strony EXCEPT wstaw podzapytanie szukające pracowników z dostępem równym 1.", cost: 600 }
     ]
   },
   {
     id: 10,
     title: "THE IMPOSSIBLE TERMINAL",
     briefing: "Jeden terminal wygenerował setki odrzuconych prób logowania w ciągu kilku minut. To nie wygląda jak zwykły błąd użytkownika. Ktoś próbował stworzyć zasłonę dymną.",
-    objective: "Znajdź employee_id osoby posiadającej największą liczbę odrzuconych prób logowania.",
+    objective: "Znajdź employee_id osoby posiadającej największą liczbę odrzuconych prób logowania dnia.",
     requiredRows: [{ employee_id: 200 }],
     maxRows: 1,
     rewardXP: 700,
     hints: [
       { id: 1, text: "Najpierw odfiltruj odrzucone próby logowania.", cost: 250 },
       { id: 2, text: "Pogrupuj wyniki według employee_id i policz liczbę prób.", cost: 500 },
-      { id: 3, text: "Posortuj wynik malejąco i ogranicz go do pierwszego rekordu.", cost: 600 }
+      { id: 3, text: "Posortuj wynik malejąco i ogranicz go do pierwszego rekordu.", cost: 750 }
     ]
   },
 
@@ -185,14 +185,14 @@ export const LEVELS: LevelDefinition[] = [
     id: 11,
     title: "THREE LIARS",
     briefing: "Porównanie danych wejściowych, wiadomości i grafików pokazuje kilka sprzeczności. Jedna z osób znajduje się znacznie wyżej w strukturze NEXUS.",
-    objective: "Znajdź pracowników, którzy mają więcej niż jeden wpis dostępu do SERVER_ROOM_03 podczas nocy zaginięcia.",
+    objective: "Znajdź pracowników, którzy mają więcej niż jeden wpis dostępu do SERVER_ROOM_03 podczas nocy zaginięcia (12 lutego).",
     requiredRows: [{ employee_id: 10 }],
     maxRows: 5,
     rewardXP: 800,
     hints: [
       { id: 1, text: "Połącz access_logs z lokalizacją SERVER_ROOM_03.", cost: 250 },
       { id: 2, text: "Pogrupuj logi według employee_id.", cost: 500 },
-      { id: 3, text: "Potrzebujesz warunku na grupę, który sprawdzi liczbę wpisów większą niż 1. Użyj HAVING.", cost: 650 }
+      { id: 3, text: "Potrzebujesz warunku na grupę, który sprawdzi liczbę wpisów większą niż 1. Użyj HAVING.", cost: 750 }
     ]
   },
   {
@@ -221,7 +221,7 @@ export const LEVELS: LevelDefinition[] = [
     hints: [
       { id: 1, text: "Połącz employees z access_logs.", cost: 500 },
       { id: 2, text: "Najpierw wyfiltruj pracowników działu SECURITY.", cost: 1000 },
-      { id: 3, text: "Możesz wykorzystać podzapytanie zwracające employee_id osób obecnych w SERVER_ROOM_03.", cost: 1200 }
+      { id: 3, text: "Możesz wykorzystać podzapytanie zwracające employee_id osób obecnych w SERVER_ROOM_03.", cost: 1500 }
     ]
   },
   {
@@ -249,9 +249,9 @@ export const LEVELS: LevelDefinition[] = [
     unlocksEvidence: "EVD_DEAD_MAN",
     unlocksTable: "audit_logs",
     hints: [
-      { id: 1, text: "Będziesz potrzebował tabel: messages, employees, oraz incidents.", cost: 500 },
-      { id: 2, text: "Użyj aliasów (np. e1 dla nadawcy, e2 dla odbiorcy).", cost: 1000 },
-      { id: 3, text: "W klauzuli WHERE użyj EXISTS (SELECT 1 FROM incidents ...).", cost: 1500 }
+      { id: 1, text: "Będziesz potrzebował tabel: messages, employees, oraz incidents.", cost: 600 },
+      { id: 2, text: "Użyj aliasów (np. e1 dla nadawcy, e2 dla odbiorcy).", cost: 1200 },
+      { id: 3, text: "W klauzuli WHERE użyj EXISTS (SELECT 1 FROM incidents ...).", cost: 1800 }
     ]
   },
 

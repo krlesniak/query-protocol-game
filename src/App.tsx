@@ -6,6 +6,7 @@ import { useGameStore } from './store/gameStore';
 import { Terminal, AlertTriangle, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { generateDatabaseSQL } from './db/schemaGenerator';
+import { useSound } from './hooks/useSound';
 import './index.css';
 
 type AppState = 'booting' | 'menu' | 'intro' | 'playing';
@@ -17,6 +18,8 @@ function App() {
 
   const { currentLevel, score, collectedEvidence, resetGame, hasSeenIntro, setHasSeenIntro } = useGameStore();
   const hasProgress = currentLevel > 1 || score > 0 || collectedEvidence.length > 0;
+
+  const { play: playClick } = useSound('mouse.mp3', { volume: 0.15 });
 
   useEffect(() => {
     const startSystem = async () => {
@@ -49,17 +52,25 @@ function App() {
     startSystem();
   }, []);
 
-  const handleContinue = () => setAppState('playing');
+  const handleContinue = () => {
+    playClick();
+    setTimeout(() => {
+      setAppState('playing');
+    }, 50); 
+  };
 
   const startGameFlow = () => {
-    if (!hasSeenIntro) {
-      setAppState('intro');
-    } else {
-      setAppState('playing');
-    }
+    setTimeout(() => {
+      if (!hasSeenIntro) {
+        setAppState('intro');
+      } else {
+        setAppState('playing');
+      }
+    }, 50);
   };
 
   const handleNewGame = () => {
+    playClick();
     if (hasProgress) {
       setShowResetWarning(true);
     } else {
@@ -69,6 +80,7 @@ function App() {
   };
 
   const confirmReset = () => {
+    playClick();
     resetGame();
     setShowResetWarning(false);
     startGameFlow();
@@ -151,7 +163,7 @@ function App() {
                   <button onClick={confirmReset} className="px-5 py-2.5 bg-red-950/30 border border-[var(--error)] text-[var(--error)] hover:bg-[var(--error)] hover:text-white transition-colors text-xs tracking-widest font-bold">
                     CONFIRM
                   </button>
-                  <button onClick={() => setShowResetWarning(false)} className="px-5 py-2.5 border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-main)] transition-colors text-xs tracking-widest">
+                  <button onClick={() => { playClick(); setShowResetWarning(false); }} className="px-5 py-2.5 border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-main)] transition-colors text-xs tracking-widest">
                     CANCEL
                   </button>
                 </div>
@@ -160,7 +172,6 @@ function App() {
           </motion.div>
         )}
 
-        {/* EKRAN INTRA */}
         {appState === 'intro' && (
           <motion.div 
             key="intro"

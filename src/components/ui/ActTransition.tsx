@@ -10,7 +10,7 @@ const TRANSITIONS: Record<number, { thoughts: string[], actTitle: string | null 
   0: { 
     thoughts: [], 
     actTitle: "ACT I — THE DISAPPEARANCE" 
-  }, // TEN WPIS OBSŁUGUJE START GRY (PRZED LEVEL 1)
+  },
   5: { 
     thoughts: ["EVIDENCE ANALYSIS COMPLETE.", "ORACLE DID NOT DISAPPEAR.", "SOMEONE USED HIS IDENTITY."], 
     actTitle: "ACT II — SOMEONE IS LYING" 

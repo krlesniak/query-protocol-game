@@ -1,4 +1,4 @@
-import { Terminal, Activity, Wifi, Clock3, LogOut } from 'lucide-react';
+import { Terminal, Activity, Wifi, Clock3, LogOut, Volume2, VolumeX } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 
 interface HeaderProps {
@@ -6,7 +6,7 @@ interface HeaderProps {
 }
 
 export const Header = ({ onReturnToMenu }: HeaderProps) => {
-  const { score } = useGameStore();
+  const { score, soundEnabled, toggleSound } = useGameStore();
 
   return (
     <header className="h-14 shrink-0 border-b border-[var(--border)] bg-[var(--surface-1)] flex items-center justify-between px-5">
@@ -45,13 +45,21 @@ export const Header = ({ onReturnToMenu }: HeaderProps) => {
           <span>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
         </div>
         
-        <div className="border-l border-[var(--border)] pl-5 ml-1 hidden sm:block">
+        <div className="border-l border-[var(--border)] pl-5 ml-1 flex items-center gap-4">
+          <button 
+            onClick={toggleSound}
+            className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--accent-bright)] transition-colors duration-200"
+            title={soundEnabled ? "Mute Sound" : "Enable Sound"}
+          >
+            {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 text-red-500/70" />}
+          </button>
+
           <button 
             onClick={onReturnToMenu}
-            className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--accent-bright)] transition-colors duration-200"
+            className="hidden sm:flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--accent-bright)] transition-colors duration-200"
           >
             <LogOut className="w-3.5 h-3.5" />
-            <span className="tracking-widest">DISCONNECT</span>
+            <span className="hidden sm:inline tracking-widest">DISCONNECT</span>
           </button>
         </div>
       </div>

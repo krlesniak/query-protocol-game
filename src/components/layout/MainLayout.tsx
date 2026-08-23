@@ -7,6 +7,7 @@ import { FolderLock } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 import { LevelValidator } from '../../game/levelValidator';
 import { LEVELS } from '../../game/levels';
+import { useSound } from '../../hooks/useSound';
 
 import { Header } from './Header';
 import { DatabaseSidebar } from './DatabaseSidebar';
@@ -82,6 +83,11 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
   const logIdCounter = useRef<number>(3);
   const currentQueryDraft = useRef(initialQuery); 
 
+  useSound('hum2.mp3', { volume: 0.05, loop: true, autoPlay: true });
+  const { play: playClick } = useSound('mouse.mp3', { volume: 0.3 });
+  const { play: playRun } = useSound('beep2.mp3', { volume: 0.5 });
+  const { play: playSuccess } = useSound('success.mp3', { volume: 0.5 }); 
+
   useEffect(() => {
     const timer = setInterval(() => {
       incrementPlayTime();
@@ -92,6 +98,9 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        if (selectedEvidence || showSchema || showCaseFile || inspectedTable) {
+          playClick();
+        }
         setSelectedEvidence(null);
         setShowSchema(false);
         setShowCaseFile(false); 
@@ -100,13 +109,14 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
     };
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
-  }, []);
+  }, [selectedEvidence, showSchema, showCaseFile, inspectedTable, playClick]);
 
   const addLog = (msg: string, type: 'info' | 'success' | 'error' | 'warning') => {
     setLogs((prev) => [{ id: logIdCounter.current++, time: new Date().toLocaleTimeString(), msg, type }, ...prev].slice(0, 50));
   };
 
   const handleNavigate = (dir: 'prev' | 'next') => {
+    playClick();
     if (viewedLevel === currentLevel) currentQueryDraft.current = query; 
     const newLevel = dir === 'prev' ? viewedLevel - 1 : viewedLevel + 1;
     setViewedLevel(newLevel);
@@ -116,6 +126,7 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
   };
 
   const handleNextLevel = () => {
+    playClick();
     setShowLevelUp(false);
     
     const efficiencyBonus = queryAttempts <= 5 ? 50 : (queryAttempts <= 10 ? 25 : 0);
@@ -144,7 +155,6 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
     completeCurrentLevel(query); 
     const nextLevel = currentLevel + 1;
     
-    // Sprawdzamy akty: 5, 10, 15, 20, 25, 29
     if ([5, 10, 15, 20, 25, 29].includes(currentLevel)) {
       setActiveTransition(currentLevel);
     } else {
@@ -162,6 +172,7 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
   };
 
   const handleRunQuery = (sqlToRun: string) => {
+    playRun();
     if (viewedLevel === currentLevel) incrementQueryAttempts();
     
     const startTime = performance.now();
@@ -172,6 +183,7 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
       const attemptedTable = lockedTables.find(t => new RegExp(`\\b${t}\\b`, 'i').test(sqlToRun));
       
       if (attemptedTable) {
+        playRun();
         if (viewedLevel === currentLevel) incrementFailedQueries();
         addLog(`[ACCESS DENIED] Attempted access to locked table '${attemptedTable}'.`, 'error');
         setSqlError(`SECURITY OVERRIDE: Access to table '${attemptedTable}' is denied. Level up to unlock.`);
@@ -181,6 +193,7 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
 
       const forbiddenKeywords = /\b(INSERT|UPDATE|DELETE|DROP|ALTER|TRUNCATE|REPLACE|CREATE)\b/i;
       if (levelData.requiredRows.length > 0 && forbiddenKeywords.test(sqlToRun)) {
+        playRun();
         if (viewedLevel === currentLevel) incrementFailedQueries();
         addLog(`[ACCESS DENIED] Write operations are locked.`, 'error');
         setSqlError(`SECURITY OVERRIDE: INSUFFICIENT PRIVILEGES. ACCOUNT RESTRICTED TO READ-ONLY MODE (SELECT).`);
@@ -209,6 +222,7 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
       const validation = LevelValidator.validate(parsedResult, levelData.requiredRows, levelData.maxRows);
       
       if (validation.success) {
+        playSuccess();
         if (viewedLevel === currentLevel) {
           addLog(`[SYSTEM] LEVEL COMPLETED`, 'success');
           setShowLevelUp(true);
@@ -216,6 +230,7 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
           addLog(`[SYSTEM] ARCHIVE QUERY VERIFIED`, 'success');
         }
       } else {
+        playRun();
         if (viewedLevel === currentLevel) incrementFailedQueries();
         if (levelData.requiredRows.length > 0 || parsedResult.rows.length > 0) {
           addLog(`[ANALYZE DENIED] ${validation.message}`, 'warning');
@@ -223,6 +238,7 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
       }
 
     } catch (error: unknown) {
+      playRun();
       if (viewedLevel === currentLevel) incrementFailedQueries();
       setResults([]);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -252,20 +268,20 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
         )}
         
         {showLevelUp && <LevelUpModal key="levelup" rewardXP={levelData.rewardXP} onNext={handleNextLevel} onClose={() => setShowLevelUp(false)} />}
-        {showCaseFile && <CaseFileModal key="casefile" onClose={() => setShowCaseFile(false)} onOpenEvidence={setSelectedEvidence} />}
-        {selectedEvidence && <EvidenceModal key="evidence" evidenceId={selectedEvidence} onClose={() => setSelectedEvidence(null)} />}
-        {showSchema && <SchemaModal key="schema" tableCount={unlockedTables.length} onClose={() => setShowSchema(false)} />}
-        {inspectedTable && <TableInspectorModal key="inspector" tableName={inspectedTable} onClose={() => setInspectedTable(null)} />}
+        {showCaseFile && <CaseFileModal key="casefile" onClose={() => { playClick(); setShowCaseFile(false); }} onOpenEvidence={(id) => { playClick(); setSelectedEvidence(id); }} />}
+        {selectedEvidence && <EvidenceModal key="evidence" evidenceId={selectedEvidence} onClose={() => { playClick(); setSelectedEvidence(null); }} />}
+        {showSchema && <SchemaModal key="schema" tableCount={unlockedTables.length} onClose={() => { playClick(); setShowSchema(false); }} />}
+        {inspectedTable && <TableInspectorModal key="inspector" tableName={inspectedTable} onClose={() => { playClick(); setInspectedTable(null); }} />}
       </AnimatePresence>
 
-      <Header onReturnToMenu={onReturnToMenu} />
+      <Header onReturnToMenu={() => { playClick(); onReturnToMenu(); }} />
 
       <div className="h-[calc(100vh-54px)] p-2 flex flex-col gap-2 min-h-0">
         <div className="flex-1 min-h-0 flex flex-col lg:grid lg:grid-cols-[225px_minmax(0,1fr)_300px] gap-2 overflow-y-auto lg:overflow-hidden">
           <DatabaseSidebar 
             newTableFlash={newTableFlash} 
-            onOpenSchema={() => setShowSchema(true)} 
-            onInspectTable={(tableName) => setInspectedTable(tableName)}
+            onOpenSchema={() => { playClick(); setShowSchema(true); }} 
+            onInspectTable={(tableName) => { playClick(); setInspectedTable(tableName); }}
           />
 
           <main className="min-w-0 min-h-[500px] lg:min-h-0 flex flex-col gap-2 shrink-0 lg:shrink">
@@ -275,13 +291,13 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
 
           <div className="flex flex-col gap-2 min-h-0 shrink-0 lg:shrink">
             <button 
-              onClick={() => setShowCaseFile(true)}
+              onClick={() => { playClick(); setShowCaseFile(true); }}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#131920] border border-[var(--border)] hover:border-[var(--accent-muted)] hover:bg-[var(--surface-2)] text-[var(--accent-bright)] transition-all font-mono text-[11px] tracking-[0.2em] uppercase shadow-sm shrink-0"
             >
               <FolderLock className="w-4 h-4" />
               CASE FILE
             </button>
-            <MissionSidebar onLog={addLog} onOpenEvidence={setSelectedEvidence} viewedLevel={viewedLevel} />
+            <MissionSidebar onLog={addLog} onOpenEvidence={(id) => { playClick(); setSelectedEvidence(id); }} viewedLevel={viewedLevel} />
           </div>
 
         </div>
