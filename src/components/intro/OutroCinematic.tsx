@@ -15,14 +15,15 @@ const systems = [
   "EXECUTIVE NETWORK ....... OFFLINE"
 ];
 
+// ddd
 const buildingFloors = [
-  { level: 7, width: "w-28", windows: 4 },
-  { level: 6, width: "w-28", windows: 4 },
+  { level: 7, width: "w-36", windows: 6 },
+  { level: 6, width: "w-36", windows: 6 },
   { level: 5, width: "w-36", windows: 6 },
   { level: 4, width: "w-36", windows: 6 },
-  { level: 3, width: "w-48", windows: 8 },
-  { level: 2, width: "w-48", windows: 8 },
-  { level: 1, width: "w-56", windows: 10 }
+  { level: 3, width: "w-36", windows: 6 },
+  { level: 2, width: "w-36", windows: 6 },
+  { level: 1, width: "w-36", windows: 6 }
 ];
 
 export const OutroCinematic = ({ onComplete }: OutroCinematicProps) => {
@@ -36,6 +37,8 @@ export const OutroCinematic = ({ onComplete }: OutroCinematicProps) => {
   useEffect(() => {
     onCompleteRef.current = onComplete;
   }, [onComplete]);
+
+  useSound('hum2.mp3', { volume: 0.4, loop: true, autoPlay: true });
 
   const { play: playBeep } = useSound('beep2.mp3', { volume: 0.2 });
   const { play: playShutdown } = useSound('shutdown2.mp3', { volume: 0.4 }); 
@@ -60,6 +63,7 @@ export const OutroCinematic = ({ onComplete }: OutroCinematicProps) => {
       if (!isMounted.current) return;
 
       setPhase(2);
+      await delay(1400);
       playShutdown(); 
       
       for (let i = 7; i >= 0; i--) {

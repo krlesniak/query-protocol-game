@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useSound } from '../../hooks/useSound';
 
 interface FinalProtocolProps {
@@ -21,6 +21,7 @@ export const FinalProtocol = ({ onComplete }: FinalProtocolProps) => {
   const [inputValue, setInputValue] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [executionLines, setExecutionLines] = useState<string[]>([]);
+  const [showHint, setShowHint] = useState(false); 
   
   const [glitchBlocks] = useState<GlitchBlock[]>(() => {
     return Array.from({ length: 60 }).map(() => ({
@@ -35,27 +36,29 @@ export const FinalProtocol = ({ onComplete }: FinalProtocolProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const isMounted = useRef(true);
   
-  useSound('hum2.mp3', { volume: 0.4, loop: true, autoPlay: true });
+  useSound('hum2.mp3', { volume: 0.4, loop: true, autoPlay: true }); 
+  useSound('heartbeat1.mp3', { volume: 0.6, loop: true, autoPlay: true });
+
   const { play: playBeep } = useSound('beep2.mp3', { volume: 0.2 });
-  const { play: playGlitch } = useSound('glitch1.mp3', { volume: 0.15 });
-  const { play: playError } = useSound('error.mp3', { volume: 0.3 });
+  const { play: playGlitch } = useSound('glitch1.mp3', { volume: 0.1 });
+  const { play: playLightGlitch } = useSound('glitch_light.mp3', { volume: 0.6 });
+  const { play: playError } = useSound('error.mp3', { volume: 0.3 }); 
   const { play: playBass } = useSound('bass_hit.mp3', { volume: 0.5 });
   const { play: playKeyboard } = useSound('keyboard.mp3', { volume: 0.15 });
+  const {play : playSuccess} = useSound('success.mp3', {volume: 0.3});
 
   useEffect(() => {
     isMounted.current = true;
 
     const runSequence = async () => {
-      playGlitch();
-      await delay(400);
-      playGlitch();
-      await delay(1500); 
+      playLightGlitch();
+      await delay(2800); 
       playBass(); 
       
       if (!isMounted.current) return;
       setPhase(1); 
       
-      await delay(1500);
+      await delay(2000);
       if (!isMounted.current) return;
       setPhase(2); 
       playGlitch();
@@ -82,18 +85,28 @@ export const FinalProtocol = ({ onComplete }: FinalProtocolProps) => {
     return () => {
       isMounted.current = false;
     };
-  }, [playBeep, playGlitch, playBass]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); 
 
   const handleCommandSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (phase !== 5) return;
 
     const command = inputValue.trim().toUpperCase();
-    playBeep();
 
-    if (command === 'EXECUTE MIRROR://NODE_07' || command === 'EXECUTE MIRROR') {
+    if (command === 'HELP' || command === 'HINT') {
+      playLightGlitch();
+      setShowHint(true);
+      setErrorMsg(null);
+      setInputValue('');
+      return;
+    }
+
+    if (command === 'EXECUTE MIRROR://NODE_07' || (command.includes('EXECUTE') && command.includes('MIRROR'))) {
+      playSuccess();
       setPhase(6); 
       setErrorMsg(null);
+      setShowHint(false);
       
       const sequence = [
         "VERIFYING...",
@@ -105,7 +118,7 @@ export const FinalProtocol = ({ onComplete }: FinalProtocolProps) => {
       ];
 
       for (let i = 0; i < sequence.length; i++) {
-        await delay(1200);
+        await delay(1000);
         if (!isMounted.current) return;
         setExecutionLines(prev => [...prev, sequence[i]]);
         
@@ -116,13 +129,13 @@ export const FinalProtocol = ({ onComplete }: FinalProtocolProps) => {
         }
       }
 
-      await delay(2500);
+      await delay(6200);
       if (isMounted.current) {
         onComplete();
       }
 
     } else {
-      playError();
+      playError(); 
       setErrorMsg('UNRECOGNIZED COMMAND OR MISSING PARAMETERS.');
       setInputValue('');
     }
@@ -165,7 +178,7 @@ export const FinalProtocol = ({ onComplete }: FinalProtocolProps) => {
         )}
 
         {phase === 2 && (
-          <div className="text-4xl tracking-widest text-center text-red-500 glow-text-red font-bold">
+          <div className="text-3xl tracking-widest text-center text-red-500 glow-text-red font-bold">
             NEXUS_OS CONNECTION LOST.
           </div>
         )}
@@ -185,8 +198,33 @@ export const FinalProtocol = ({ onComplete }: FinalProtocolProps) => {
             <div className="text-base opacity-70 tracking-widest mb-2 text-[#1fff0f]">ORACLE'S LAST MESSAGE:</div>
             <div className="text-3xl leading-relaxed tracking-wider text-[#1fff0f] glow-text-neon">
               "I didn't leave you the answer.<br/>
-              I left you the pieces."
+              I left you the <span 
+                className="cursor-pointer hover:text-[#1f651a] transition-colors duration-300 relative group glow-text-neon z-50"
+                onClick={() => {
+                  if (!showHint) {
+                    playLightGlitch();
+                    setShowHint(true);
+                  }
+                }}
+              >
+                pieces
+              </span>."
             </div>
+
+            <AnimatePresence>
+              {showHint && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="mt-2 text-[11px] opacity-40 tracking-[0.2em] text-[#1fff0f] border-l border-[#1fff0f]/30 pl-4 overflow-hidden"
+                >
+                  <div className="py-2">
+                    [CORRUPTED MEMORY FRAGMENT RECOVERED]<br/>
+                    EXPECTED SYNTAX: EXECUTE [PROJECT_NAME]://[LAST_KNOWN_NODE]
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
             
             {phase === 5 && (
               <form onSubmit={handleCommandSubmit} className="mt-10 flex flex-col gap-4">
@@ -201,7 +239,6 @@ export const FinalProtocol = ({ onComplete }: FinalProtocolProps) => {
                       setInputValue(e.target.value);
                       playKeyboard();
                     }}
-                    onBlur={() => inputRef.current?.focus()} 
                     className="bg-transparent border-none outline-none w-full text-[#1fff0f] uppercase placeholder-[#1fff0f]/30 glow-text-neon"
                     placeholder="_"
                     autoComplete="off"

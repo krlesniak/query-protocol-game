@@ -291,7 +291,7 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
           <OutroCinematic 
             key="outro-cinematic"
             onComplete={() => {
-              console.log("Koniec filmu! TU ZROBIMY EKRAN STATYSTYK CASE CLOSED!");
+              console.log(" Outro cinematic completed. Returning to menu...");
             }} 
           />
         )}
