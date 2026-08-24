@@ -23,6 +23,8 @@ import { SqlEditor } from '../editor/SqlEditor';
 import { SqlResults } from '../terminal/SqlResults';
 import { TableInspectorModal } from '../ui/TableInspectorModal';
 import { ActTransition } from '../ui/ActTransition';
+import { FinalProtocol } from '../ui/FinalProtocol';
+import { OutroCinematic } from '../intro/OutroCinematic';
 
 const TABLE_SCHEMA: Record<string, string[]> = {
   employees: ['id', 'username', 'full_name', 'department', 'pos', 'clearance_level', 'status', 'assigned_location_id'],
@@ -74,6 +76,9 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
   const [activeTransition, setActiveTransition] = useState<number | null>(
     currentLevel === 1 && completedLevels.length === 0 ? 0 : null
   );
+  const [showFinalProtocol, setShowFinalProtocol] = useState(false);
+  const [showOutro, setShowOutro] = useState(false);
+  
 
   const [logs, setLogs] = useState<LogEntry[]>([
     { id: 1, time: new Date().toLocaleTimeString(), msg: 'NEXUS_OS connection initialized', type: 'info' },
@@ -222,12 +227,18 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
       const validation = LevelValidator.validate(parsedResult, levelData.requiredRows, levelData.maxRows);
       
       if (validation.success) {
-        playSuccess();
-        if (viewedLevel === currentLevel) {
-          addLog(`[SYSTEM] LEVEL COMPLETED`, 'success');
-          setShowLevelUp(true);
+        if (currentLevel === 30 && viewedLevel === 30) {
+          playRun();
+          addLog(`[SYSTEM] CRITICAL ANOMALY DETECTED. CONNECTION UNSTABLE.`, 'error');
+          setShowFinalProtocol(true);
         } else {
-          addLog(`[SYSTEM] ARCHIVE QUERY VERIFIED`, 'success');
+          playSuccess();
+          if (viewedLevel === currentLevel) {
+            addLog(`[SYSTEM] LEVEL COMPLETED`, 'success');
+            setShowLevelUp(true);
+          } else {
+            addLog(`[SYSTEM] ARCHIVE QUERY VERIFIED`, 'success');
+          }
         }
       } else {
         playRun();
@@ -263,6 +274,24 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
               if (finishedLevel > 0) {
                 proceedToLevel(finishedLevel + 1); 
               }
+            }} 
+          />
+        )}
+
+        {showFinalProtocol && !showOutro && (
+          <FinalProtocol 
+            key="final-protocol"
+            onComplete={() => {
+              setShowOutro(true);
+            }} 
+          />
+        )}
+
+        {showOutro && (
+          <OutroCinematic 
+            key="outro-cinematic"
+            onComplete={() => {
+              console.log("Koniec filmu! TU ZROBIMY EKRAN STATYSTYK CASE CLOSED!");
             }} 
           />
         )}

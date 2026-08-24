@@ -41,10 +41,18 @@ interface GameState {
 }
 
 const initialState = {
-  currentLevel: 1,
+  currentLevel: 30,
   score: 200,
   hasSeenIntro: false,
-  unlockedTables: ['employees'],
+  unlockedTables: ['employees',
+                   'locations',
+                   'access_logs',
+                   'messages',
+                   'incidents',
+                   'audit_logs',
+                   'internal_projects',
+                   'infrastructure_nodes'
+                ],
   collectedEvidence: [],
   completedLevels: [],
   usedHints: {},
