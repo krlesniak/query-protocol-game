@@ -129,7 +129,7 @@ export const FinalProtocol = ({ onComplete }: FinalProtocolProps) => {
         }
       }
 
-      await delay(6200);
+      await delay(4500);
       if (isMounted.current) {
         onComplete();
       }

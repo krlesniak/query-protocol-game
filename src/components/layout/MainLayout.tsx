@@ -25,6 +25,7 @@ import { TableInspectorModal } from '../ui/TableInspectorModal';
 import { ActTransition } from '../ui/ActTransition';
 import { FinalProtocol } from '../ui/FinalProtocol';
 import { OutroCinematic } from '../intro/OutroCinematic';
+import { CaseClosed } from '../ui/CaseClosed';
 
 const TABLE_SCHEMA: Record<string, string[]> = {
   employees: ['id', 'username', 'full_name', 'department', 'pos', 'clearance_level', 'status', 'assigned_location_id'],
@@ -78,6 +79,7 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
   );
   const [showFinalProtocol, setShowFinalProtocol] = useState(false);
   const [showOutro, setShowOutro] = useState(false);
+  const [showStats, setShowStats] = useState(false);
   
 
   const [logs, setLogs] = useState<LogEntry[]>([
@@ -278,7 +280,7 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
           />
         )}
 
-        {showFinalProtocol && !showOutro && (
+        {showFinalProtocol && !showOutro && !showStats && (
           <FinalProtocol 
             key="final-protocol"
             onComplete={() => {
@@ -287,11 +289,22 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
           />
         )}
 
-        {showOutro && (
+        {showOutro && !showStats && (
           <OutroCinematic 
             key="outro-cinematic"
             onComplete={() => {
-              console.log(" Outro cinematic completed. Returning to menu...");
+              setShowStats(true); 
+            }} 
+          />
+        )}
+
+        {/* STATISTICS */}
+        {showStats && (
+          <CaseClosed 
+            key="case-closed" 
+            onReturnToMenu={() => { 
+              playClick(); 
+              onReturnToMenu(); 
             }} 
           />
         )}
