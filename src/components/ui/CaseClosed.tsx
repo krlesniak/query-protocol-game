@@ -9,7 +9,7 @@ interface CaseClosedProps {
 }
 
 export const CaseClosed = ({ onReturnToMenu }: CaseClosedProps) => {
-  const { score, playTime, queryAttempts, failedQueries, collectedEvidence, completedLevels, usedHints } = useGameStore();
+  const { score, playTime, totalQueryAttempts, failedQueries, collectedEvidence, completedLevels, usedHints, resetGame } = useGameStore();
 
   useSound('hum2.mp3', { volume: 0.4, loop: true, autoPlay: true });
   const { play: playClick } = useSound('keyboard.mp3', { volume: 0.5 });
@@ -118,10 +118,10 @@ export const CaseClosed = ({ onReturnToMenu }: CaseClosedProps) => {
               <div className="text-2xl font-light tracking-wider text-[#c4ecc2]">{collectedEvidence.length} FILES</div>
             </motion.div>
             <motion.div variants={itemVariants}>
-              <div className="text-xs text-[#64748b] tracking-[0.2em] mb-1 uppercase">QUERIES / ERRORS</div>
-              <div className="text-2xl font-light tracking-wider text-[#c4ecc2]">
-                {queryAttempts} / <span className="text-red-300 font-normal">{failedQueries}</span>
-              </div>
+            <div className="text-xs text-[#64748b] tracking-[0.2em] mb-1 uppercase">QUERIES / ERRORS</div>
+            <div className="text-2xl font-light tracking-wider text-[#c4ecc2]">
+                {totalQueryAttempts} / <span className="text-red-300 font-normal">{failedQueries}</span>
+            </div>
             </motion.div>
             <motion.div variants={itemVariants}>
               <div className="text-xs text-[#64748b] tracking-[0.2em] mb-1 uppercase">HINTS USED</div>
@@ -140,6 +140,7 @@ export const CaseClosed = ({ onReturnToMenu }: CaseClosedProps) => {
           <button 
             onClick={() => {
               playClick();
+              resetGame();
               onReturnToMenu();
             }}
             onMouseEnter={() => playHover()}

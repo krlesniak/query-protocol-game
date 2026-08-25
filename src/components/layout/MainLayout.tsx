@@ -239,6 +239,7 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
         if (currentLevel === 30 && viewedLevel === 30) {
           playRun();
           addLog(`[SYSTEM] CRITICAL ANOMALY DETECTED. CONNECTION UNSTABLE.`, 'error');
+          completeCurrentLevel(sqlToRun);
           setShowFinalProtocol(true);
         } else {
           playSuccess();

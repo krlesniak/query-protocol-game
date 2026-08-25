@@ -101,7 +101,7 @@ export const useGameStore = create<GameState>()(
           return {
             completedLevels: newCompletedLevels,
             completedQueries: { ...state.completedQueries, [state.currentLevel]: successfulQuery },
-            currentLevel: state.currentLevel + 1,
+            currentLevel: state.currentLevel < 30 ? state.currentLevel + 1 : 30,
             queryAttempts: 0,
           };
         }),

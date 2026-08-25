@@ -483,13 +483,15 @@ export const LEVELS: LevelDefinition[] = [
   // ============================================================
   // AKT V — THE TRUTH
   // ============================================================
+
+  // ok
   {
     id: 26,
     title: "THE SECOND ORACLE",
     briefing: "W systemie istnieją ślady drugiego użytkownika, cyfrowego 'cienia', który niemal idealnie naśladował logowania ORACLE'a. Znajdźmy go.",
     objective: "Znajdź użytkownika (username), którego profil operacyjny logowań pokrywa się w ilości akcji z oryginalnym kontem oracle_01.",
     requiredRows: [{ username: "oracle_shadow" }],
-    maxRows: 10,
+    maxRows: 1,
     requiredKeywords: ["HAVING", "COUNT"], 
     rewardXP: 2700,
     hints: [
@@ -498,6 +500,8 @@ export const LEVELS: LevelDefinition[] = [
       { id: 3, text: "W klauzuli HAVING przyrównaj COUNT(*) do ilości wyników z Twojego podzapytania CTE.", cost: 2400 }
     ]
   },
+
+  // ok
   {
     id: 27,
     title: "THE RANKING",
@@ -508,26 +512,31 @@ export const LEVELS: LevelDefinition[] = [
     requiredKeywords: ["RANK", "OVER"], 
     rewardXP: 3000,
     hints: [
-      { id: 1, text: "Musisz zliczyć logi wejść dla lokacji 31.", cost: 800 },
+      { id: 1, text: "Musisz zliczyć logi wejść dla lokacji 31 (MIRROR_CORE).", cost: 800 },
       { id: 2, text: "Wykorzystaj funkcję okienkową RANK() OVER (ORDER BY COUNT(*) DESC).", cost: 1600 },
       { id: 3, text: "Całość opakuj w zewnętrzne zapytanie, odfiltrowując rekord gdzie ranga = 1.", cost: 2400 }
     ]
   },
+
+  // ok
   {
     id: 28,
     title: "THE ANOMALY",
     briefing: "Aktywność jednego z członków IT (w audit_logs) radykalnie różni się od średniej dla całego zespołu. Namierzmy go analitycznie.",
     objective: "Oblicz średnią ilość operacji audytu na pracownika, a następnie znajdź tego (username), którego ilość logów najbardziej odstaje od tej średniej (użyj funkcji ABS).",
     requiredRows: [{ username: "admin_sys" }],
-    maxRows: 5,
+    maxRows: 1,
     requiredKeywords: ["AVG", "ABS"], 
     rewardXP: 3200,
     hints: [
       { id: 1, text: "Utwórz CTE sumujące ilość wpisów na każdego użytkownika w audit_logs.", cost: 800 },
-      { id: 2, text: "Utwórz drugie CTE wyliczające średnią wartość (AVG) z pierwszego CTE.", cost: 1600 },
-      { id: 3, text: "W głównym zapytaniu posortuj wyniki używając ORDER BY ABS(ilosc - srednia) DESC LIMIT 1.", cost: 2400 }
+      { id: 2, text: "Utwórz drugie CTE wyliczające średnią wartość (AVG) z pierwszego CTE.", cost: 1400 },
+      { id: 3, text: "Podczas łączenia CTE z głównym zapytaniem, skorzystaj z CROSS JOIN, który pozwoli na porównanie każdej wartości z średnią.", cost: 1800 },
+      { id: 4, text: "W głównym zapytaniu posortuj wyniki używając ORDER BY ABS(ilosc - srednia) DESC LIMIT 1.", cost: 2400 },
     ]
   },
+
+  // ok
   {
     id: 29,
     title: "ORACLE'S LAST FOOTSTEP",
@@ -543,6 +552,8 @@ export const LEVELS: LevelDefinition[] = [
       { id: 3, text: "W zewnętrznym zapytaniu odfiltruj wiersz, w którym wartość tej funkcji wynosi 2.", cost: 3000 }
     ]
   },
+
+  // ok
   {
     id: 30,
     title: "THE LAST QUERY",
@@ -550,13 +561,11 @@ export const LEVELS: LevelDefinition[] = [
     objective: "Odtwórz ostatnie zapytanie ORACLE'a. Wynik musi składać się z trzech kolumn: 'full_name' powiązane z oracle_01, 'node_name' odpowiadające węzłowi NODE_07, oraz 'controller' zawierające pełne imię CTO NEXUS.",
     requiredRows: [{ full_name: "Adrian Voss", node_name: "NODE_07", controller: "Elias Voss" }],
     maxRows: 1,
-    requiredKeywords: ["AS"], 
+    requiredKeywords: ["AS", "full_name", "node_name", "controller"], 
     rewardXP: 5000,
     unlocksEvidence: "EVD_FINAL_PROTOCOL",
     hints: [
-      { id: 1, text: "Finał wymaga podzapytań skalarnych (SELECT ... AS) dla każdej kolumny wynikowej osobno.", cost: 1000 },
-      { id: 2, text: "Pierwsza kolumna: (SELECT full_name FROM employees WHERE username = 'oracle_01') AS full_name", cost: 2000 },
-      { id: 3, text: "Skonstruuj pozostałe dwie kolumny (dla node_name i controller) w dokładnie ten sam sposób w jednej linijce.", cost: 3000 }
+      { id: 1, text: "Finał wymaga podzapytań skalarnych dla każdej kolumny wynikowej osobno (SELECT ... AS).", cost: 5000 },
     ]
   }
 ];

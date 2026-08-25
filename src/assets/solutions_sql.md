@@ -82,13 +82,15 @@
 
 ## AKT V — THE TRUTH
 **LVL 26:**
-`WITH oracle_ops AS (SELECT action_type, location_id FROM access_logs WHERE employee_id = 77) SELECT e.username FROM employees e JOIN access_logs a ON e.id = a.employee_id JOIN oracle_ops o ON a.action_type = o.action_type AND a.location_id = o.location_id WHERE e.id != 77 GROUP BY e.id HAVING COUNT(*) = (SELECT COUNT(*) FROM oracle_ops);`
+`WITH OracleLogs AS (SELECT COUNT(*) as total_logs FROM access_logs a JOIN employees e ON a.employee_id = e.id WHERE e.username = 'oracle_01') SELECT e.username FROM employees e JOIN access_logs a ON e.id = a.employee_id WHERE e.username != 'oracle_01' GROUP BY e.username HAVING COUNT(*) = (SELECT total_logs FROM OracleLogs);`
 
 **LVL 27:**
-`SELECT full_name FROM (SELECT e.full_name, RANK() OVER (ORDER BY COUNT(a.id) DESC) as access_rank FROM employees e JOIN access_logs a ON e.id = a.employee_id WHERE a.location_id = (SELECT id FROM locations WHERE name = 'MIRROR_CORE') GROUP BY e.id) WHERE access_rank = 1;`
+`SELECT full_name FROM (SELECT e.full_name, RANK() OVER (ORDER BY COUNT(*) DESC) as access_rank FROM employees e JOIN access_logs a ON e.id = a.employee_id WHERE a.location_id = (SELECT id FROM locations WHERE name = 'MIRROR_CORE') GROUP BY e.id) WHERE access_rank = 1;`
 
 **LVL 28:**
-`WITH stats AS (SELECT employee_id, COUNT(*) as op_count FROM audit_logs GROUP BY employee_id), avg_stats AS (SELECT AVG(op_count) as avg_op FROM stats) SELECT e.username FROM employees e JOIN stats s ON e.id = s.employee_id, avg_stats a ORDER BY ABS(s.op_count - a.avg_op) DESC LIMIT 1;`
+`WITH stats AS (SELECT employee_id, COUNT(*) as op_count FROM audit_logs GROUP BY employee_id), avg_stats AS (SELECT AVG(op_count) as avg_op FROM stats) SELECT e.username FROM employees e JOIN stats s ON e.id = s.employee_id, avg_stats a ORDER BY ABS(s.op_count - a.avg_op) DESC LIMIT 1;` 
+
+`WITH Amount AS (SELECT employee_id, COUNT(*) AS log_count FROM audit_logs GROUP BY employee_id), AvgAmount AS (SELECT AVG(log_count) AS avg_count FROM Amount) SELECT e.username FROM Amount a JOIN employees e ON a.employee_id = e.idCROSS JOIN AvgAmount aa ORDER BY ABS(a.log_count - aa.avg_count) DESC LIMIT 1;` 
 
 **LVL 29:**
 `WITH oracle_logs AS (SELECT a.location_id, ROW_NUMBER() OVER (ORDER BY a.created_at DESC) as rn FROM access_logs a JOIN employees e ON a.employee_id = e.id WHERE e.username = 'oracle_01') SELECT l.name FROM oracle_logs o JOIN locations l ON o.location_id = l.id WHERE o.rn = 2;`
