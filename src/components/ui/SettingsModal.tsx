@@ -57,7 +57,7 @@ export const SettingsModal = ({ onClose }: SettingsModalProps) => {
             </div>
             <input 
               type="range" 
-              min="0" max="1" step="0.05"
+              min="0" max="1" step="0.01"
               value={sfxVolume}
               onChange={(e) => setSfxVolume(parseFloat(e.target.value))}
               className="w-full h-1 bg-[var(--surface-3)] outline-none appearance-none cursor-pointer accent-[var(--accent-dark-grey)]"
@@ -72,7 +72,7 @@ export const SettingsModal = ({ onClose }: SettingsModalProps) => {
             </div>
             <input 
               type="range" 
-              min="0" max="1" step="0.05"
+              min="0" max="1" step="0.01"
               value={musicVolume}
               onChange={(e) => setMusicVolume(parseFloat(e.target.value))}
               className="w-full h-1 bg-[var(--surface-3)] outline-none appearance-none cursor-pointer accent-[var(--accent-dark-grey)]"

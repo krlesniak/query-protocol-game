@@ -226,7 +226,7 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
       setSubPhase(3);
       if (!(await wait(1500))) return;
 
-      playSound('bass_hit2.mp3');
+      playSound('bass_hit.mp3');
       if (!(await wait(100))) return;
 
       finishIntro();
@@ -401,7 +401,7 @@ export const IntroCinematic = ({ onComplete }: IntroCinematicProps) => {
 
             {subPhase >= 2 && (
               <div className="mt-4 text-xl md:text-2xl">
-                <span className="opacity-70">FORENSIC DATABASE ACCESS: </span>
+                <span className="opacity-70">DATABASE ACCESS: </span>
                 <span className="text-[#1fff0f] font-bold">GRANTED</span>
               </div>
             )}

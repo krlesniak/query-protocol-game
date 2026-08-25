@@ -12,7 +12,6 @@ export class LevelValidator {
       return { success: false, message: 'QUERY REJECTED. ERROR: EXPECTED DDL/DML, RECEIVED DATA ROWS.' };
     }
 
-    // Sprawdzenie, czy zapytanie w ogóle zwróciło dane
     if (!result || result.rows.length === 0) {
       return { success: false, message: 'QUERY REJECTED. ERROR: EMPTY_RESULT_SET. No data matched the criteria.' };
     }
@@ -24,7 +23,6 @@ export class LevelValidator {
       };
     }
 
-    // Weryfikacja dokładnej liczby kolumn
     const expectedColumns = Object.keys(requiredRows[0]);
     if (result.columns.length !== expectedColumns.length) {
       return { 
@@ -33,7 +31,6 @@ export class LevelValidator {
       };
     }
 
-    // Sprawdzenie poprawności wyników
     for (const requiredRow of requiredRows) {
       const matchFound = result.rows.some((resultRow) => {
         return Object.entries(requiredRow).every(([key, value]) => {

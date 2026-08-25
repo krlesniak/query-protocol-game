@@ -187,7 +187,6 @@ export const generateDatabaseSQL = (): string => {
 
   for (let i = 0; i < 5000; i++) {
     let employeeId;
-    // OCHRONA 
     do {
       employeeId = Math.floor(random() * 250) + 1;
     } while (specialIds.includes(employeeId));
@@ -201,7 +200,7 @@ export const generateDatabaseSQL = (): string => {
     sql += `INSERT INTO access_logs VALUES (${logId++}, ${employeeId}, ${locationId}, '${action}', '${dateStr}', ${granted});\n`;
   }
 
-  // KLUCZOWE LOGI FABULARNE
+  // CRUCIAL ACCESS LOGS FOR STORYLINE
   sql += `
     INSERT INTO access_logs VALUES (${logId++}, 77, 3, 'ENTER', '2026-02-12 23:47:00', 1);
     INSERT INTO access_logs VALUES (${logId++}, 77, 1, 'EXIT', '2026-02-13 04:00:00', 1);
@@ -350,7 +349,7 @@ export const generateDatabaseSQL = (): string => {
     sql += `INSERT INTO audit_logs (employee_id, triggered_by, action, target, created_at) VALUES (${employeeId}, ${triggeredBy}, '${action}', '${target}', '${dateStr}');\n`;
   }
 
-  // KLUCZOWE AUDYTY FABULARNE
+  // CRUCIAL AUDIT LOGS FOR STORYLINE
   sql += `
     INSERT INTO audit_logs (employee_id, triggered_by, action, target, created_at) VALUES 
       (10, 10, 'PURGE', 'security_logs', '2026-02-13 00:31:05'),

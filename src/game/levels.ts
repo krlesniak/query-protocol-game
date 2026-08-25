@@ -20,7 +20,7 @@ export interface LevelDefinition {
 
 export const LEVELS: LevelDefinition[] = [
   // ============================================================
-  // AKT I — THE DISAPPEARANCE
+  // ACT I — THE DISAPPEARANCE
   // ============================================================
 
   // ok
@@ -109,7 +109,7 @@ export const LEVELS: LevelDefinition[] = [
   },
 
   // ============================================================
-  // AKT II — SOMEONE IS LYING
+  // ACT II — SOMEONE IS LYING
   // ============================================================
 
   // ok
@@ -207,7 +207,7 @@ export const LEVELS: LevelDefinition[] = [
   },
 
   // ============================================================
-  // AKT III — THE MIRROR
+  // ACT III — THE MIRROR
   // ============================================================
 
   // ok
@@ -297,7 +297,7 @@ export const LEVELS: LevelDefinition[] = [
   },
 
   // ============================================================
-  // AKT IV — ORACLE'S LAST QUERY
+  // ACT IV — ORACLE'S LAST QUERY
   // ============================================================
 
   // ok
@@ -481,7 +481,7 @@ export const LEVELS: LevelDefinition[] = [
   },
 
   // ============================================================
-  // AKT V — THE TRUTH
+  // ACT V — THE TRUTH
   // ============================================================
 
   // ok

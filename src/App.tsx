@@ -37,10 +37,11 @@ function App() {
   const { currentLevel, score, collectedEvidence, resetGame, hasSeenIntro, setHasSeenIntro, soundEnabled, toggleSound, musicVolume, sfxVolume } = useGameStore();
   const hasProgress = currentLevel > 1 || score > 0 || collectedEvidence.length > 0;
 
-  useSound('hum2.mp3', { volume: musicVolume, loop: true, autoPlay: true });
-  const { play: playClick } = useSound('mouse.mp3', { volume: sfxVolume });
-  const { play: playKeyboard } = useSound('keyboard.mp3', { volume: sfxVolume });
-  const { play: playBeep } = useSound('beep2.mp3', { volume: sfxVolume });
+  useSound('hum2.mp3', { volume: soundEnabled ? musicVolume : 0, loop: true, autoPlay: true });
+  
+  const { play: playClick } = useSound('mouse.mp3', { volume: soundEnabled ? sfxVolume : 0 });
+  const { play: playKeyboard } = useSound('keyboard.mp3', { volume: soundEnabled ? sfxVolume : 0 });
+  const { play: playBeep } = useSound('beep2.mp3', { volume: soundEnabled ? sfxVolume : 0 });
 
 
   useEffect(() => {

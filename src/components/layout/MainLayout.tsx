@@ -48,6 +48,7 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
     completedLevels,
     musicVolume,
     sfxVolume,
+    soundEnabled,
     addScore, 
     unlockTable, 
     addEvidence, 
@@ -94,10 +95,9 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
   const logIdCounter = useRef<number>(3);
   const currentQueryDraft = useRef(initialQuery); 
 
-  useSound('hum2.mp3', { volume: musicVolume, loop: true, autoPlay: true });
-  const { play: playClick } = useSound('mouse.mp3', { volume: sfxVolume });
-  const { play: playRun } = useSound('beep2.mp3', { volume: sfxVolume });
-  const { play: playSuccess } = useSound('success.mp3', { volume: sfxVolume }); 
+  const { play: playClick } = useSound('mouse.mp3', { volume: soundEnabled ? sfxVolume : 0 });
+  const { play: playRun } = useSound('beep2.mp3', { volume: soundEnabled ? sfxVolume : 0 });
+  const { play: playSuccess } = useSound('success.mp3', { volume: soundEnabled ? sfxVolume : 0 });
 
   useEffect(() => {
     const timer = setInterval(() => {

@@ -1,42 +1,44 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { useGameStore } from '../store/gameStore';
 
 export const useSound = (fileName: string, options?: { volume?: number; loop?: boolean; autoPlay?: boolean }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const soundEnabled = useGameStore(state => state.soundEnabled);
+  const volume = options?.volume ?? 0.5;
+  const loop = options?.loop ?? false;
+  const autoPlay = options?.autoPlay ?? false;
 
   useEffect(() => {
-    audioRef.current = new Audio(`/assets/audio/${fileName}`);
-    audioRef.current.volume = options?.volume ?? 0.5;
-    audioRef.current.loop = options?.loop ?? false;
+    const audio = new Audio(`/assets/audio/${fileName}`);
+    audio.loop = loop;
+    audio.volume = volume;
+    audioRef.current = audio;
+
+    if (autoPlay) {
+      audio.play().catch(() => {});
+    }
 
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
+      audio.pause();
+      audioRef.current = null;
     };
-  }, [fileName, options?.volume, options?.loop]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fileName]); 
 
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.muted = !soundEnabled;
+      audioRef.current.volume = volume;
+      
+      if (volume > 0 && loop && audioRef.current.paused) {
+        audioRef.current.play().catch(() => {});
+      }
     }
-  }, [soundEnabled]);
-
-  // Autoplay
-  useEffect(() => {
-    if (options?.autoPlay && audioRef.current) {
-      audioRef.current.play().catch(() => {});
-    }
-  }, [options?.autoPlay]);
+  }, [volume, loop]);
 
   const play = useCallback(() => {
-    if (audioRef.current && soundEnabled) {
+    if (audioRef.current && volume > 0) {
       audioRef.current.currentTime = 0;
       audioRef.current.play().catch(() => {});
     }
-  }, [soundEnabled]);
+  }, [volume]);
 
   const stop = useCallback(() => {
     if (audioRef.current) {
