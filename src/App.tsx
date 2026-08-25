@@ -3,7 +3,7 @@ import { MainLayout } from './components/layout/MainLayout';
 import { IntroCinematic } from './components/intro/IntroCinematic'; 
 import { dbService } from './db/DatabaseService';
 import { useGameStore } from './store/gameStore';
-import { Terminal, AlertTriangle, ChevronRight } from 'lucide-react';
+import { Terminal, AlertTriangle, ChevronRight, Volume2, VolumeX } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { generateDatabaseSQL } from './db/schemaGenerator';
 import { useSound } from './hooks/useSound';
@@ -11,52 +11,94 @@ import './index.css';
 
 type AppState = 'booting' | 'menu' | 'intro' | 'playing';
 
+const BOOT_SEQUENCE = [
+  "NEXUS_OS BIOS v9.01.4 (SECURE BOOT ENABLED)",
+  "PROCESSOR: ORACLE_NEURAL_NET_v2 DETECTED",
+  "MAIN MEMORY: 1024 TB SECURE RAM ALLOCATED... OK",
+  "MOUNTING ENCRYPTED VOLUMES...",
+  "VFS: MOUNTED ROOT (EXT4 FILESYSTEM) READ-ONLY.",
+  "INITIALIZING DATABASE PROTOCOLS...",
+  "ESTABLISHING SECURE UPLINK...",
+  "BYPASSING EXTERNAL FIREWALLS...",
+  "CHECKING CLEARANCE LEVELS...",
+  "ACCESS GRANTED.",
+  "SYSTEM READY."
+];
+
+const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+
 function App() {
   const [appState, setAppState] = useState<AppState>('booting');
-  const [progress, setProgress] = useState(0);
+  const [bootLogs, setBootLogs] = useState<string[]>([]);
+  const [progress, setProgress] = useState(0); 
   const [showResetWarning, setShowResetWarning] = useState(false);
 
-  const { currentLevel, score, collectedEvidence, resetGame, hasSeenIntro, setHasSeenIntro } = useGameStore();
+  const { currentLevel, score, collectedEvidence, resetGame, hasSeenIntro, setHasSeenIntro, soundEnabled, toggleSound } = useGameStore();
   const hasProgress = currentLevel > 1 || score > 0 || collectedEvidence.length > 0;
 
-  const { play: playClick } = useSound('mouse.mp3', { volume: 0.15 });
+  useSound('hum2.mp3', { volume: 0.3, loop: true, autoPlay: true });
+  const { play: playClick } = useSound('mouse.mp3', { volume: 0.2 });
+  const { play: playKeyboard } = useSound('keyboard.mp3', { volume: 0.15 });
+  const { play: playBeep } = useSound('beep2.mp3', { volume: 0.3 });
 
   useEffect(() => {
+    let aborted = false; 
+
     const startSystem = async () => {
       try {
-        const progressInterval = setInterval(() => {
-          setProgress((prev) => {
-            if (prev >= 100) {
-              clearInterval(progressInterval);
-              return 100;
-            }
-            return prev + Math.floor(Math.random() * 8) + 2;
-          });
-        }, 80);
+        const initDB = async () => {
+          await dbService.init();
+          try { 
+            const fullSqlScript = generateDatabaseSQL();
+            dbService.seed(fullSqlScript); 
+          } catch { /* ignore */ }
+        };
 
-        await dbService.init();
-        try { 
-          const fullSqlScript = generateDatabaseSQL();
-          dbService.seed(fullSqlScript); 
-        } catch { /* ignore */ }
+        const runVisualBoot = async () => {
+          await delay(500);
+          for (let i = 0; i < BOOT_SEQUENCE.length; i++) {
+            if (aborted) return;
+            
+            setBootLogs(prev => [...prev, BOOT_SEQUENCE[i]]);
+            
+            const newProgress = Math.floor(((i + 1) / BOOT_SEQUENCE.length) * 100);
+            setProgress(newProgress);
+            
+            playKeyboard();
+            
+            const waitTime = i === BOOT_SEQUENCE.length - 1 ? 900 : Math.random() * 300 + 50;
+            await delay(waitTime);
+          }
+          if (!aborted) {
+            playBeep(); 
+            await delay(600);
+          }
+        };
 
-        setTimeout(() => {
-          clearInterval(progressInterval);
-          setProgress(100);
-          setTimeout(() => setAppState('menu'), 600);
-        }, 1500);
+        await Promise.all([initDB(), runVisualBoot()]);
+
+        if (!aborted) {
+          setAppState('menu');
+        }
+
       } catch (error) {
         console.error("Critical system error:", error);
       }
     };
+
     startSystem();
+
+    return () => {
+      aborted = true; 
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleContinue = () => {
     playClick();
     setTimeout(() => {
       setAppState('playing');
-    }, 50); 
+    }, 100); 
   };
 
   const startGameFlow = () => {
@@ -66,7 +108,7 @@ function App() {
       } else {
         setAppState('playing');
       }
-    }, 50);
+    }, 100);
   };
 
   const handleNewGame = () => {
@@ -90,39 +132,87 @@ function App() {
   const filledBlocks = Math.floor((progress / 100) * totalBlocks);
 
   return (
-    <div className="h-screen w-full bg-[var(--bg-base)] flex items-center justify-center font-mono selection:bg-transparent overflow-hidden">
+    <div className="min-h-screen w-full bg-[var(--bg-base)] flex items-center justify-center font-mono selection:bg-[var(--accent)]/30 selection:text-[var(--accent-bright)] overflow-hidden relative">
       
+      {/* PRZYCISK DŹWIĘKU */}
+      {appState !== 'playing' && (
+        <div className="fixed top-8 right-8 z-[9999]">
+          <button
+            onClick={() => {
+              playClick();
+              if (toggleSound) toggleSound();
+            }}
+            className="p-3 border border-[var(--border)] bg-[var(--surface-1)] text-[var(--text-secondary)] hover:text-[var(--accent-bright)] hover:border-[var(--accent)] hover:shadow-[0_0_15px_var(--accent)] transition-all duration-300 group"
+          >
+            {soundEnabled !== false ? (
+              <Volume2 className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
+            ) : (
+              <VolumeX className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
+            )}
+          </button>
+        </div>
+      )}
+
       <AnimatePresence mode="wait">
+        
+        {/* BOOT SEQUENCE */}
         {appState === 'booting' && (
           <motion.div 
             key="booting"
             initial={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 1.05 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
-            className="flex flex-col items-center gap-8 absolute"
+            exit={{ opacity: 0, scale: 1.05, filter: 'brightness(2) blur(5px)' }}
+            transition={{ duration: 0.6, ease: "easeIn" }}
+            className="w-full h-full max-w-4xl p-12 flex flex-col justify-end gap-12 text-[var(--text-secondary)] tracking-widest leading-relaxed"
           >
-            <div className="text-[var(--text-main)] text-base tracking-[0.2em] uppercase flex flex-col items-center gap-3">
-              <span>Welcome to Query Protocol</span>
-              <span className="text-[var(--text-muted)] text-sm tracking-widest animate-pulse">
-                {progress === 100 ? 'System Ready.' : 'Please wait...'}
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5 p-1.5 border border-[var(--border)] bg-[var(--surface-1)] shadow-2xl">
-              {Array.from({ length: totalBlocks }).map((_, index) => (
-                <div key={index} className={`h-8 w-3.5 transition-colors duration-75 ${index < filledBlocks ? 'bg-[var(--accent)] shadow-[0_0_10px_var(--accent)]' : 'bg-[var(--surface-3)]'}`} />
+            {/* TERMINAL LOGS */}
+            <div className="flex-1 flex flex-col justify-end items-start text-[12px] text-left w-full">
+              {bootLogs.map((log, index) => (
+                <div key={index} className={index === BOOT_SEQUENCE.length - 1 ? "text-[var(--accent)] font-bold mt-4 text-[14px]" : ""}>
+                  {log}
+                </div>
               ))}
+              <div className="animate-pulse text-[var(--accent)] mt-2">_</div>
             </div>
-            <div className="text-[var(--accent)] text-xl font-bold tracking-widest mt-2">{Math.min(progress, 100)}%</div>
+
+            {/* Loading Bar */}
+            <div className="flex flex-col items-start gap-6 shrink-0 pb-10 w-full">
+              
+              <div className="text-[var(--text-main)] text-base tracking-[0.2em] uppercase flex flex-col items-start gap-3 text-left">
+                <span>Welcome to Query Protocol</span>
+                <span className="text-[var(--text-muted)] text-sm tracking-widest animate-pulse">
+                  {progress === 100 ? 'PROTOCOL ENGAGED.' : 'LOADING SECURE ENVIRONMENT...'}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-1.5 p-1.5 border border-[var(--border)] bg-[var(--surface-1)] shadow-2xl">
+                {Array.from({ length: totalBlocks }).map((_, index) => (
+                  <div 
+                    key={index} 
+                    className={`h-8 w-3.5 transition-colors duration-75 ${
+                      index < filledBlocks 
+                        ? 'bg-[var(--accent)] shadow-[0_0_10px_var(--accent)]' 
+                        : 'bg-[var(--surface-3)]'
+                    }`} 
+                  />
+                ))}
+              </div>
+              
+              {/* Percentage - center */}
+              <div className="text-[var(--accent)] text-xl font-bold tracking-widest text-left">
+                {Math.min(progress, 100)}%
+              </div>
+            </div>
           </motion.div>
         )}
 
+        {/* MAIN MENU */}
         {appState === 'menu' && (
           <motion.div 
             key="menu"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            initial={{ opacity: 0, y: 10, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, scale: 0.98, filter: 'blur(5px)' }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
             className="max-w-xl w-full flex flex-col gap-8 p-10 border border-[var(--border)] bg-[var(--surface-1)] shadow-2xl relative overflow-hidden"
           >
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--accent)] to-transparent opacity-50" />
@@ -136,34 +226,42 @@ function App() {
             {!showResetWarning ? (
               <div className="flex flex-col gap-4">
                 {hasProgress && (
-                  <button onClick={handleContinue} className="flex items-center justify-between p-4 border border-[var(--accent)] bg-[var(--accent-surface)] text-[var(--accent-bright)] hover:bg-[var(--accent)] hover:text-black transition-all duration-200 group text-left">
-                    <div>
-                      <div className="tracking-widest text-sm font-bold">CONTINUE SESSION</div>
-                      <div className="text-[10px] opacity-80 mt-1">LVL {currentLevel} // {score} XP</div>
+                  <button onClick={handleContinue} className="group relative flex items-center justify-between p-5 border border-[var(--accent)] bg-[var(--accent-surface)] transition-all duration-300 overflow-hidden text-left">
+                    <div className="relative z-10 flex flex-col">
+                      <span className="tracking-[0.2em] text-sm font-bold text-[var(--accent-bright)] group-hover:text-black transition-colors duration-300">
+                        CONTINUE SESSION
+                      </span>
+                      <span className="text-[10px] tracking-widest opacity-80 mt-1 text-[var(--accent-bright)] group-hover:text-black transition-colors duration-300">
+                        LVL {currentLevel} // {score} XP
+                      </span>
                     </div>
-                    <ChevronRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+                    <ChevronRight className="relative z-10 w-5 h-5 text-[var(--accent-bright)] group-hover:text-black group-hover:translate-x-2 transition-all duration-300" />
+                    <div className="absolute inset-0 w-full h-full bg-[var(--accent)] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300 ease-out z-0"></div>
                   </button>
                 )}
                 
-                <button onClick={handleNewGame} className="flex items-center justify-between p-4 border border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-main)] hover:text-[var(--text-main)] transition-all duration-200 group text-left">
-                  <div className="tracking-widest text-sm">INITIALIZE NEW INVESTIGATION</div>
-                  <ChevronRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+                <button onClick={handleNewGame} className="group relative flex items-center justify-between p-5 border border-[var(--border)] bg-transparent transition-all duration-300 overflow-hidden text-left">
+                  <span className="relative z-10 tracking-[0.2em] text-sm text-[var(--text-secondary)] group-hover:text-black transition-colors duration-300 font-bold">
+                    INITIALIZE NEW INVESTIGATION
+                  </span>
+                  <ChevronRight className="relative z-10 w-5 h-5 text-[var(--text-secondary)] group-hover:text-black group-hover:translate-x-2 transition-all duration-300" />
+                  <div className="absolute inset-0 w-full h-full bg-[var(--text-main)] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300 ease-out z-0"></div>
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col gap-4 border-l-2 border-[var(--accent-light-green)] pl-5 py-2">
-                <div className="flex items-center gap-3 text-[var(--accent-light-green)]">
+              <div className="flex flex-col gap-4 border-l-2 border-[var(--error)] pl-5 py-2">
+                <div className="flex items-center gap-3 text-[var(--error)]">
                   <AlertTriangle className="w-6 h-6 animate-pulse" />
                   <span className="tracking-widest font-bold text-sm">WARNING: DATA OVERRIDE</span>
                 </div>
-                <p className="text-[12px] text-[var(--text-secondary)] leading-relaxed">
+                <p className="text-[12px] text-[var(--text-secondary)] leading-relaxed tracking-wide">
                   Starting a new investigation will erase all currently saved progress, collected evidence, and clearance levels. This action cannot be undone.
                 </p>
                 <div className="flex gap-4 mt-4">
-                  <button onClick={confirmReset} className="px-5 py-2.5 bg-red-950/30 border border-[var(--error)] text-[var(--error)] hover:bg-[var(--error)] hover:text-white transition-colors text-xs tracking-widest font-bold">
-                    CONFIRM
+                  <button onClick={confirmReset} className="px-5 py-3 bg-red-950/20 border border-[var(--error)] text-[var(--error)] hover:bg-[var(--error)] hover:text-white transition-colors text-xs tracking-widest font-bold">
+                    CONFIRM PURGE
                   </button>
-                  <button onClick={() => { playClick(); setShowResetWarning(false); }} className="px-5 py-2.5 border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-main)] transition-colors text-xs tracking-widest">
+                  <button onClick={() => { playClick(); setShowResetWarning(false); }} className="px-5 py-3 border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-main)] transition-colors text-xs tracking-widest">
                     CANCEL
                   </button>
                 </div>
@@ -172,6 +270,7 @@ function App() {
           </motion.div>
         )}
 
+      {/* CINEMATIC INTRO */}
         {appState === 'intro' && (
           <motion.div 
             key="intro"
@@ -188,6 +287,7 @@ function App() {
           </motion.div>
         )}
 
+        {/* MAIN GAME */}
         {appState === 'playing' && (
           <motion.div 
             key="playing"
