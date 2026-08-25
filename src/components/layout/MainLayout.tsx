@@ -198,8 +198,10 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
         return; 
       }
 
+      const sqlWithoutStrings = sqlToRun.replace(/'[^']*'/g, '');
       const forbiddenKeywords = /\b(INSERT|UPDATE|DELETE|DROP|ALTER|TRUNCATE|REPLACE|CREATE)\b/i;
-      if (levelData.requiredRows.length > 0 && forbiddenKeywords.test(sqlToRun)) {
+      
+      if (levelData.requiredRows.length > 0 && forbiddenKeywords.test(sqlWithoutStrings)) {
         playRun();
         if (viewedLevel === currentLevel) incrementFailedQueries();
         addLog(`[ACCESS DENIED] Write operations are locked.`, 'error');

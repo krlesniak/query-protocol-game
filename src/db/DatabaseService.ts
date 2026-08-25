@@ -16,7 +16,7 @@ class DatabaseService {
 
       this.db = new SQL.Database();
       this.isInitialized = true;
-      console.log('[System] Silnik SQLite (WASM) zainicjowany pomyślnie.');
+      console.log('[System] SQLite engine initialized successfully.');
     } catch (error) {
       console.error('[System Error] Failed to load WASM engine:', error);
       throw error;
@@ -25,15 +25,19 @@ class DatabaseService {
 
   execute(query: string): QueryExecResult[] {
     if (!this.db) {
-      throw new Error("Brak połączenia z bazą danych.");
+      throw new Error("No database connection available.");
     }
 
     try {
       const restrictedKeywords = ['DROP', 'DELETE', 'UPDATE', 'ALTER', 'INSERT'];
       const upperQuery = query.toUpperCase();
       
-      if (restrictedKeywords.some(keyword => upperQuery.includes(keyword))) {
-         throw new Error("ACCESS_DENIED: Naruszenie protokołu. Dozwolony tylko odczyt (SELECT).");
+      const queryWithoutStrings = upperQuery.replace(/'[^']*'/g, '');
+      
+      const isTriggerAllowed = upperQuery.includes('CREATE TRIGGER');
+      
+      if (!isTriggerAllowed && restrictedKeywords.some(keyword => queryWithoutStrings.includes(keyword))) {
+         throw new Error("ACCESS_DENIED: Write operations are locked. Only SELECT queries are allowed.");
       }
 
       return this.db.exec(query);

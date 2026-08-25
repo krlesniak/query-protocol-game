@@ -157,9 +157,12 @@ export const LEVELS: LevelDefinition[] = [
     objective:
       "Znajdź identyfikator osoby (employee_id), która fizycznie WESZŁA do SERVER_ROOM_03 (z access_logs) w dniu 12 lutego 2026 ORAZ figurowała jako nadawca wiadomości. Użyj operatora INTERSECT.",
     requiredRows: [
-      { employee_id: 13 }
+      { employee_id: 13 }, 
+      { employee_id: 10 },
+      { employee_id: 59 },
+      { employee_id: 77 }
     ],
-    maxRows: 5,
+    maxRows: 4,
     requiredKeywords: ["INTERSECT"], 
     rewardXP: 600,
     hints: [
@@ -174,8 +177,8 @@ export const LEVELS: LevelDefinition[] = [
     title: "THE GHOST IN THE MACHINE",
     briefing: "Spójrzmy na logi w poszukiwaniu anomalii. Prawdziwy intruz w sieci firmowej zostawia ślady, ale często brakuje mu pomyślnego uwierzytelnienia. Ustalmy, kto atakował drzwi, ale nigdy nie wszedł do środka.",
     objective: "Znajdź ID osób, które mają w systemie odrzucone logowania (access_granted), wykluczając wszystkie osoby, którym kiedykolwiek przyznano dostęp.",
-    requiredRows: [{ employee_id: 200 }],
-    maxRows: 5,
+    requiredRows: [{ employee_id: 200 }, {employee_id: 42}],
+    maxRows: 2,
     requiredKeywords: ["EXCEPT"], 
     rewardXP: 650,
     unlocksEvidence: "EVD_ARCHIVE_LOG",
@@ -213,8 +216,8 @@ export const LEVELS: LevelDefinition[] = [
     title: "THREE LIARS",
     briefing: "Porównanie danych wejściowych, wiadomości i grafików pokazuje kilka sprzeczności. Jedna z osób znajduje się znacznie wyżej w strukturze NEXUS.",
     objective: "Znajdź pracowników, którzy mają więcej niż jeden wpis dostępu do SERVER_ROOM_03 podczas nocy zaginięcia (12 lutego).",
-    requiredRows: [{ employee_id: 10 }],
-    maxRows: 5,
+    requiredRows: [{ employee_id: 10 }, { employee_id: 13 }],
+    maxRows: 2,
     requiredKeywords: ["GROUP BY", "HAVING"], 
     rewardXP: 800,
     unlocksTable: "audit_logs",
@@ -239,7 +242,7 @@ export const LEVELS: LevelDefinition[] = [
     hints: [
       { id: 1, text: "Operacja purge znajduje się w danych systemowych.", cost: 250 },
       { id: 2, text: "Połącz log operacji z tabelą employees.", cost: 500 },
-      { id: 3, text: "Potrzebujesz JOIN po identyfikatorze pracownika.", cost: 750 }
+      { id: 3, text: "Pamiętaj o warunku WHERE z logami bezpieczeństwa (security_logs).", cost: 750 }
     ]
   },
 
@@ -250,7 +253,7 @@ export const LEVELS: LevelDefinition[] = [
     briefing: "Między 23:47 a 00:31 istnieje dokładnie 44-minutowa luka. ORACLE nie wyszedł z budynku. Ktoś z ochrony wszedł wtedy do SERVER_ROOM_03.",
     objective: "Znajdź wszystkich pracowników SECURITY, którzy weszli do SERVER_ROOM_03 w czasie brakującej godziny.",
     requiredRows: [{ full_name: "Martin Vale" }],
-    maxRows: 5,
+    maxRows: 1,
     rewardXP: 900,
     hints: [
       { id: 1, text: "Połącz employees z access_logs.", cost: 500 },
@@ -296,30 +299,37 @@ export const LEVELS: LevelDefinition[] = [
   // ============================================================
   // AKT IV — ORACLE'S LAST QUERY
   // ============================================================
+
+  // ok
   {
     id: 16,
     title: "THE MISSING SEQUENCE",
     briefing: "W danych brakuje fragmentu historii. Część rekordów została usunięta. Musimy zrekonstruować wydarzenia między 23:47 a 00:31.",
     objective: "Znajdź pracownika, który był obecny w SERVER_ROOM_03 podczas całej brakującej sekwencji zdarzeń (jego MIN wejście było <= 23:47, a MAX >= 00:31 dnia 12/13 Lutego).",
     requiredRows: [{ full_name: "Martin Vale" }],
-    maxRows: 3,
+    maxRows: 1,
     requiredKeywords: ["MIN", "MAX", "HAVING"], 
     rewardXP: 1200,
     unlocksTable: "internal_projects",
     hints: [
-      { id: 1, text: "Porównaj pierwsze i ostatnie zdarzenie każdego pracownika.", cost: 700 },
+      { id: 1, text: "Pamiętaj o warunku WHERE z datą tego zdarzenia (12 i 13 lutego).", cost: 700 },
       { id: 2, text: "Przyda Ci się grupowanie danych według employee_id.", cost: 1400 },
       { id: 3, text: "Sprawdź, kto spełnia jednocześnie warunek pierwszego i ostatniego zdarzenia używając HAVING.", cost: 2100 }
     ]
   },
+
+  // ok
   {
     id: 17,
     title: "THE COVER",
     briefing: "MIRROR nie był jedynym projektem. Część z nich została oficjalnie sklasyfikowana w logach audytu, ale jeden wciąż umyka procedurom.",
-    objective: "Znajdź kody projektów (project_code z internal_projects), które NIE zostały sklasyfikowane – czyli odrzuć (EXCEPT) te, których nazwy pojawiają się jako 'target' w tabeli audit_logs.",
-    requiredRows: [{ project_code: "NODE_07" }],
-    maxRows: 20,
-    requiredKeywords: ["EXCEPT"], 
+    objective: "Znajdź kody projektów, które nie zostały sklasyfikowane – czyli odrzuć te, których nazwy pojawiają się jako 'target' w tabeli audit_logs.",
+    requiredRows: [{ project_code: "NODE_07" }, { project_code: "PROJECT ARGUS" }, { project_code: "PROJECT ECHO" }, 
+                   { project_code: "PROJECT ATLAS" }, { project_code: "PROJECT GLASS" }, { project_code: "PROJECT HELIX" }, 
+                   { project_code: "PROJECT LANTERN" }, { project_code: "PROJECT NIGHTFALL" }, { project_code: "PROJECT REDLINE" },
+                   { project_code: "PROJECT ORBIT" }, { project_code: "PROJECT SPECTER" }, { project_code: "PROJECT VEIL" }],
+    maxRows: 12,
+    requiredKeywords: ["EXCEPT", "project_code", "target"], 
     rewardXP: 1300,
     unlocksTable: "infrastructure_nodes",
     hints: [
@@ -328,30 +338,36 @@ export const LEVELS: LevelDefinition[] = [
       { id: 3, text: "Zapytanie zwróci projekty, które istnieją, ale brakuje ich w audycie.", cost: 2100 }
     ]
   },
+
+  // ok
   {
     id: 18,
     title: "NODE_07",
     briefing: "Nazwa NODE_07 pojawia się tylko raz. To identyfikator ukrytego węzła w hierarchii infrastruktury NEXUS.",
-    objective: "Prześledź hierarchię infrastruktury od głównego węzła do NODE_07 i znajdź pełną ścieżkę połączeń w tabeli infrastructure_nodes.",
-    requiredRows: [{ node_name: "NODE_07" }],
-    maxRows: 20,
-    requiredKeywords: ["WITH", "RECURSIVE"], 
+    objective: "Prześledź hierarchię infrastruktury od głównego węzła do NODE_07 i znajdź pełną ścieżkę połączeń w tabeli infrastructure_nodes. Użyj rekurencji.",
+    requiredRows: [{ node_name: "NODE_07" }, {node_name: "SEC_GATEWAY"}, { node_name: "NET_CORE" }, { node_name: "ROOT" }],
+    maxRows: 4,
+    requiredKeywords: ["WITH", "RECURSIVE", "UNION", "ALL"], 
     rewardXP: 1500,
     unlocksEvidence: "EVD_NODE_07",
     hints: [
-      { id: 1, text: "Każdy węzeł posiada identyfikator swojego rodzica.", cost: 700 },
-      { id: 2, text: "Musisz wielokrotnie przechodzić od dziecka do rodzica.", cost: 1400 },
-      { id: 3, text: "SQLite pozwala wykonywać takie przejście za pomocą WITH RECURSIVE.", cost: 2100 }
+      { id: 1, text: "Każdy węzeł posiada identyfikator swojego rodzica (parent_id). Składnia rekurencyjna: WITH RECURSIVE.", cost: 700 },
+      { id: 2, text: "Musisz wielokrotnie przechodzić od dziecka do rodzica. Użyj UNION ALL.", cost: 1400 },
     ]
   },
+
+  
+  // ok
   {
     id: 19,
     title: "THE NETWORK",
     briefing: "Struktura sieci to drzewo. Jeśli ukryty serwer faktycznie istnieje, musi znajdować się na samym końcu łańcucha jako 'ślepy' punkt docelowy.",
     objective: "Znajdź ID węzłów w infrastructure_nodes, które są punktami końcowymi – to znaczy ich ID NIE występuje w kolumnie parent_id żadnego innego węzła. Użyj EXCEPT.",
-    requiredRows: [{ id: 5 }],
-    maxRows: 20,
-    requiredKeywords: ["EXCEPT"], 
+    requiredRows: [{ id: 5 }, { id: 7 }, { id: 9 }, { id: 11 }, {id: 12}, { id: 13 }, 
+                   { id: 16 }, { id: 17 }, {id: 19 }, { id: 20 }, { id: 21 }, { id: 21 }, 
+                   { id: 24 }, { id: 26 }, { id: 27 }, { id: 30 }],
+    maxRows: 16,
+    requiredKeywords: ["EXCEPT", "NOT NULL", "parent_id"], 
     rewardXP: 1600,
     hints: [
       { id: 1, text: "Porównujesz ze sobą dwa zapytania z tej samej tabeli infrastructure_nodes.", cost: 700 },
@@ -359,37 +375,43 @@ export const LEVELS: LevelDefinition[] = [
       { id: 3, text: "W drugim wyciągasz kolumnę parent_id. Użyj EXCEPT pomiędzy nimi.", cost: 2100 }
     ]
   },
+
+  // ok
   {
     id: 20,
     title: "THE FALSE TRAIL",
-    briefing: "Zarząd celowo stworzył konkurencyjne tropy. Połączmy logi z audytem, aby wyłuskać winnego z całej listy ochroniarzy i pracowników.",
-    objective: "Znajdź ID pracownika, który: wywołał operację w audycie (jako triggered_by w audit_logs) INTERSECT fizycznie wszedł do SERVER_ROOM_03 (z access_logs) EXCEPT ma zablokowane wejścia (access_granted=0 w access_logs).",
+    briefing: "Zarząd celowo stworzył konkurencyjne tropy. Połączmy logi z audytem, aby znaleźć winnego z całej listy ochroniarzy i pracowników.",
+    objective: "Znajdź ID pracownika, który wywołał operację w audycie, fizycznie wszedł do SERVER_ROOM_03 oraz nie ma zablokowanych wejść.",
     requiredRows: [{ triggered_by: 10 }],
-    maxRows: 5,
+    maxRows: 10,
     requiredKeywords: ["INTERSECT", "EXCEPT"], 
     rewardXP: 1700,
     hints: [
-      { id: 1, text: "Musisz użyć trzech zapytań połączonych operatorami.", cost: 700 },
+      { id: 1, text: "Musisz użyć trzech zapytań połączonych operatorami (INTERSECT i EXCEPT).", cost: 700 },
       { id: 2, text: "SELECT triggered_by FROM audit_logs INTERSECT SELECT employee_id FROM access_logs WHERE ...", cost: 1400 },
       { id: 3, text: "Na samym końcu dopisz EXCEPT SELECT employee_id FROM access_logs WHERE access_granted = 0", cost: 2100 }
     ]
   },
+
+  // ok
   {
     id: 21,
     title: "THE TRAP",
     briefing: "Przechodzimy do ofensywy. Zamiast tylko czytać dane, musimy aktywnie złapać tych, którzy je usuwają. Ktoś z zarządu regularnie czyści tabelę wiadomości.",
-    objective: "Napisz CREATE TRIGGER o nazwie 'ghost_tracker', po (AFTER) usunięciu (DELETE) na tabeli 'messages'. Trigger ma logować do tabeli 'audit_logs': (employee_id = OLD.sender_id, triggered_by = OLD.sender_id, action = 'DELETE_MSG', target = OLD.subject).",
+    objective: "Napisz CREATE TRIGGER o nazwie 'ghost_tracker', po usunięciu na tabeli 'messages'. Trigger ma logować do tabeli 'audit_logs': (employee_id = OLD.sender_id, triggered_by = OLD.sender_id, action = 'DELETE_MSG', target = OLD.subject).",
     requiredRows: [], 
     maxRows: 0,
-    requiredKeywords: ["CREATE", "TRIGGER", "AFTER", "DELETE"], 
+    requiredKeywords: ["CREATE", "TRIGGER", "AFTER", "DELETE", "ON", "BEGIN", "END", "INSERT", "OLD"], 
     rewardXP: 1800,
     unlocksEvidence: "EVD_AUDIT_TRAIL",
     hints: [
-      { id: 1, text: "Składnia: CREATE TRIGGER nazwa AFTER DELETE ON tabela BEGIN ... END;", cost: 500 },
-      { id: 2, text: "Wewnątrz bloku wykonaj INSERT INTO audit_logs (employee_id, triggered_by, action, target) VALUES (...);", cost: 1000 },
-      { id: 3, text: "Aby odnieść się do usuniętych danych, użyj np. OLD.sender_id.", cost: 1500 }
+      { id: 1, text: "Składnia: CREATE TRIGGER nazwa AFTER/BEFORE DELETE/UPDATE ON tabela BEGIN ... END;", cost: 800 },
+      { id: 2, text: "Wewnątrz bloku wykonaj polecenie INSERT INTO...", cost: 1600 },
+      { id: 3, text: "Aby odnieść się do usuniętych danych, użyj np. OLD.sender_id.", cost: 2400 }
     ]
   },
+
+  // ok
   {
     id: 22,
     title: "WHO PULLED THE TRIGGER",
@@ -400,34 +422,39 @@ export const LEVELS: LevelDefinition[] = [
     requiredKeywords: ["WITH", "ORDER BY", "DESC", "LIMIT"], 
     rewardXP: 1900,
     hints: [
-      { id: 1, text: "Najpierw stwórz CTE grupujące odrzucone logi po id z ORDER BY ... DESC LIMIT 3.", cost: 700 },
+      { id: 1, text: "Najpierw stwórz CTE grupujące odrzucone logi po id z ORDER BY ... DESC LIMIT ....", cost: 700 },
       { id: 2, text: "W głównym zapytaniu połącz employees z audit_logs szukając akcji 'DELETE' na targecie 'oracle_01'.", cost: 1400 },
-      { id: 3, text: "Na końcu głównego zapytania dodaj warunek upewniający się, że ID pracownika znajduje się w wynikach Twojego CTE.", cost: 2100 }
+      { id: 3, text: "Na końcu głównego zapytania dodaj warunek upewniający się (podzapytanie), że ID pracownika znajduje się w wynikach Twojego CTE.", cost: 2100 }
     ]
   },
+
+  // ok
   {
     id: 23,
     title: "THE HIDDEN ARCHIVE",
     briefing: "Baza ukrywa kłamstwa dyrekcji. Musimy użyć zaawansowanej eliminacji zbiorów, by znaleźć ten jeden temat wiadomości, który spina cały spisek.",
-    objective: "Wydobądź tematy (subject) zaszyfrowanych wiadomości, a następnie wyeliminuj z nich (EXCEPT) te, które wysłała dyrekcja (department = 'EXECUTIVE'), ORAZ wyeliminuj te, których odbiorcą był dział IT (department = 'IT_OPS').",
-    requiredRows: [{ subject: "ORACLE PROTOCOL" }],
-    maxRows: 10,
+    objective: "Wydobądź tematy (subject) zaszyfrowanych wiadomości, a następnie wyeliminuj z nich te, które wysłała dyrekcja, ORAZ wyeliminuj te, których odbiorcą był dział IT.",
+    requiredRows: [{ subject: "ORACLE PROTOCOL" }, { subject: "CCTV FEED" }, { subject: "Meeting" }, { subject: "Backup" }, { subject: "Security Alert" }],
+    maxRows: 7,
     requiredKeywords: ["EXCEPT"], 
     rewardXP: 2000,
     hints: [
-      { id: 1, text: "Twój cel wymaga złączenia trzech zapytań (SELECT subject ...) połączonych dwoma operatorami EXCEPT.", cost: 800 },
-      { id: 2, text: "W pierwszym zapytaniu wyciągnij po prostu tematy gdzie is_encrypted = 1.", cost: 1600 },
-      { id: 3, text: "Drugie i trzecie zapytanie musi posiadać JOIN z tabelą employees (odpowiednio po nadawcy i odbiorcy), aby odfiltrować działy.", cost: 2400 }
+      { id: 1, text: "Dział dyrekcji - 'EXECUTIVE', dział IT - 'IT_OPS'", cost: 400 },
+      { id: 2, text: "Twój cel wymaga złączenia trzech zapytań połączonych dwoma operatorami EXCEPT.", cost: 800 },
+      { id: 3, text: "W pierwszym zapytaniu wyciągnij po prostu tematy gdzie is_encrypted = 1.", cost: 1600 },
+      { id: 4, text: "Drugie i trzecie zapytanie musi posiadać JOIN z tabelą employees (odpowiednio po nadawcy i odbiorcy), aby odfiltrować działy.", cost: 2400 }
     ]
   },
+
+  // ok
   {
     id: 24,
     title: "THE BLOODLINE",
     briefing: "Hierarchia NODE_07 prowadzi jeszcze głębiej. Każdy węzeł ma rodzica, ale część węzłów ma również powiązania boczne (linked_sibling_id).",
     objective: "Znajdź wszystkie węzły znajdujące się na ścieżce prowadzącej od węzła 'ORACLE_NODE' w górę. Zwróć kolumnę node_name.",
-    requiredRows: [{ node_name: "ORACLE_NODE" }],
-    maxRows: 50,
-    requiredKeywords: ["WITH", "RECURSIVE"], 
+    requiredRows: [{ node_name: "ORACLE_NODE" }, { node_name: "SEC_GATEWAY" }, { node_name: "NET_CORE" }, { node_name: "ROOT" }, { node_name: "NODE_07" }],
+    maxRows: 8,
+    requiredKeywords: ["WITH", "RECURSIVE", "UNION", "ALL", "linked_sibling_id"], 
     rewardXP: 2200,
     hints: [
       { id: 1, text: "Potrzebujesz ponownie przejść przez hierarchię zależności infrastructure_nodes.", cost: 800 },
@@ -435,6 +462,8 @@ export const LEVELS: LevelDefinition[] = [
       { id: 3, text: "Uwzględnij w złączeniu rekurencyjnym warunek OR na kolumnę linked_sibling_id.", cost: 2400 }
     ]
   },
+
+  // ok
   {
     id: 25,
     title: "THE REAL ARCHITECT",
@@ -442,12 +471,12 @@ export const LEVELS: LevelDefinition[] = [
     objective: "Wyciągnij pełne imię nadawcy wiadomości 'PROJECT MIRROR', KTÓRY jednocześnie: ma clearance = 5 ORAZ NIE MA ani jednego odrzuconego wejścia (access_granted = 0) w logach. Użyj NOT EXISTS.",
     requiredRows: [{ full_name: "Elias Voss" }],
     maxRows: 1,
-    requiredKeywords: ["NOT", "EXISTS"], 
+    requiredKeywords: ["NOT", "EXISTS", "PROJECT MIRROR", "access_granted", "5"], 
     rewardXP: 2500,
     hints: [
       { id: 1, text: "Zacznij od złączenia wiadomości z pracownikami.", cost: 800 },
-      { id: 2, text: "Zamiast łączyć access_logs bezpośrednio, użyj podzapytania skorelowanego z klauzulą NOT EXISTS.", cost: 1600 },
-      { id: 3, text: "NOT EXISTS (SELECT 1 FROM access_logs a WHERE a.employee_id = e.id AND a.access_granted = 0).", cost: 2400 }
+      { id: 2, text: "Dodaj warunki na clearance_level i temat wiadomości.", cost: 1200 },
+      { id: 3, text: "Użyj podzapytania z klauzulą NOT EXISTS (SELECT 1 FROM access_logs a WHERE ....", cost: 1600 },
     ]
   },
 

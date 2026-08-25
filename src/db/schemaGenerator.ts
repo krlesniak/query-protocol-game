@@ -214,6 +214,7 @@ export const generateDatabaseSQL = (): string => {
     INSERT INTO access_logs VALUES (${logId++}, 10, 3, 'EXIT', '2026-02-12 23:25:00', 1);
 
     -- DLA LEVELU 16 (Vale jest wewnątrz podczas Missing Sequence)
+    INSERT INTO access_logs VALUES (${logId++}, 13, 3, 'ENTER', '2026-02-12 23:45:00', 1);
     INSERT INTO access_logs VALUES (${logId++}, 13, 3, 'ENTER', '2026-02-12 23:50:00', 1);
     INSERT INTO access_logs VALUES (${logId++}, 13, 3, 'EXIT', '2026-02-13 00:35:00', 1);
   `;
@@ -335,7 +336,7 @@ export const generateDatabaseSQL = (): string => {
   // AUDIT LOGS
   const auditActions = ["LOGIN", "LOGOUT", "UPDATE", "READ", "EXPORT", "CLASSIFY", "DECLASSIFY", "DELETE", "CREATE", "PURGE"];
   const auditTargets = ["employees", "access_logs", "messages", "incidents", "system_cache", "sys_config", "user_perms", "project_data", "network_config", "archive_index"];  
-  
+
   for (let i = 0; i < 1000; i++) {
     let employeeId, triggeredBy;
     do { employeeId = Math.floor(random() * 250) + 1; } while (specialIds.includes(employeeId));

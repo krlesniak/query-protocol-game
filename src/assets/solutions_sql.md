@@ -51,7 +51,7 @@
 
 ## AKT IV — ORACLE'S LAST QUERY
 **LVL 16:**
-`SELECT e.full_name FROM employees e JOIN access_logs a ON e.id = a.employee_id WHERE a.location_id = 3 GROUP BY e.id HAVING MIN(a.created_at) <= '2026-02-12 23:47:00' AND MAX(a.created_at) >= '2026-02-13 00:31:00';`
+`SELECT e.full_name FROM employees e JOIN access_logs a ON e.id = a.employee_id WHERE a.location_id = 3 AND a.created_at >= '2026-02-12 00:00:00' AND a.created_at <= '2026-02-13 23:59:59' GROUP BY e.id HAVING MIN(a.created_at) <= '2026-02-12 23:47:00' AND MAX(a.created_at) >= '2026-02-13 00:31:00';`
 
 **LVL 17:**
 `SELECT project_code FROM internal_projects EXCEPT SELECT target FROM audit_logs;`
