@@ -57,7 +57,7 @@ function App() {
         };
 
         const runVisualBoot = async () => {
-          await delay(500);
+          await delay(800);
           for (let i = 0; i < BOOT_LOGS.length; i++) {
             if (aborted) return;
             
@@ -68,12 +68,12 @@ function App() {
             
             playKeyboard();
             
-            const waitTime = i === BOOT_LOGS.length - 1 ? 900 : Math.random() * 300 + 50;
+            const waitTime = i === BOOT_LOGS.length - 1 ? 1000 : Math.random() * 350 + 50;
             await delay(waitTime);
           }
           if (!aborted) {
             playBeep(); 
-            await delay(600);
+            await delay(800);
           }
         };
 

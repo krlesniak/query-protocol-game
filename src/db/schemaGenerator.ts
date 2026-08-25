@@ -207,13 +207,14 @@ export const generateDatabaseSQL = (): string => {
     INSERT INTO access_logs VALUES (${logId++}, 77, 1, 'EXIT', '2026-02-13 04:00:00', 1);
     INSERT INTO access_logs VALUES (${logId++}, 999, 3, 'ENTER', '2026-02-12 23:48:00', 1);
     INSERT INTO access_logs VALUES (${logId++}, 999, 1, 'EXIT', '2026-02-13 04:01:00', 1);
+    INSERT INTO access_logs VALUES (${logId++}, 1000, 3, 'EXIT', '2026-02-12 23:32:12', 1);
     
     -- DLA LEVELU 11 (Voss wchodzi do LEVEL 3)
     INSERT INTO access_logs VALUES (${logId++}, 10, 3, 'ENTER', '2026-02-12 23:10:00', 1);
     INSERT INTO access_logs VALUES (${logId++}, 10, 3, 'EXIT', '2026-02-12 23:25:00', 1);
 
     -- DLA LEVELU 16 (Vale jest wewnątrz podczas Missing Sequence)
-    INSERT INTO access_logs VALUES (${logId++}, 13, 3, 'ENTER', '2026-02-12 23:45:00', 1);
+    INSERT INTO access_logs VALUES (${logId++}, 13, 3, 'ENTER', '2026-02-12 23:50:00', 1);
     INSERT INTO access_logs VALUES (${logId++}, 13, 3, 'EXIT', '2026-02-13 00:35:00', 1);
   `;
 
@@ -245,6 +246,7 @@ export const generateDatabaseSQL = (): string => {
     INSERT INTO messages VALUES (${msgId++}, 31, 10, '2026-02-12 18:44:00', 'Security Alert', 'Your clearance was used against protocol.', 1);
     INSERT INTO messages VALUES (${msgId++}, 88, 77, '2026-02-08 03:12:00', 'ARCHIVE REQUEST', 'Someone accessed the restricted archive using your credentials.', 1);
     INSERT INTO messages VALUES (${msgId++}, 13, 67, '2026-02-12 23:50:00', 'CCTV FEED', 'Nexus is the most trusted source of information.', 1);
+    INSERT INTO messages VALUES (${msgId++}, 77, 56, '2026-02-08 14:55:00', 'Meeting', 'What time are we going for the meeting?', 1);
   `;
 
   const subjects = ["Daily Report", "System Notification", "Maintenance Request", "Access Review", "Security Update", "Project Status", "Meeting Request", "Incident Follow-up", "Data Review", "Network Alert"];
@@ -282,6 +284,7 @@ export const generateDatabaseSQL = (): string => {
   sql += `
     INSERT INTO incidents VALUES (${incidentId++}, 3, '2026-02-12 23:48:00', 'CRITICAL', 'CCTV feed corrupted. Signal lost.');
     INSERT INTO incidents VALUES (${incidentId++}, 3, '2026-02-13 00:31:00', 'WARNING', 'Manual purge of security logs initiated by executive override.');
+    INSERT INTO incidents VALUES (${incidentId++}, 8, '2026-02-08 10:32:00', 'CRITICAL', 'Security logs purged. Data integrity compromised.');
     INSERT INTO incidents VALUES (${incidentId++}, 31, '2026-02-13 00:35:00', 'CRITICAL', 'Unauthorized process detected inside MIRROR CORE.');
     INSERT INTO incidents VALUES (${incidentId}, 5, '2026-02-11 20:12:00', 'CRITICAL', 'Archive access controller overwhelmed by repeated denied requests.');
   `;
@@ -331,8 +334,8 @@ export const generateDatabaseSQL = (): string => {
 
   // AUDIT LOGS
   const auditActions = ["LOGIN", "LOGOUT", "UPDATE", "READ", "EXPORT", "CLASSIFY", "DECLASSIFY", "DELETE", "CREATE", "PURGE"];
-  const auditTargets = ["employees", "access_logs", "messages", "incidents", "security_logs", "sys_config", "user_perms", "project_data", "network_config", "archive_index"];
-
+  const auditTargets = ["employees", "access_logs", "messages", "incidents", "system_cache", "sys_config", "user_perms", "project_data", "network_config", "archive_index"];  
+  
   for (let i = 0; i < 1000; i++) {
     let employeeId, triggeredBy;
     do { employeeId = Math.floor(random() * 250) + 1; } while (specialIds.includes(employeeId));

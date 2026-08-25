@@ -56,7 +56,7 @@ export const BootSequence = ({ bootLogs, progress }: BootSequenceProps) => {
         " STATUS: ROUTING...       ",
         " ENCRYPTION: PENDING      "
       ]);
-    }, 100);
+    }, 90);
 
     return () => clearInterval(interval);
   }, [progress]);

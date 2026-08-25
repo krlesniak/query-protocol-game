@@ -11,6 +11,7 @@ export interface LevelDefinition {
   objective: string;
   requiredRows: Record<string, unknown>[];
   maxRows?: number;
+  requiredKeywords?: string[];
   rewardXP: number;
   unlocksTable?: string;
   unlocksEvidence?: string;
@@ -18,11 +19,11 @@ export interface LevelDefinition {
 }
 
 export const LEVELS: LevelDefinition[] = [
-
   // ============================================================
   // AKT I — THE DISAPPEARANCE
   // ============================================================
 
+  // ok
   {
     id: 1,
     title: "FIRST CONTACT",
@@ -37,6 +38,8 @@ export const LEVELS: LevelDefinition[] = [
       { id: 2, text: "Wyfiltruj rekord, którego username odpowiada pseudonimowi ORACLE.", cost: 100 }
     ]
   },
+
+  // ok
   {
     id: 2,
     title: "LAST KNOWN LOCATION",
@@ -52,13 +55,16 @@ export const LEVELS: LevelDefinition[] = [
       { id: 2, text: "Następnie odszukaj ten identyfikator w tabeli locations.", cost: 100 }
     ]
   },
+
+  // ok
   {
     id: 3,
     title: "NO EXIT",
     briefing: "Wiemy już, gdzie ORACLE pracował. Teraz trzeba sprawdzić, co wydarzyło się tamtej nocy. W logach znajduje się wpis dotyczący wejścia do SERVER_ROOM_03.",
     objective: "Znajdź log potwierdzający wejście do SERVER_ROOM_03 po godzinie 23:00 dnia 12 lutego 2026.",
     requiredRows: [{ action_type: "ENTER", location_id: 3 }],
-    maxRows: 5,
+    maxRows: 4,
+    requiredKeywords: ["ENTER"], 
     rewardXP: 300,
     unlocksTable: "incidents",
     unlocksEvidence: "EVD_SERVER_LOG_CONTRADICTION",
@@ -68,6 +74,8 @@ export const LEVELS: LevelDefinition[] = [
       { id: 3, text: "Czas jest zapisany jako tekst. Spróbuj znaleźć wpis późniejszy niż '2026-02-12 23:00:00'.", cost: 150 }
     ]
   },
+
+  // ok
   {
     id: 4,
     title: "THE GHOST",
@@ -75,6 +83,7 @@ export const LEVELS: LevelDefinition[] = [
     objective: "Znajdź opis krytycznego incydentu dotyczącego monitoringu w SERVER_ROOM_03.",
     requiredRows: [{ description: "CCTV feed corrupted. Signal lost." }],
     maxRows: 1,
+    requiredKeywords: ["CRITICAL"],
     rewardXP: 350,
     unlocksTable: "messages",
     hints: [
@@ -82,11 +91,13 @@ export const LEVELS: LevelDefinition[] = [
       { id: 2, text: "Odfiltruj incydenty o statusie CRITICAL dotyczące SERVER_ROOM_03.", cost: 200 }
     ]
   },
+
+  // ok
   {
     id: 5,
     title: "BORROWED IDENTITY",
     briefing: "Karta ORACLE'a została użyta po jego ostatnim potwierdzonym logowaniu. Nie wygląda na to, żeby używał jej sam. Ktoś wewnątrz NEXUS miał odpowiedni poziom dostępu.",
-    objective: "Znajdź pracownika działu SECURITY posiadającego clearance_level równy 5.",
+    objective: "Znajdź imię i nazwisko pracownika działu SECURITY posiadającego clearance_level równy 5.",
     requiredRows: [{ full_name: "Martin Vale" }],
     maxRows: 1,
     rewardXP: 400,
@@ -101,6 +112,7 @@ export const LEVELS: LevelDefinition[] = [
   // AKT II — SOMEONE IS LYING
   // ============================================================
 
+  // ok
   {
     id: 6,
     title: "NIGHT SHIFT",
@@ -108,27 +120,35 @@ export const LEVELS: LevelDefinition[] = [
     objective: "Znajdź wiadomość Martina zawierającą informację o rozpoczęciu nocnej zmiany.",
     requiredRows: [{ body: "Starting my night shift in Sector CORE." }],
     maxRows: 1,
+    requiredKeywords: ["LIKE"],
     rewardXP: 450,
     hints: [
       { id: 1, text: "Znajdź wiadomości należące do Martina.", cost: 200 },
-      { id: 2, text: "Szukasz konkretnego fragmentu tekstu, więc przyda Ci się operator LIKE i znak %.", cost: 400 }
+      { id: 2, text: "Szukasz konkretnego fragmentu tekstu, więc przyda Ci się operator LIKE i znak %.", cost: 300 },
+      { id: 3, text: "Użyj podzapytania, aby znaleźć id Martina.", cost: 400 }
     ]
   },
+
+  // ok
   {
     id: 7,
     title: "DEAD MAN'S MESSAGE",
     briefing: "Martin nie jest jedyną osobą, która zostawiła ślad. ORACLE przewidział, że ktoś może manipulować logami. Zostawił wiadomość, ale nie w miejscu, którego normalnie szukałby administrator.",
-    objective: "Znajdź wiadomość ORACLE'a zawierającą ostrzeżenie, aby nie ufać logom.",
+    objective: "Znajdź  treść wiadomości ORACLE'a zawierającą ostrzeżenie, aby nie ufać logom.",
     requiredRows: [{ body: "If you are reading this, do not trust the logs." }, 
                    { body: "MIRROR IS NOT THE PROJECT. IT IS THE COVER. DO NOT TRUST NEXUS. FIND NODE_07." }],
     maxRows: 2,
+    requiredKeywords: ["LIKE", "TRUST"], 
     rewardXP: 500,
     unlocksEvidence: "EVD_ECHO_DOC",
     hints: [
       { id: 1, text: "Wiadomość znajduje się w tabeli messages.", cost: 200 },
-      { id: 2, text: "Użyj LIKE '%trust%' aby znaleźć ostrzeżenie ukryte w tekście.", cost: 400 }
+      { id: 2, text: "Użyj podzapytania, aby znaleźć id ORACLE'a.", cost: 300 },
+      { id: 3, text: "Użyj LIKE '%trust%' aby znaleźć ostrzeżenie ukryte w tekście.", cost: 400 }
     ]
   },
+
+  // ok
   {
     id: 8,
     title: "CROSS-REFERENCE",
@@ -140,28 +160,33 @@ export const LEVELS: LevelDefinition[] = [
       { employee_id: 13 }
     ],
     maxRows: 5,
+    requiredKeywords: ["INTERSECT"], 
     rewardXP: 600,
     hints: [
       { id: 1, text: "Ogranicz access_logs do lokacji 3 oraz daty '2026-02-12%' i typu 'ENTER'.", cost: 200 },
       { id: 2, text: "Użyj operatora INTERSECT połączonego z zapytaniem o sender_id z tabeli messages.", cost: 400 },
-      { id: 3, text: "Gotowa składnia: SELECT employee_id FROM access_logs WHERE warunek_1 AND warunek_2 AND warunek_3 INTERSECT SELECT sender_id FROM messages;", cost: 600 }
     ]
   },
+
+  // ok
   {
     id: 9,
     title: "THE GHOST IN THE MACHINE",
     briefing: "Spójrzmy na logi w poszukiwaniu anomalii. Prawdziwy intruz w sieci firmowej zostawia ślady, ale często brakuje mu pomyślnego uwierzytelnienia. Ustalmy, kto atakował drzwi, ale nigdy nie wszedł do środka.",
-    objective: "Znajdź ID osób, które mają w systemie odrzucone logowania (access_granted = 0), wykluczając (EXCEPT) wszystkie osoby, którym kiedykolwiek przyznano dostęp (access_granted = 1).",
+    objective: "Znajdź ID osób, które mają w systemie odrzucone logowania (access_granted), wykluczając wszystkie osoby, którym kiedykolwiek przyznano dostęp.",
     requiredRows: [{ employee_id: 200 }],
     maxRows: 5,
+    requiredKeywords: ["EXCEPT"], 
     rewardXP: 650,
     unlocksEvidence: "EVD_ARCHIVE_LOG",
     hints: [
-      { id: 1, text: "Porównujesz ze sobą dwa zapytania do tej samej tabeli: access_logs.", cost: 200 },
+      { id: 1, text: "Porównujesz ze sobą dwa zapytania do tej samej tabeli: access_logs (Użyj EXCEPT).", cost: 200 },
       { id: 2, text: "Z lewej strony EXCEPT szukaj employee_id z dostępem równym 0.", cost: 400 },
       { id: 3, text: "Z prawej strony EXCEPT wstaw podzapytanie szukające pracowników z dostępem równym 1.", cost: 600 }
     ]
   },
+
+  // ok
   {
     id: 10,
     title: "THE IMPOSSIBLE TERMINAL",
@@ -169,6 +194,7 @@ export const LEVELS: LevelDefinition[] = [
     objective: "Znajdź employee_id osoby posiadającej największą liczbę odrzuconych prób logowania dnia.",
     requiredRows: [{ employee_id: 200 }],
     maxRows: 1,
+    requiredKeywords: ["GROUP BY", "ORDER BY", "DESC", "LIMIT"], 
     rewardXP: 700,
     hints: [
       { id: 1, text: "Najpierw odfiltruj odrzucone próby logowania.", cost: 250 },
@@ -181,6 +207,7 @@ export const LEVELS: LevelDefinition[] = [
   // AKT III — THE MIRROR
   // ============================================================
 
+  // ok
   {
     id: 11,
     title: "THREE LIARS",
@@ -188,19 +215,24 @@ export const LEVELS: LevelDefinition[] = [
     objective: "Znajdź pracowników, którzy mają więcej niż jeden wpis dostępu do SERVER_ROOM_03 podczas nocy zaginięcia (12 lutego).",
     requiredRows: [{ employee_id: 10 }],
     maxRows: 5,
+    requiredKeywords: ["GROUP BY", "HAVING"], 
     rewardXP: 800,
+    unlocksTable: "audit_logs",
     hints: [
       { id: 1, text: "Połącz access_logs z lokalizacją SERVER_ROOM_03.", cost: 250 },
       { id: 2, text: "Pogrupuj logi według employee_id.", cost: 500 },
       { id: 3, text: "Potrzebujesz warunku na grupę, który sprawdzi liczbę wpisów większą niż 1. Użyj HAVING.", cost: 750 }
     ]
   },
+
+  // NIE OK!
   {
     id: 12,
     title: "EXECUTIVE ACCESS",
     briefing: "W danych pojawia się inny pracownik o nazwisku Voss — CTO NEXUS i brat ORACLE'a. Konto wykonawcze zostało użyte do operacji usunięcia logów bezpieczeństwa.",
     objective: "Znajdź pełne imię i nazwisko pracownika, którego konto wykonało operację purge na logach bezpieczeństwa.",
     requiredRows: [{ full_name: "Elias Voss" }],
+    requiredKeywords: ["PURGE", "security_logs"],
     maxRows: 1,
     rewardXP: 850,
     unlocksEvidence: "EVD_EXECUTIVE_PURGE",
@@ -210,6 +242,8 @@ export const LEVELS: LevelDefinition[] = [
       { id: 3, text: "Potrzebujesz JOIN po identyfikatorze pracownika.", cost: 750 }
     ]
   },
+
+  // ok
   {
     id: 13,
     title: "THE MISSING HOUR",
@@ -224,6 +258,8 @@ export const LEVELS: LevelDefinition[] = [
       { id: 3, text: "Możesz wykorzystać podzapytanie zwracające employee_id osób obecnych w SERVER_ROOM_03.", cost: 1500 }
     ]
   },
+
+  // ok
   {
     id: 14,
     title: "CHAIN OF EVIDENCE",
@@ -238,6 +274,8 @@ export const LEVELS: LevelDefinition[] = [
       { id: 2, text: "Połącz dane pracowników z tabelą messages i ogranicz wynik do Martina oraz ORACLE'a.", cost: 1000 }
     ]
   },
+
+  // ok
   {
     id: 15,
     title: "PROJECT MIRROR",
@@ -245,9 +283,9 @@ export const LEVELS: LevelDefinition[] = [
     objective: "Użyj JOIN i podzapytania EXISTS. Znajdź pełne imię nadawcy (jako sender) oraz odbiorcy (jako receiver) wiadomości 'PROJECT MIRROR', ale TYLKO jeśli w systemie zarejestrowano incydent ze statusem 'WARNING' w SERVER_ROOM_03.",
     requiredRows: [{ sender: "Elias Voss", receiver: "Marcus Vance" }],
     maxRows: 1,
+    requiredKeywords: ["EXISTS", "WARNING", 'location_id'], 
     rewardXP: 1100,
     unlocksEvidence: "EVD_DEAD_MAN",
-    unlocksTable: "audit_logs",
     hints: [
       { id: 1, text: "Będziesz potrzebował tabel: messages, employees, oraz incidents.", cost: 600 },
       { id: 2, text: "Użyj aliasów (np. e1 dla nadawcy, e2 dla odbiorcy).", cost: 1200 },
@@ -258,7 +296,6 @@ export const LEVELS: LevelDefinition[] = [
   // ============================================================
   // AKT IV — ORACLE'S LAST QUERY
   // ============================================================
-
   {
     id: 16,
     title: "THE MISSING SEQUENCE",
@@ -266,6 +303,7 @@ export const LEVELS: LevelDefinition[] = [
     objective: "Znajdź pracownika, który był obecny w SERVER_ROOM_03 podczas całej brakującej sekwencji zdarzeń (jego MIN wejście było <= 23:47, a MAX >= 00:31 dnia 12/13 Lutego).",
     requiredRows: [{ full_name: "Martin Vale" }],
     maxRows: 3,
+    requiredKeywords: ["MIN", "MAX", "HAVING"], 
     rewardXP: 1200,
     unlocksTable: "internal_projects",
     hints: [
@@ -281,6 +319,7 @@ export const LEVELS: LevelDefinition[] = [
     objective: "Znajdź kody projektów (project_code z internal_projects), które NIE zostały sklasyfikowane – czyli odrzuć (EXCEPT) te, których nazwy pojawiają się jako 'target' w tabeli audit_logs.",
     requiredRows: [{ project_code: "NODE_07" }],
     maxRows: 20,
+    requiredKeywords: ["EXCEPT"], 
     rewardXP: 1300,
     unlocksTable: "infrastructure_nodes",
     hints: [
@@ -296,6 +335,7 @@ export const LEVELS: LevelDefinition[] = [
     objective: "Prześledź hierarchię infrastruktury od głównego węzła do NODE_07 i znajdź pełną ścieżkę połączeń w tabeli infrastructure_nodes.",
     requiredRows: [{ node_name: "NODE_07" }],
     maxRows: 20,
+    requiredKeywords: ["WITH", "RECURSIVE"], 
     rewardXP: 1500,
     unlocksEvidence: "EVD_NODE_07",
     hints: [
@@ -311,6 +351,7 @@ export const LEVELS: LevelDefinition[] = [
     objective: "Znajdź ID węzłów w infrastructure_nodes, które są punktami końcowymi – to znaczy ich ID NIE występuje w kolumnie parent_id żadnego innego węzła. Użyj EXCEPT.",
     requiredRows: [{ id: 5 }],
     maxRows: 20,
+    requiredKeywords: ["EXCEPT"], 
     rewardXP: 1600,
     hints: [
       { id: 1, text: "Porównujesz ze sobą dwa zapytania z tej samej tabeli infrastructure_nodes.", cost: 700 },
@@ -325,6 +366,7 @@ export const LEVELS: LevelDefinition[] = [
     objective: "Znajdź ID pracownika, który: wywołał operację w audycie (jako triggered_by w audit_logs) INTERSECT fizycznie wszedł do SERVER_ROOM_03 (z access_logs) EXCEPT ma zablokowane wejścia (access_granted=0 w access_logs).",
     requiredRows: [{ triggered_by: 10 }],
     maxRows: 5,
+    requiredKeywords: ["INTERSECT", "EXCEPT"], 
     rewardXP: 1700,
     hints: [
       { id: 1, text: "Musisz użyć trzech zapytań połączonych operatorami.", cost: 700 },
@@ -339,6 +381,7 @@ export const LEVELS: LevelDefinition[] = [
     objective: "Napisz CREATE TRIGGER o nazwie 'ghost_tracker', po (AFTER) usunięciu (DELETE) na tabeli 'messages'. Trigger ma logować do tabeli 'audit_logs': (employee_id = OLD.sender_id, triggered_by = OLD.sender_id, action = 'DELETE_MSG', target = OLD.subject).",
     requiredRows: [], 
     maxRows: 0,
+    requiredKeywords: ["CREATE", "TRIGGER", "AFTER", "DELETE"], 
     rewardXP: 1800,
     unlocksEvidence: "EVD_AUDIT_TRAIL",
     hints: [
@@ -354,6 +397,7 @@ export const LEVELS: LevelDefinition[] = [
     objective: "Użyj CTE. Wyciągnij pełne imię osoby, która usunęła target 'oracle_01', pod warunkiem, że ta sama osoba znajduje się w Top 3 pracowników z największą liczbą odrzuconych wejść (access_granted = 0) w systemie.",
     requiredRows: [{ full_name: "Marcus Vance" }],
     maxRows: 1,
+    requiredKeywords: ["WITH", "ORDER BY", "DESC", "LIMIT"], 
     rewardXP: 1900,
     hints: [
       { id: 1, text: "Najpierw stwórz CTE grupujące odrzucone logi po id z ORDER BY ... DESC LIMIT 3.", cost: 700 },
@@ -368,6 +412,7 @@ export const LEVELS: LevelDefinition[] = [
     objective: "Wydobądź tematy (subject) zaszyfrowanych wiadomości, a następnie wyeliminuj z nich (EXCEPT) te, które wysłała dyrekcja (department = 'EXECUTIVE'), ORAZ wyeliminuj te, których odbiorcą był dział IT (department = 'IT_OPS').",
     requiredRows: [{ subject: "ORACLE PROTOCOL" }],
     maxRows: 10,
+    requiredKeywords: ["EXCEPT"], 
     rewardXP: 2000,
     hints: [
       { id: 1, text: "Twój cel wymaga złączenia trzech zapytań (SELECT subject ...) połączonych dwoma operatorami EXCEPT.", cost: 800 },
@@ -382,6 +427,7 @@ export const LEVELS: LevelDefinition[] = [
     objective: "Znajdź wszystkie węzły znajdujące się na ścieżce prowadzącej od węzła 'ORACLE_NODE' w górę. Zwróć kolumnę node_name.",
     requiredRows: [{ node_name: "ORACLE_NODE" }],
     maxRows: 50,
+    requiredKeywords: ["WITH", "RECURSIVE"], 
     rewardXP: 2200,
     hints: [
       { id: 1, text: "Potrzebujesz ponownie przejść przez hierarchię zależności infrastructure_nodes.", cost: 800 },
@@ -396,6 +442,7 @@ export const LEVELS: LevelDefinition[] = [
     objective: "Wyciągnij pełne imię nadawcy wiadomości 'PROJECT MIRROR', KTÓRY jednocześnie: ma clearance = 5 ORAZ NIE MA ani jednego odrzuconego wejścia (access_granted = 0) w logach. Użyj NOT EXISTS.",
     requiredRows: [{ full_name: "Elias Voss" }],
     maxRows: 1,
+    requiredKeywords: ["NOT", "EXISTS"], 
     rewardXP: 2500,
     hints: [
       { id: 1, text: "Zacznij od złączenia wiadomości z pracownikami.", cost: 800 },
@@ -407,7 +454,6 @@ export const LEVELS: LevelDefinition[] = [
   // ============================================================
   // AKT V — THE TRUTH
   // ============================================================
-
   {
     id: 26,
     title: "THE SECOND ORACLE",
@@ -415,6 +461,7 @@ export const LEVELS: LevelDefinition[] = [
     objective: "Znajdź użytkownika (username), którego profil operacyjny logowań pokrywa się w ilości akcji z oryginalnym kontem oracle_01.",
     requiredRows: [{ username: "oracle_shadow" }],
     maxRows: 10,
+    requiredKeywords: ["HAVING", "COUNT"], 
     rewardXP: 2700,
     hints: [
       { id: 1, text: "Wykorzystaj CTE do zliczenia logów oryginalnego oracle_01.", cost: 800 },
@@ -429,6 +476,7 @@ export const LEVELS: LevelDefinition[] = [
     objective: "Znajdź osobę zajmującą pierwsze miejsce w rankingu ilości dostępu do lokacji 'MIRROR_CORE'. Zwróć tylko jej full_name.",
     requiredRows: [{ full_name: "Elias Voss" }],
     maxRows: 1,
+    requiredKeywords: ["RANK", "OVER"], 
     rewardXP: 3000,
     hints: [
       { id: 1, text: "Musisz zliczyć logi wejść dla lokacji 31.", cost: 800 },
@@ -443,6 +491,7 @@ export const LEVELS: LevelDefinition[] = [
     objective: "Oblicz średnią ilość operacji audytu na pracownika, a następnie znajdź tego (username), którego ilość logów najbardziej odstaje od tej średniej (użyj funkcji ABS).",
     requiredRows: [{ username: "admin_sys" }],
     maxRows: 5,
+    requiredKeywords: ["AVG", "ABS"], 
     rewardXP: 3200,
     hints: [
       { id: 1, text: "Utwórz CTE sumujące ilość wpisów na każdego użytkownika w audit_logs.", cost: 800 },
@@ -457,6 +506,7 @@ export const LEVELS: LevelDefinition[] = [
     objective: "Wykorzystaj funkcję ROW_NUMBER() wewnątrz CTE. Znajdź dokładną nazwę lokacji (name z locations), w której ORACLE zarejestrował swoje PRZEDOSTATNIE zdarzenie chronologicznie w access_logs.",
     requiredRows: [{ name: "SERVER_ROOM_03" }],
     maxRows: 1,
+    requiredKeywords: ["ROW_NUMBER", "OVER"], 
     rewardXP: 4000,
     hints: [
       { id: 1, text: "Stwórz CTE pobierające logi ORACLE'a posortowane po dacie (ORDER BY created_at DESC).", cost: 1000 },
@@ -471,6 +521,7 @@ export const LEVELS: LevelDefinition[] = [
     objective: "Odtwórz ostatnie zapytanie ORACLE'a. Wynik musi składać się z trzech kolumn: 'full_name' powiązane z oracle_01, 'node_name' odpowiadające węzłowi NODE_07, oraz 'controller' zawierające pełne imię CTO NEXUS.",
     requiredRows: [{ full_name: "Adrian Voss", node_name: "NODE_07", controller: "Elias Voss" }],
     maxRows: 1,
+    requiredKeywords: ["AS"], 
     rewardXP: 5000,
     unlocksEvidence: "EVD_FINAL_PROTOCOL",
     hints: [

@@ -228,7 +228,12 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
 
       const validation = LevelValidator.validate(parsedResult, levelData.requiredRows, levelData.maxRows);
       
-      if (validation.success) {
+      const upperQuery = sqlToRun.toUpperCase();
+      const hasRequiredKeywords = levelData.requiredKeywords 
+        ? levelData.requiredKeywords.every(keyword => upperQuery.includes(keyword.toUpperCase())) 
+        : true;
+      
+      if (validation.success && hasRequiredKeywords) {
         if (currentLevel === 30 && viewedLevel === 30) {
           playRun();
           addLog(`[SYSTEM] CRITICAL ANOMALY DETECTED. CONNECTION UNSTABLE.`, 'error');
@@ -242,6 +247,15 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
             addLog(`[SYSTEM] ARCHIVE QUERY VERIFIED`, 'success');
           }
         }
+      } else if (validation.success && !hasRequiredKeywords) {
+        playRun();
+        if (viewedLevel === currentLevel) incrementFailedQueries();
+        
+        const missing = levelData.requiredKeywords?.filter(k => !upperQuery.includes(k.toUpperCase())) || [];
+        const errorMsg = `RESULT MATCHES, BUT LOGIC IS INCOMPLETE. REQUIRED SYNTAX MISSING: ${missing.join(', ')}`;
+        
+        addLog(`[ANALYZE DENIED] Missing query logic.`, 'warning');
+        setSqlError(errorMsg);
       } else {
         playRun();
         if (viewedLevel === currentLevel) incrementFailedQueries();
