@@ -102,7 +102,7 @@ export const FinalProtocol = ({ onComplete }: FinalProtocolProps) => {
       return;
     }
 
-    if (command === 'EXECUTE MIRROR://NODE_07' || (command.includes('EXECUTE') && command.includes('MIRROR'))) {
+    if (command === 'EXECUTE MIRROR://NODE_07') {
       playSuccess();
       setPhase(6); 
       setErrorMsg(null);

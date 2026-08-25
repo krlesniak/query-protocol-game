@@ -4,14 +4,15 @@ import { IntroCinematic } from './components/intro/IntroCinematic';
 import { dbService } from './db/DatabaseService';
 import { useGameStore } from './store/gameStore';
 import { Terminal, AlertTriangle, ChevronRight, Volume2, VolumeX } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { generateDatabaseSQL } from './db/schemaGenerator';
 import { useSound } from './hooks/useSound';
+import { BootSequence } from './components/boot/BootSequence';
 import './index.css';
 
 type AppState = 'booting' | 'menu' | 'intro' | 'playing';
 
-const BOOT_SEQUENCE = [
+const BOOT_LOGS = [
   "NEXUS_OS BIOS v9.01.4 (SECURE BOOT ENABLED)",
   "PROCESSOR: ORACLE_NEURAL_NET_v2 DETECTED",
   "MAIN MEMORY: 1024 TB SECURE RAM ALLOCATED... OK",
@@ -36,10 +37,11 @@ function App() {
   const { currentLevel, score, collectedEvidence, resetGame, hasSeenIntro, setHasSeenIntro, soundEnabled, toggleSound } = useGameStore();
   const hasProgress = currentLevel > 1 || score > 0 || collectedEvidence.length > 0;
 
-  useSound('hum2.mp3', { volume: 0.3, loop: true, autoPlay: true });
+  useSound('hum2.mp3', { volume: 0.25, loop: true, autoPlay: true });
   const { play: playClick } = useSound('mouse.mp3', { volume: 0.2 });
   const { play: playKeyboard } = useSound('keyboard.mp3', { volume: 0.15 });
   const { play: playBeep } = useSound('beep2.mp3', { volume: 0.3 });
+
 
   useEffect(() => {
     let aborted = false; 
@@ -56,17 +58,17 @@ function App() {
 
         const runVisualBoot = async () => {
           await delay(500);
-          for (let i = 0; i < BOOT_SEQUENCE.length; i++) {
+          for (let i = 0; i < BOOT_LOGS.length; i++) {
             if (aborted) return;
             
-            setBootLogs(prev => [...prev, BOOT_SEQUENCE[i]]);
+            setBootLogs(prev => [...prev, BOOT_LOGS[i]]);
             
-            const newProgress = Math.floor(((i + 1) / BOOT_SEQUENCE.length) * 100);
+            const newProgress = Math.floor(((i + 1) / BOOT_LOGS.length) * 100);
             setProgress(newProgress);
             
             playKeyboard();
             
-            const waitTime = i === BOOT_SEQUENCE.length - 1 ? 900 : Math.random() * 300 + 50;
+            const waitTime = i === BOOT_LOGS.length - 1 ? 900 : Math.random() * 300 + 50;
             await delay(waitTime);
           }
           if (!aborted) {
@@ -94,11 +96,10 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+
   const handleContinue = () => {
     playClick();
-    setTimeout(() => {
-      setAppState('playing');
-    }, 100); 
+    setTimeout(() => setAppState('playing'), 100); 
   };
 
   const startGameFlow = () => {
@@ -128,14 +129,10 @@ function App() {
     startGameFlow();
   };
 
-  const totalBlocks = 20;
-  const filledBlocks = Math.floor((progress / 100) * totalBlocks);
-
   return (
     <div className="min-h-screen w-full bg-[var(--bg-base)] flex items-center justify-center font-mono selection:bg-[var(--accent)]/30 selection:text-[var(--accent-bright)] overflow-hidden relative">
       
-      {/* PRZYCISK DŹWIĘKU */}
-      {appState !== 'playing' && (
+      {(appState === 'booting' || appState === 'menu') && (
         <div className="fixed top-8 right-8 z-[9999]">
           <button
             onClick={() => {
@@ -157,55 +154,10 @@ function App() {
         
         {/* BOOT SEQUENCE */}
         {appState === 'booting' && (
-          <motion.div 
-            key="booting"
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 1.05, filter: 'brightness(2) blur(5px)' }}
-            transition={{ duration: 0.6, ease: "easeIn" }}
-            className="w-full h-full max-w-4xl p-12 flex flex-col justify-end gap-12 text-[var(--text-secondary)] tracking-widest leading-relaxed"
-          >
-            {/* TERMINAL LOGS */}
-            <div className="flex-1 flex flex-col justify-end items-start text-[12px] text-left w-full">
-              {bootLogs.map((log, index) => (
-                <div key={index} className={index === BOOT_SEQUENCE.length - 1 ? "text-[var(--accent)] font-bold mt-4 text-[14px]" : ""}>
-                  {log}
-                </div>
-              ))}
-              <div className="animate-pulse text-[var(--accent)] mt-2">_</div>
-            </div>
-
-            {/* Loading Bar */}
-            <div className="flex flex-col items-start gap-6 shrink-0 pb-10 w-full">
-              
-              <div className="text-[var(--text-main)] text-base tracking-[0.2em] uppercase flex flex-col items-start gap-3 text-left">
-                <span>Welcome to Query Protocol</span>
-                <span className="text-[var(--text-muted)] text-sm tracking-widest animate-pulse">
-                  {progress === 100 ? 'PROTOCOL ENGAGED.' : 'LOADING SECURE ENVIRONMENT...'}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-1.5 p-1.5 border border-[var(--border)] bg-[var(--surface-1)] shadow-2xl">
-                {Array.from({ length: totalBlocks }).map((_, index) => (
-                  <div 
-                    key={index} 
-                    className={`h-8 w-3.5 transition-colors duration-75 ${
-                      index < filledBlocks 
-                        ? 'bg-[var(--accent)] shadow-[0_0_10px_var(--accent)]' 
-                        : 'bg-[var(--surface-3)]'
-                    }`} 
-                  />
-                ))}
-              </div>
-              
-              {/* Percentage - center */}
-              <div className="text-[var(--accent)] text-xl font-bold tracking-widest text-left">
-                {Math.min(progress, 100)}%
-              </div>
-            </div>
-          </motion.div>
+          <BootSequence bootLogs={bootLogs} progress={progress} />
         )}
 
-        {/* MAIN MENU */}
+        {/* MENU STATE */}
         {appState === 'menu' && (
           <motion.div 
             key="menu"
@@ -270,7 +222,7 @@ function App() {
           </motion.div>
         )}
 
-      {/* CINEMATIC INTRO */}
+        {/* INTRO STATE */}
         {appState === 'intro' && (
           <motion.div 
             key="intro"
@@ -287,7 +239,7 @@ function App() {
           </motion.div>
         )}
 
-        {/* MAIN GAME */}
+        {/* PLAYING STATE */}
         {appState === 'playing' && (
           <motion.div 
             key="playing"
