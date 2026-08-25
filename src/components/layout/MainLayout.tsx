@@ -26,6 +26,7 @@ import { ActTransition } from '../ui/ActTransition';
 import { FinalProtocol } from '../ui/FinalProtocol';
 import { OutroCinematic } from '../intro/OutroCinematic';
 import { CaseClosed } from '../ui/CaseClosed';
+import { SettingsModal } from '../ui/SettingsModal';
 
 const TABLE_SCHEMA: Record<string, string[]> = {
   employees: ['id', 'username', 'full_name', 'department', 'pos', 'clearance_level', 'status', 'assigned_location_id'],
@@ -45,6 +46,8 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
     unlockedTables, 
     completedQueries, 
     completedLevels,
+    musicVolume,
+    sfxVolume,
     addScore, 
     unlockTable, 
     addEvidence, 
@@ -74,6 +77,7 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
   const [toast, setToast] = useState<{ title: string; desc: string } | null>(null);
   const [showSchema, setShowSchema] = useState(false);
   const [inspectedTable, setInspectedTable] = useState<string | null>(null);
+  const [showSettings, setShowSettings] = useState(false); 
   const [activeTransition, setActiveTransition] = useState<number | null>(
     currentLevel === 1 && completedLevels.length === 0 ? 0 : null
   );
@@ -90,10 +94,10 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
   const logIdCounter = useRef<number>(3);
   const currentQueryDraft = useRef(initialQuery); 
 
-  useSound('hum2.mp3', { volume: 0.05, loop: true, autoPlay: true });
-  const { play: playClick } = useSound('mouse.mp3', { volume: 0.3 });
-  const { play: playRun } = useSound('beep2.mp3', { volume: 0.5 });
-  const { play: playSuccess } = useSound('success.mp3', { volume: 0.5 }); 
+  useSound('hum2.mp3', { volume: musicVolume, loop: true, autoPlay: true });
+  const { play: playClick } = useSound('mouse.mp3', { volume: sfxVolume });
+  const { play: playRun } = useSound('beep2.mp3', { volume: sfxVolume });
+  const { play: playSuccess } = useSound('success.mp3', { volume: sfxVolume }); 
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -105,18 +109,19 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (selectedEvidence || showSchema || showCaseFile || inspectedTable) {
+        if (selectedEvidence || showSchema || showCaseFile || inspectedTable || showSettings) {
           playClick();
         }
         setSelectedEvidence(null);
         setShowSchema(false);
         setShowCaseFile(false); 
         setInspectedTable(null);
+        setShowSettings(false); 
       }
     };
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
-  }, [selectedEvidence, showSchema, showCaseFile, inspectedTable, playClick]);
+  }, [selectedEvidence, showSchema, showCaseFile, inspectedTable, showSettings, playClick]);
 
   const addLog = (msg: string, type: 'info' | 'success' | 'error' | 'warning') => {
     setLogs((prev) => [{ id: logIdCounter.current++, time: new Date().toLocaleTimeString(), msg, type }, ...prev].slice(0, 50));
@@ -283,6 +288,9 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
       <AnimatePresence>
         {toast && <ToastNotification key="toast" title={toast.title} desc={toast.desc} />}
         
+        {/* NOWY MODAL USTAWIEN */}
+        {showSettings && <SettingsModal key="settings" onClose={() => { playClick(); setShowSettings(false); }} />}
+        
         {activeTransition !== null && (
           <ActTransition 
             key="act-transition" 
@@ -333,7 +341,7 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
         {inspectedTable && <TableInspectorModal key="inspector" tableName={inspectedTable} onClose={() => { playClick(); setInspectedTable(null); }} />}
       </AnimatePresence>
 
-      <Header onReturnToMenu={() => { playClick(); onReturnToMenu(); }} />
+      <Header onReturnToMenu={() => { playClick(); onReturnToMenu(); }} onOpenSettings={() => { playClick(); setShowSettings(true); }} />
 
       <div className="h-[calc(100vh-54px)] p-2 flex flex-col gap-2 min-h-0">
         <div className="flex-1 min-h-0 flex flex-col lg:grid lg:grid-cols-[225px_minmax(0,1fr)_300px] gap-2 overflow-y-auto lg:overflow-hidden">

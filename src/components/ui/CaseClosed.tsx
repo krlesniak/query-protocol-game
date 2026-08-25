@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import { useGameStore } from '../../store/gameStore';
 import { LEVELS } from '../../game/levels';
@@ -10,6 +10,7 @@ interface CaseClosedProps {
 
 export const CaseClosed = ({ onReturnToMenu }: CaseClosedProps) => {
   const { score, playTime, totalQueryAttempts, failedQueries, collectedEvidence, completedLevels, usedHints, resetGame } = useGameStore();
+  const [confirmWipe, setConfirmWipe] = useState(false);
 
   useSound('hum2.mp3', { volume: 0.4, loop: true, autoPlay: true });
   const { play: playClick } = useSound('keyboard.mp3', { volume: 0.5 });
@@ -130,30 +131,57 @@ export const CaseClosed = ({ onReturnToMenu }: CaseClosedProps) => {
           </div>
         </motion.div>
 
-        {/* END BTN */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 2, duration: 0.8 }}
-          className="mt-6 flex justify-start"
+          className="mt-6 flex flex-col justify-start"
         >
-          <button 
-            onClick={() => {
-              playClick();
-              resetGame();
-              onReturnToMenu();
-            }}
-            onMouseEnter={() => playHover()}
-            className="group relative flex items-center justify-between w-full px-8 py-5 border border-[var(--accent)] bg-[var(--accent-surface)] transition-all duration-300 font-mono text-sm tracking-[0.3em] uppercase overflow-hidden"
-          >
-            <span className="relative z-10 font-bold text-[var(--accent-bright)] group-hover:text-black transition-colors duration-300">
-              CLEAR SYSTEM LOGS & EXIT
-            </span>
-            <span className="relative z-10 text-[var(--accent-bright)] opacity-80 group-hover:text-black group-hover:opacity-100 group-hover:translate-x-1 transition-all font-bold">
-              {'>'}
-            </span>
-            <div className="absolute inset-0 w-full h-full bg-[var(--accent)] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300 ease-out z-0"></div>
-          </button>
+          {!confirmWipe ? (
+            <button 
+              onClick={() => {
+                playClick();
+                setConfirmWipe(true);
+              }}
+              onMouseEnter={() => playHover()}
+              className="group relative flex items-center justify-between w-full px-8 py-5 border border-[var(--accent)] bg-[var(--accent-surface)] transition-all duration-300 font-mono text-sm tracking-[0.3em] uppercase overflow-hidden"
+            >
+              <span className="relative z-10 font-bold text-[var(--accent-bright)] group-hover:text-black transition-colors duration-300">
+                CLEAR SYSTEM LOGS & EXIT
+              </span>
+              <span className="relative z-10 text-[var(--accent-bright)] opacity-80 group-hover:text-black group-hover:opacity-100 group-hover:translate-x-1 transition-all font-bold">
+                {'>'}
+              </span>
+              <div className="absolute inset-0 w-full h-full bg-[var(--accent)] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300 ease-out z-0"></div>
+            </button>
+          ) : (
+            <div className="flex flex-col gap-5 p-6 border border-red-900/50 bg-red-950/10">
+              <span className="text-red-400 font-mono text-sm tracking-widest text-center uppercase">
+                WARNING: THIS WILL WIPE ALL INVESTIGATION DATA. PROCEED?
+              </span>
+              <div className="flex gap-4 w-full">
+                <button 
+                  onClick={() => {
+                    playClick();
+                    resetGame();
+                    onReturnToMenu();
+                  }} 
+                  className="flex-1 py-3 bg-red-900/40 text-red-200 hover:bg-red-900 transition-colors font-mono tracking-widest text-sm font-bold"
+                >
+                  YES, PURGE
+                </button>
+                <button 
+                  onClick={() => {
+                    playClick();
+                    setConfirmWipe(false);
+                  }} 
+                  className="flex-1 py-3 border border-[#3e4a59] text-[#64748b] hover:bg-[#1a232c] hover:text-white transition-colors font-mono tracking-widest text-sm font-bold"
+                >
+                  CANCEL
+                </button>
+              </div>
+            </div>
+          )}
         </motion.div>
       </motion.div>
 

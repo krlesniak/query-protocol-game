@@ -3,6 +3,7 @@ import { Terminal, Play, ChevronRight, ChevronLeft } from 'lucide-react';
 import Editor, { type OnMount } from '@monaco-editor/react';
 import type { editor as MonacoEditorTypes } from 'monaco-editor';
 import { motion } from 'framer-motion';
+import { useGameStore } from '../../store/gameStore';
 
 interface SqlEditorProps {
   query: string;
@@ -17,6 +18,7 @@ export const SqlEditor = ({ query, setQuery, onRunQuery, viewedLevel, currentLev
   const editorRef = useRef<MonacoEditorTypes.IStandaloneCodeEditor | null>(null);
   const queryHistory = useRef<string[]>([]);
   const historyIndex = useRef<number>(-1);
+  const editorFontSize = useGameStore(state => state.editorFontSize);
   
   const onRunQueryRef = useRef(onRunQuery);
   useEffect(() => { onRunQueryRef.current = onRunQuery; }, [onRunQuery]);
@@ -177,7 +179,7 @@ export const SqlEditor = ({ query, setQuery, onRunQuery, viewedLevel, currentLev
           value={query}
           onChange={(val) => setQuery(val || '')}
           onMount={handleEditorDidMount}
-          options={{ minimap: { enabled: false }, fontSize: 15, fontFamily: '"JetBrains Mono", monospace', lineHeight: 22, padding: { top: 4 }, scrollBeyondLastLine: false, overviewRulerBorder: false, hideCursorInOverviewRuler: true, matchBrackets: 'always', renderLineHighlight: 'all' }}
+          options={{ fontSize: editorFontSize, fontFamily: '"JetBrains Mono", monospace', minimap: { enabled: false }, lineHeight: Math.round(editorFontSize * 1.5), padding: { top: 4 }, scrollBeyondLastLine: false, overviewRulerBorder: false, hideCursorInOverviewRuler: true, matchBrackets: 'always', renderLineHighlight: 'all' }}
         />
       </div>
     </section>

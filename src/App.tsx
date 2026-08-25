@@ -34,13 +34,13 @@ function App() {
   const [progress, setProgress] = useState(0); 
   const [showResetWarning, setShowResetWarning] = useState(false);
 
-  const { currentLevel, score, collectedEvidence, resetGame, hasSeenIntro, setHasSeenIntro, soundEnabled, toggleSound } = useGameStore();
+  const { currentLevel, score, collectedEvidence, resetGame, hasSeenIntro, setHasSeenIntro, soundEnabled, toggleSound, musicVolume, sfxVolume } = useGameStore();
   const hasProgress = currentLevel > 1 || score > 0 || collectedEvidence.length > 0;
 
-  useSound('hum2.mp3', { volume: 0.25, loop: true, autoPlay: true });
-  const { play: playClick } = useSound('mouse.mp3', { volume: 0.2 });
-  const { play: playKeyboard } = useSound('keyboard.mp3', { volume: 0.15 });
-  const { play: playBeep } = useSound('beep2.mp3', { volume: 0.3 });
+  useSound('hum2.mp3', { volume: musicVolume, loop: true, autoPlay: true });
+  const { play: playClick } = useSound('mouse.mp3', { volume: sfxVolume });
+  const { play: playKeyboard } = useSound('keyboard.mp3', { volume: sfxVolume });
+  const { play: playBeep } = useSound('beep2.mp3', { volume: sfxVolume });
 
 
   useEffect(() => {

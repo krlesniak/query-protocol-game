@@ -1,12 +1,13 @@
-import { Terminal, Activity, Wifi, Clock3, LogOut, Volume2, VolumeX } from 'lucide-react';
+import { Terminal, Activity, Wifi, Clock3, LogOut, Settings } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 
 interface HeaderProps {
   onReturnToMenu: () => void;
+  onOpenSettings: () => void; // <--- DODANY PROP
 }
 
-export const Header = ({ onReturnToMenu }: HeaderProps) => {
-  const { score, soundEnabled, toggleSound } = useGameStore();
+export const Header = ({ onReturnToMenu, onOpenSettings }: HeaderProps) => {
+  const { score } = useGameStore();
 
   return (
     <header className="h-14 shrink-0 border-b border-[var(--border)] bg-[var(--surface-1)] flex items-center justify-between px-5">
@@ -46,12 +47,13 @@ export const Header = ({ onReturnToMenu }: HeaderProps) => {
         </div>
         
         <div className="border-l border-[var(--border)] pl-5 ml-1 flex items-center gap-4">
+          
           <button 
-            onClick={toggleSound}
+            onClick={onOpenSettings}
             className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--accent-bright)] transition-colors duration-200"
-            title={soundEnabled ? "Mute Sound" : "Enable Sound"}
+            title="System Preferences"
           >
-            {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 text-red-500/70" />}
+            <Settings className="w-4 h-4" />
           </button>
 
           <button 

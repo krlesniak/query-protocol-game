@@ -19,6 +19,10 @@ interface GameState {
   gameCompleted: boolean;
   soundEnabled: boolean;
 
+  musicVolume: number;
+  sfxVolume: number;
+  editorFontSize: number;
+
   addScore: (points: number) => void;
   setCurrentLevel: (level: number) => void;
   unlockTable: (tableName: string) => void;
@@ -38,6 +42,10 @@ interface GameState {
   isTableUnlocked: (tableName: string) => boolean;
   hasEvidence: (evidenceId: string) => boolean;
   isLevelCompleted: (levelId: number) => boolean;
+
+  setMusicVolume: (volume: number) => void;
+  setSfxVolume: (volume: number) => void;
+  setEditorFontSize: (size: number) => void;
 }
 
 const initialState = {
@@ -56,6 +64,10 @@ const initialState = {
   playTime: 0,
   gameCompleted: false,
   soundEnabled: true,
+
+  musicVolume: 0.3,
+  sfxVolume: 0.4,
+  editorFontSize: 15,
 };
 
 export const useGameStore = create<GameState>()(
@@ -142,6 +154,10 @@ export const useGameStore = create<GameState>()(
       isTableUnlocked: (tableName: string) => get().unlockedTables.includes(tableName),
       hasEvidence: (evidenceId: string) => get().collectedEvidence.includes(evidenceId),
       isLevelCompleted: (levelId: number) => get().completedLevels.includes(levelId),
+
+      setMusicVolume: (volume) => set({ musicVolume: volume }),
+      setSfxVolume: (volume) => set({ sfxVolume: volume }),
+      setEditorFontSize: (size) => set({ editorFontSize: size }),
     }),
     {
       name: 'query-protocol-game',
