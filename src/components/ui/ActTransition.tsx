@@ -160,16 +160,16 @@ export const ActTransition = ({ levelCompleted, onComplete }: ActTransitionProps
       animate={{ opacity: 1 }} 
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
-      className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-[#05080a] text-[var(--accent-bright)] font-mono p-8 select-none"
+      className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-[#05080a] text-[var(--accent-bright)] font-mono p-4 sm:p-8 select-none"
     >
       <div className="pointer-events-none absolute inset-0 z-10 scanlines opacity-30"></div>
       
       {phase === 'THOUGHTS' && transitionData.thoughts.length > 0 && (
-        <div className="relative z-20 flex flex-col items-center justify-center gap-6 text-center max-w-3xl">
+        <div className="relative z-20 flex flex-col items-center justify-center gap-4 sm:gap-6 text-center max-w-3xl">
           {transitionData.thoughts.map((text, index) => (
             <div 
               key={index} 
-              className={`text-xl md:text-3xl tracking-widest leading-relaxed ${index === transitionData.thoughts.length - 1 && index === visibleLines ? 'font-bold' : 'opacity-70'}`}
+              className={`text-base sm:text-xl md:text-3xl tracking-widest leading-relaxed ${index === transitionData.thoughts.length - 1 && index === visibleLines ? 'font-bold' : 'opacity-70'}`}
             >
               {index < visibleLines && text}
               {index === visibleLines && (
@@ -190,7 +190,7 @@ export const ActTransition = ({ levelCompleted, onComplete }: ActTransitionProps
           transition={{ duration: 2, ease: "easeOut" }}
           className="relative z-20 flex items-center justify-center text-center"
         >
-          <h1 className="text-3xl md:text-5xl lg:text-6xl tracking-[0.3em] font-bold text-[var(--accent-bright)] glow-text uppercase">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl tracking-[0.2em] sm:tracking-[0.3em] font-bold text-[var(--accent-bright)] glow-text uppercase px-4 break-words">
             {transitionData.actTitle}
           </h1>
         </motion.div>

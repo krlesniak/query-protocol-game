@@ -130,32 +130,33 @@ export const SqlEditor = ({ query, setQuery, onRunQuery, viewedLevel, currentLev
 
   return (
     <section className="flex-1 min-h-0 flex flex-col border border-[var(--border)] bg-[var(--surface-1)] focus-within:border-[var(--accent-muted)] transition-colors duration-200 overflow-hidden">
-      <div className="h-11 border-b border-[var(--border)] flex items-center justify-between px-4 shrink-0">
-        <div className="flex items-center gap-2 font-mono">
-          <span className="text-[var(--text-muted)] text-[10px]">01</span>
+      
+      <div className="h-10 sm:h-11 border-b border-[var(--border)] flex items-center justify-between px-2 sm:px-4 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 font-mono shrink-0">
+          <span className="hidden sm:inline text-[var(--text-muted)] text-[10px]">01</span>
           <Terminal className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
-          <span className="text-[11px] tracking-widest text-[var(--text-secondary)]">SQL CONSOLE</span>
+          <span className="text-[9px] sm:text-[11px] tracking-[0.1em] sm:tracking-widest text-[var(--text-secondary)] truncate">SQL CONSOLE</span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           {currentLevel > 1 && (
             <div className="flex items-center bg-[var(--surface-2)] rounded-sm border border-[var(--border)] overflow-hidden">
               <button
                 onClick={() => onNavigate('prev')}
                 disabled={viewedLevel === 1}
-                className="p-1.5 hover:bg-[var(--surface-3)] text-[var(--text-secondary)] disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                className="p-1 sm:p-1.5 hover:bg-[var(--surface-3)] text-[var(--text-secondary)] disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </button>
-              <span className="font-mono text-[10px] px-2 text-[var(--text-muted)]">
+              <span className="font-mono text-[9px] sm:text-[10px] px-1 sm:px-2 text-[var(--text-muted)] truncate">
                 LVL {viewedLevel}/{currentLevel}
               </span>
               <button
                 onClick={() => onNavigate('next')}
                 disabled={viewedLevel === currentLevel}
-                className="p-1.5 hover:bg-[var(--surface-3)] text-[var(--text-secondary)] disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                className="p-1 sm:p-1.5 hover:bg-[var(--surface-3)] text-[var(--text-secondary)] disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
               >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </button>
             </div>
           )}
@@ -163,9 +164,9 @@ export const SqlEditor = ({ query, setQuery, onRunQuery, viewedLevel, currentLev
           <motion.button 
             whileTap={{ scale: 0.97 }}
             onClick={handleRunClick} 
-            className="flex items-center gap-2 px-3 py-1.5 border border-[var(--accent-muted)] text-[var(--accent-bright)] hover:border-[var(--accent)] hover:bg-[var(--accent-surface)] font-mono text-[11px] tracking-wide transition-colors"
+            className="flex items-center gap-1 sm:gap-2 px-2 py-1 sm:px-3 sm:py-1.5 border border-[var(--accent-muted)] text-[var(--accent-bright)] hover:border-[var(--accent)] hover:bg-[var(--accent-surface)] font-mono text-[9px] sm:text-[11px] tracking-wide transition-colors"
           >
-            <Play className="w-3.5 h-3.5 fill-current" />
+            <Play className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current" />
             RUN
             <span className="hidden sm:inline text-[var(--text-muted)]">CTRL+ENTER</span>
           </motion.button>
@@ -179,7 +180,19 @@ export const SqlEditor = ({ query, setQuery, onRunQuery, viewedLevel, currentLev
           value={query}
           onChange={(val) => setQuery(val || '')}
           onMount={handleEditorDidMount}
-          options={{ fontSize: editorFontSize, fontFamily: '"JetBrains Mono", monospace', minimap: { enabled: false }, lineHeight: Math.round(editorFontSize * 1.5), padding: { top: 4 }, scrollBeyondLastLine: false, overviewRulerBorder: false, hideCursorInOverviewRuler: true, matchBrackets: 'always', renderLineHighlight: 'all' }}
+          options={{ 
+            fontSize: editorFontSize, 
+            fontFamily: '"JetBrains Mono", monospace', 
+            minimap: { enabled: false }, 
+            lineHeight: Math.round(editorFontSize * 1.5), 
+            padding: { top: 4 }, 
+            scrollBeyondLastLine: false, 
+            overviewRulerBorder: false, 
+            hideCursorInOverviewRuler: true, 
+            matchBrackets: 'always', 
+            renderLineHighlight: 'all',
+            automaticLayout: true 
+          }}
         />
       </div>
     </section>

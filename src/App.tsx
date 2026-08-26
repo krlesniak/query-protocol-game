@@ -134,18 +134,18 @@ function App() {
     <div className="min-h-screen w-full bg-[var(--bg-base)] flex items-center justify-center font-mono selection:bg-[var(--accent)]/30 selection:text-[var(--accent-bright)] overflow-hidden relative">
       
       {(appState === 'booting' || appState === 'menu') && (
-        <div className="fixed top-8 right-8 z-[9999]">
+        <div className="fixed top-4 right-4 sm:top-8 sm:right-8 z-[9999]">
           <button
             onClick={() => {
               playClick();
               if (toggleSound) toggleSound();
             }}
-            className="p-3 border border-[var(--border)] bg-[var(--surface-1)] text-[var(--text-secondary)] hover:text-[var(--accent-bright)] hover:border-[var(--accent)] hover:shadow-[0_0_15px_var(--accent)] transition-all duration-300 group"
+            className="p-2 sm:p-3 border border-[var(--border)] bg-[var(--surface-1)] text-[var(--text-secondary)] hover:text-[var(--accent-bright)] hover:border-[var(--accent)] hover:shadow-[0_0_15px_var(--accent)] transition-all duration-300 group"
           >
             {soundEnabled !== false ? (
-              <Volume2 className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
+              <Volume2 className="w-4 h-4 sm:w-5 sm:h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
             ) : (
-              <VolumeX className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
+              <VolumeX className="w-4 h-4 sm:w-5 sm:h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
             )}
           </button>
         </div>
@@ -166,55 +166,55 @@ function App() {
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             exit={{ opacity: 0, scale: 0.98, filter: 'blur(5px)' }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="max-w-xl w-full flex flex-col gap-8 p-10 border border-[var(--border)] bg-[var(--surface-1)] shadow-2xl relative overflow-hidden"
+            className="max-w-xl w-[calc(100%-2rem)] sm:w-full flex flex-col gap-6 sm:gap-8 p-6 sm:p-10 border border-[var(--border)] bg-[var(--surface-1)] shadow-2xl relative overflow-hidden mx-auto"
           >
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--accent)] to-transparent opacity-50" />
             
-            <div className="flex flex-col gap-3 border-b border-[var(--border)] pb-6 mb-2">
-              <Terminal className="w-10 h-10 text-[var(--accent)] mb-2" />
-              <h1 className="text-3xl tracking-[0.2em] font-bold text-[var(--text-main)]">QUERY_PROTOCOL</h1>
-              <p className="text-[var(--text-secondary)] text-xs tracking-widest uppercase">Nexus Dynamics // Authorized Personnel Only</p>
+            <div className="flex flex-col gap-2 sm:gap-3 border-b border-[var(--border)] pb-4 sm:pb-6 mb-2">
+              <Terminal className="w-8 h-8 sm:w-10 sm:h-10 text-[var(--accent)] mb-1 sm:mb-2" />
+              <h1 className="text-2xl sm:text-3xl tracking-[0.15em] sm:tracking-[0.2em] font-bold text-[var(--text-main)] break-words">QUERY_PROTOCOL</h1>
+              <p className="text-[var(--text-secondary)] text-[10px] sm:text-xs tracking-widest uppercase">Nexus Dynamics // Authorized Personnel Only</p>
             </div>
 
             {!showResetWarning ? (
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-3 sm:gap-4">
                 {hasProgress && (
-                  <button onClick={handleContinue} className="group relative flex items-center justify-between p-5 border border-[var(--accent)] bg-[var(--accent-surface)] transition-all duration-300 overflow-hidden text-left">
+                  <button onClick={handleContinue} className="group relative flex items-center justify-between p-4 sm:p-5 border border-[var(--accent)] bg-[var(--accent-surface)] transition-all duration-300 overflow-hidden text-left">
                     <div className="relative z-10 flex flex-col">
-                      <span className="tracking-[0.2em] text-sm font-bold text-[var(--accent-bright)] group-hover:text-black transition-colors duration-300">
+                      <span className="tracking-[0.15em] sm:tracking-[0.2em] text-xs sm:text-sm font-bold text-[var(--accent-bright)] group-hover:text-black transition-colors duration-300">
                         CONTINUE SESSION
                       </span>
-                      <span className="text-[10px] tracking-widest opacity-80 mt-1 text-[var(--accent-bright)] group-hover:text-black transition-colors duration-300">
+                      <span className="text-[9px] sm:text-[10px] tracking-widest opacity-80 mt-1 text-[var(--accent-bright)] group-hover:text-black transition-colors duration-300">
                         LVL {currentLevel} // {score} XP
                       </span>
                     </div>
-                    <ChevronRight className="relative z-10 w-5 h-5 text-[var(--accent-bright)] group-hover:text-black group-hover:translate-x-2 transition-all duration-300" />
+                    <ChevronRight className="relative z-10 w-4 h-4 sm:w-5 sm:h-5 text-[var(--accent-bright)] group-hover:text-black group-hover:translate-x-2 transition-all duration-300 shrink-0" />
                     <div className="absolute inset-0 w-full h-full bg-[var(--accent)] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300 ease-out z-0"></div>
                   </button>
                 )}
                 
-                <button onClick={handleNewGame} className="group relative flex items-center justify-between p-5 border border-[var(--border)] bg-transparent transition-all duration-300 overflow-hidden text-left">
-                  <span className="relative z-10 tracking-[0.2em] text-sm text-[var(--text-secondary)] group-hover:text-black transition-colors duration-300 font-bold">
+                <button onClick={handleNewGame} className="group relative flex items-center justify-between p-4 sm:p-5 border border-[var(--border)] bg-transparent transition-all duration-300 overflow-hidden text-left">
+                  <span className="relative z-10 tracking-[0.15em] sm:tracking-[0.2em] text-xs sm:text-sm text-[var(--text-secondary)] group-hover:text-black transition-colors duration-300 font-bold">
                     INITIALIZE NEW INVESTIGATION
                   </span>
-                  <ChevronRight className="relative z-10 w-5 h-5 text-[var(--text-secondary)] group-hover:text-black group-hover:translate-x-2 transition-all duration-300" />
+                  <ChevronRight className="relative z-10 w-4 h-4 sm:w-5 sm:h-5 text-[var(--text-secondary)] group-hover:text-black group-hover:translate-x-2 transition-all duration-300 shrink-0" />
                   <div className="absolute inset-0 w-full h-full bg-[var(--text-main)] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300 ease-out z-0"></div>
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col gap-4 border-l-2 border-[var(--error)] pl-5 py-2">
-                <div className="flex items-center gap-3 text-[var(--error)]">
-                  <AlertTriangle className="w-6 h-6 animate-pulse" />
-                  <span className="tracking-widest font-bold text-sm">WARNING: DATA OVERRIDE</span>
+              <div className="flex flex-col gap-3 sm:gap-4 border-l-2 border-[var(--error)] pl-4 sm:pl-5 py-2">
+                <div className="flex items-center gap-2 sm:gap-3 text-[var(--error)]">
+                  <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 animate-pulse shrink-0" />
+                  <span className="tracking-widest font-bold text-xs sm:text-sm">WARNING: DATA OVERRIDE</span>
                 </div>
-                <p className="text-[12px] text-[var(--text-secondary)] leading-relaxed tracking-wide">
+                <p className="text-[11px] sm:text-[12px] text-[var(--text-secondary)] leading-relaxed tracking-wide">
                   Starting a new investigation will erase all currently saved progress, collected evidence, and clearance levels. This action cannot be undone.
                 </p>
-                <div className="flex gap-4 mt-4">
-                  <button onClick={confirmReset} className="px-5 py-3 bg-red-950/20 border border-[var(--error)] text-[var(--error)] hover:bg-[var(--error)] hover:text-white transition-colors text-xs tracking-widest font-bold">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-2 sm:mt-4">
+                  <button onClick={confirmReset} className="w-full sm:w-auto px-4 sm:px-5 py-3 bg-red-950/20 border border-[var(--error)] text-[var(--error)] hover:bg-[var(--error)] hover:text-white transition-colors text-[10px] sm:text-xs tracking-widest font-bold text-center">
                     CONFIRM PURGE
                   </button>
-                  <button onClick={() => { playClick(); setShowResetWarning(false); }} className="px-5 py-3 border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-main)] transition-colors text-xs tracking-widest">
+                  <button onClick={() => { playClick(); setShowResetWarning(false); }} className="w-full sm:w-auto px-4 sm:px-5 py-3 border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-main)] transition-colors text-[10px] sm:text-xs tracking-widest text-center">
                     CANCEL
                   </button>
                 </div>

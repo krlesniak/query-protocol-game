@@ -63,7 +63,7 @@ export const LEVELS: LevelDefinition[] = [
     briefing: "Wiemy już, gdzie ORACLE pracował. Teraz trzeba sprawdzić, co wydarzyło się tamtej nocy. W logach znajduje się wpis dotyczący wejścia do SERVER_ROOM_03.",
     objective: "Znajdź log potwierdzający wejście do SERVER_ROOM_03 po godzinie 23:00 dnia 12 lutego 2026.",
     requiredRows: [{ action_type: "ENTER", location_id: 3 }],
-    maxRows: 4,
+    maxRows: 5,
     requiredKeywords: ["ENTER"], 
     rewardXP: 300,
     unlocksTable: "incidents",

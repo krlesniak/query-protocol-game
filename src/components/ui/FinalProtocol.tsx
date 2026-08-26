@@ -45,7 +45,7 @@ export const FinalProtocol = ({ onComplete }: FinalProtocolProps) => {
   const { play: playError } = useSound('error.mp3', { volume: 0.3 }); 
   const { play: playBass } = useSound('bass_hit.mp3', { volume: 0.5 });
   const { play: playKeyboard } = useSound('keyboard.mp3', { volume: 0.15 });
-  const {play : playSuccess} = useSound('success.mp3', {volume: 0.3});
+  const { play : playSuccess} = useSound('success.mp3', {volume: 0.3});
 
   useEffect(() => {
     isMounted.current = true;
@@ -142,7 +142,7 @@ export const FinalProtocol = ({ onComplete }: FinalProtocolProps) => {
   };
 
   return (
-    <div className={`fixed inset-0 z-[999] text-[#1fff0f] font-mono overflow-hidden select-none flex flex-col items-center justify-center transition-colors ${phase > 0 ? 'bg-[#020202] p-8 pointer-events-auto' : 'bg-transparent pointer-events-none'}`}>
+    <div className={`fixed inset-0 z-[999] text-[#1fff0f] font-mono overflow-hidden select-none flex flex-col items-center justify-center transition-colors ${phase > 0 ? 'bg-[#020202] p-4 sm:p-8 pointer-events-auto' : 'bg-transparent pointer-events-none'}`}>
       
       {phase === 0 && (
         <div className="absolute inset-0 z-50">
@@ -172,19 +172,19 @@ export const FinalProtocol = ({ onComplete }: FinalProtocolProps) => {
       <div className={`relative z-20 w-full max-w-3xl flex flex-col gap-8 ${phase === 2 ? 'hacker-glitch' : ''}`}>
         
         {phase === 1 && (
-          <div className="text-4xl font-extrabold tracking-widest text-center text-[#1fff0f] glow-text-neon">
+          <div className="text-2xl sm:text-4xl font-extrabold tracking-widest text-center text-[#1fff0f] glow-text-neon">
             QUERY EXECUTED.
           </div>
         )}
 
         {phase === 2 && (
-          <div className="text-3xl tracking-widest text-center text-red-500 glow-text-red font-bold">
+          <div className="text-2xl sm:text-4xl tracking-widest text-center text-red-500 glow-text-red font-bold">
             NEXUS_OS CONNECTION LOST.
           </div>
         )}
 
         {phase === 3 && (
-          <div className="text-4xl font-extrabold tracking-widest text-center animate-pulse text-[#1fff0f]/60">
+          <div className="text-2xl sm:text-4xl font-extrabold tracking-widest text-center animate-pulse text-[#1fff0f]/60">
             ACCESSING FINAL PROTOCOL...
           </div>
         )}
@@ -193,10 +193,10 @@ export const FinalProtocol = ({ onComplete }: FinalProtocolProps) => {
           <motion.div 
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
-            className="flex flex-col gap-6 border border-[#1fff0f]/30 p-10 bg-black/70 backdrop-blur-sm shadow-[0_0_40px_rgba(31,255,15,0.15)]"
+            className="flex flex-col gap-4 sm:gap-6 border border-[#1fff0f]/30 p-6 sm:p-10 bg-black/70 backdrop-blur-sm shadow-[0_0_40px_rgba(31,255,15,0.15)]"
           >
-            <div className="text-base opacity-70 tracking-widest mb-2 text-[#1fff0f]">ORACLE'S LAST MESSAGE:</div>
-            <div className="text-3xl leading-relaxed tracking-wider text-[#1fff0f] glow-text-neon">
+            <div className="text-xs sm:text-base opacity-70 tracking-widest mb-1 sm:mb-2 text-[#1fff0f]">ORACLE'S LAST MESSAGE:</div>
+            <div className="text-lg sm:text-3xl leading-relaxed tracking-wider text-[#1fff0f] glow-text-neon">
               "I didn't leave you the answer.<br/>
               I left you the <span 
                 className="cursor-pointer hover:text-[#1f651a] transition-colors duration-300 relative group glow-text-neon z-50"
@@ -216,9 +216,9 @@ export const FinalProtocol = ({ onComplete }: FinalProtocolProps) => {
                 <motion.div 
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
-                  className="mt-2 text-[11px] opacity-40 tracking-[0.2em] text-[#1fff0f] border-l border-[#1fff0f]/30 pl-4 overflow-hidden"
+                  className="mt-2 text-[9px] sm:text-[11px] opacity-40 tracking-[0.2em] text-[#1fff0f] border-l border-[#1fff0f]/30 pl-3 sm:pl-4 overflow-hidden"
                 >
-                  <div className="py-2">
+                  <div className="py-2 break-words">
                     [CORRUPTED MEMORY FRAGMENT RECOVERED]<br/>
                     EXPECTED SYNTAX: EXECUTE [PROJECT_NAME]://[LAST_KNOWN_NODE]
                   </div>
@@ -227,10 +227,10 @@ export const FinalProtocol = ({ onComplete }: FinalProtocolProps) => {
             </AnimatePresence>
             
             {phase === 5 && (
-              <form onSubmit={handleCommandSubmit} className="mt-10 flex flex-col gap-4">
-                <div className="text-base opacity-70 tracking-widest text-[#1fff0f]">ENTER EXECUTION COMMAND:</div>
-                <div className="flex items-center gap-4 text-2xl bg-[#050f05] border border-[#1fff0f]/60 p-5 focus-within:shadow-[0_0_20px_rgba(31,255,15,0.3)] focus-within:border-[#1fff0f] transition-all">
-                  <span className="text-[#1fff0f] glow-text-neon">{'>'}</span>
+              <form onSubmit={handleCommandSubmit} className="mt-6 sm:mt-10 flex flex-col gap-3 sm:gap-4">
+                <div className="text-xs sm:text-base opacity-70 tracking-widest text-[#1fff0f]">ENTER EXECUTION COMMAND:</div>
+                <div className="flex items-center gap-3 sm:gap-4 text-base sm:text-2xl bg-[#050f05] border border-[#1fff0f]/60 p-3 sm:p-5 focus-within:shadow-[0_0_20px_rgba(31,255,15,0.3)] focus-within:border-[#1fff0f] transition-all">
+                  <span className="text-[#1fff0f] glow-text-neon shrink-0">{'>'}</span>
                   <input 
                     ref={inputRef}
                     type="text" 
@@ -239,14 +239,14 @@ export const FinalProtocol = ({ onComplete }: FinalProtocolProps) => {
                       setInputValue(e.target.value);
                       playKeyboard();
                     }}
-                    className="bg-transparent border-none outline-none w-full text-[#1fff0f] uppercase placeholder-[#1fff0f]/30 glow-text-neon"
+                    className="bg-transparent border-none outline-none w-full text-[#1fff0f] uppercase placeholder-[#1fff0f]/30 glow-text-neon min-w-0"
                     placeholder="_"
                     autoComplete="off"
                     spellCheck="false"
                   />
                 </div>
                 {errorMsg && (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-500 text-base tracking-widest font-bold glow-text-red">
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-500 text-xs sm:text-base tracking-widest font-bold glow-text-red break-words">
                     {errorMsg}
                   </motion.div>
                 )}
@@ -256,13 +256,13 @@ export const FinalProtocol = ({ onComplete }: FinalProtocolProps) => {
         )}
 
         {phase === 6 && (
-          <div className="flex flex-col gap-5 w-full pl-8 border-l-2 border-[#1fff0f]/40">
+          <div className="flex flex-col gap-3 sm:gap-5 w-full pl-4 sm:pl-8 border-l-2 border-[#1fff0f]/40">
             {executionLines.map((line, index) => (
               <motion.div 
                 key={index}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                className={`tracking-widest ${index === executionLines.length - 1 ? 'text-3xl mt-6 font-bold text-[#1fff0f] glow-text-neon' : 'text-xl text-[#1fff0f]/90'}`}
+                className={`tracking-widest break-words ${index === executionLines.length - 1 ? 'text-lg sm:text-3xl mt-4 sm:mt-6 font-bold text-[#1fff0f] glow-text-neon' : 'text-xs sm:text-xl text-[#1fff0f]/90'}`}
               >
                 {line}
               </motion.div>
@@ -273,39 +273,15 @@ export const FinalProtocol = ({ onComplete }: FinalProtocolProps) => {
       </div>
 
       <style>{`
-        @keyframes flicker-black {
-          0% { background: transparent; }
-          20% { background: #020202; }
-          25% { background: transparent; }
-          40% { background: #020202; }
-          45% { background: transparent; }
-          90% { background: transparent; }
-          100% { background: #020202; }
-        }
-        @keyframes block-reveal {
-          to { opacity: 1; }
-        }
-        @keyframes glitch-dark {
-          0% { opacity: 0; background: transparent; }
-          30% { opacity: 1; background: rgba(31, 255, 15, 0.05); backdrop-filter: hue-rotate(90deg) contrast(150%); }
-          35% { opacity: 0; background: transparent; }
-          70% { opacity: 1; background: rgba(239, 68, 68, 0.05); backdrop-filter: contrast(200%); }
-          75% { opacity: 0; }
-        }
+        @keyframes flicker-black { 0% { background: transparent; } 20% { background: #020202; } 25% { background: transparent; } 40% { background: #020202; } 45% { background: transparent; } 90% { background: transparent; } 100% { background: #020202; } }
+        @keyframes block-reveal { to { opacity: 1; } }
+        @keyframes glitch-dark { 0% { opacity: 0; background: transparent; } 30% { opacity: 1; background: rgba(31, 255, 15, 0.05); backdrop-filter: hue-rotate(90deg) contrast(150%); } 35% { opacity: 0; background: transparent; } 70% { opacity: 1; background: rgba(239, 68, 68, 0.05); backdrop-filter: contrast(200%); } 75% { opacity: 0; } }
         .animate-flicker-black { animation: flicker-black 1.8s forwards; }
         .animate-glitch-dark { animation: glitch-dark 1.5s forwards; }
-
-        .scanlines {
-          background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.15));
-          background-size: 100% 4px;
-        }
-        
+        .scanlines { background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.15)); background-size: 100% 4px; }
         .glow-text-red { text-shadow: 0 0 15px rgba(239, 68, 68, 0.6); }
         .glow-text-neon { text-shadow: 0 0 12px rgba(31, 255, 15, 0.6); }
-        
-        .hacker-glitch {
-          animation: hard-glitch 0.2s linear infinite;
-        }
+        .hacker-glitch { animation: hard-glitch 0.2s linear infinite; }
         @keyframes hard-glitch {
           0% { transform: translate(0) skewX(0deg); filter: none; }
           20% { transform: translate(-10px, 5px) skewX(-15deg); filter: drop-shadow(-5px 0 rgba(239,68,68,0.5)) drop-shadow(5px 0 rgba(31,255,15,0.3)); }

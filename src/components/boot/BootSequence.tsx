@@ -69,15 +69,18 @@ export const BootSequence = ({ bootLogs, progress }: BootSequenceProps) => {
       initial={{ opacity: 1 }}
       exit={{ opacity: 0, scale: 1.05, filter: 'brightness(2) blur(5px)' }}
       transition={{ duration: 0.6, ease: "easeIn" }}
-      className="w-full h-full max-w-6xl p-12 flex justify-between gap-12 text-[var(--text-secondary)] tracking-widest leading-relaxed"
+      className="w-full h-full max-w-6xl p-6 sm:p-12 flex justify-between gap-12 text-[var(--text-secondary)] tracking-widest leading-relaxed"
     >
       {/* LEFT COLUMN - LOGS AND PROGRESS BAR */}
-      <div className="flex-1 flex flex-col justify-end gap-10">
+      <div className="flex-1 flex flex-col justify-end gap-6 sm:gap-10 w-full">
         
         {/* Terminal Logs */}
-        <div className="flex flex-col justify-end items-start text-[12px] text-left">
+        <div className="flex flex-col justify-end items-start text-[10px] sm:text-[12px] text-left w-full">
           {bootLogs.map((log, index) => (
-            <div key={index} className={index === bootLogs.length - 1 && progress === 100 ? "text-[var(--accent)] font-bold mt-4 text-[14px]" : ""}>
+            <div 
+              key={index} 
+              className={`w-full break-words ${index === bootLogs.length - 1 && progress === 100 ? "text-[var(--accent)] font-bold mt-2 sm:mt-4 text-[12px] sm:text-[14px]" : ""}`}
+            >
               {log}
             </div>
           ))}
@@ -85,19 +88,19 @@ export const BootSequence = ({ bootLogs, progress }: BootSequenceProps) => {
         </div>
 
         {/* Load Progress */}
-        <div className="flex flex-col items-start gap-6 shrink-0 pb-10 w-full">
-          <div className="text-[var(--text-main)] text-base tracking-[0.2em] uppercase flex flex-col items-start gap-3 text-left">
+        <div className="flex flex-col items-start gap-4 sm:gap-6 shrink-0 pb-4 sm:pb-10 w-full">
+          <div className="text-[var(--text-main)] text-xs sm:text-base tracking-[0.2em] uppercase flex flex-col items-start gap-2 sm:gap-3 text-left w-full">
             <span>Welcome to Query Protocol</span>
-            <span className="text-[var(--text-muted)] text-sm tracking-widest animate-pulse">
+            <span className="text-[var(--text-muted)] text-[10px] sm:text-sm tracking-widest animate-pulse">
               {progress === 100 ? 'PROTOCOL ENGAGED.' : 'LOADING SECURE ENVIRONMENT...'}
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 p-1.5 border border-[var(--border)] bg-[var(--surface-1)] shadow-2xl">
+          <div className="flex items-center gap-1 sm:gap-1.5 p-1 sm:p-1.5 border border-[var(--border)] bg-[var(--surface-1)] shadow-2xl w-full">
             {Array.from({ length: totalBlocks }).map((_, index) => (
               <div 
                 key={index} 
-                className={`h-8 w-3.5 transition-colors duration-75 ${
+                className={`flex-1 h-6 sm:h-8 transition-colors duration-75 ${
                   index < filledBlocks 
                     ? 'bg-[var(--accent)] shadow-[0_0_10px_var(--accent)]' 
                     : 'bg-[var(--surface-3)]'
@@ -106,7 +109,7 @@ export const BootSequence = ({ bootLogs, progress }: BootSequenceProps) => {
             ))}
           </div>
           
-          <div className="text-[var(--accent)] text-xl font-bold tracking-widest text-left">
+          <div className="text-[var(--accent)] text-lg sm:text-xl font-bold tracking-widest text-left">
             {Math.min(progress, 100)}%
           </div>
         </div>

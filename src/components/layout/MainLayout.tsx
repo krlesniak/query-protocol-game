@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { dbService } from '../../db/DatabaseService';
 import type { QueryExecResult } from 'sql.js';
 import { AnimatePresence } from 'framer-motion';
-import { FolderLock } from 'lucide-react';
+import { FolderLock, Database, Terminal as TerminalIcon, FileText } from 'lucide-react';
 
 import { useGameStore } from '../../store/gameStore';
 import { LevelValidator } from '../../game/levelValidator';
@@ -46,7 +46,6 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
     unlockedTables, 
     completedQueries, 
     completedLevels,
-    musicVolume,
     sfxVolume,
     soundEnabled,
     addScore, 
@@ -71,6 +70,8 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
   const [sqlError, setSqlError] = useState<string | null>(null);
   const [execTime, setExecTime] = useState(0);
   
+  const [activeTab, setActiveTab] = useState<'schema' | 'terminal' | 'mission'>('terminal');
+
   const [showLevelUp, setShowLevelUp] = useState(false); 
   const [selectedEvidence, setSelectedEvidence] = useState<string | null>(null);
   const [showCaseFile, setShowCaseFile] = useState(false); 
@@ -86,7 +87,6 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
   const [showOutro, setShowOutro] = useState(false);
   const [showStats, setShowStats] = useState(false);
   
-
   const [logs, setLogs] = useState<LogEntry[]>([
     { id: 1, time: new Date().toLocaleTimeString(), msg: 'NEXUS_OS connection initialized', type: 'info' },
     { id: 2, time: new Date().toLocaleTimeString(), msg: 'Awaiting query input...', type: 'info' },
@@ -287,8 +287,6 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
 
       <AnimatePresence>
         {toast && <ToastNotification key="toast" title={toast.title} desc={toast.desc} />}
-        
-        {/* NOWY MODAL USTAWIEN */}
         {showSettings && <SettingsModal key="settings" onClose={() => { playClick(); setShowSettings(false); }} />}
         
         {activeTransition !== null && (
@@ -306,32 +304,15 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
         )}
 
         {showFinalProtocol && !showOutro && !showStats && (
-          <FinalProtocol 
-            key="final-protocol"
-            onComplete={() => {
-              setShowOutro(true);
-            }} 
-          />
+          <FinalProtocol key="final-protocol" onComplete={() => setShowOutro(true)} />
         )}
 
         {showOutro && !showStats && (
-          <OutroCinematic 
-            key="outro-cinematic"
-            onComplete={() => {
-              setShowStats(true); 
-            }} 
-          />
+          <OutroCinematic key="outro-cinematic" onComplete={() => setShowStats(true)} />
         )}
 
-        {/* STATISTICS */}
         {showStats && (
-          <CaseClosed 
-            key="case-closed" 
-            onReturnToMenu={() => { 
-              playClick(); 
-              onReturnToMenu(); 
-            }} 
-          />
+          <CaseClosed key="case-closed" onReturnToMenu={() => { playClick(); onReturnToMenu(); }} />
         )}
         
         {showLevelUp && <LevelUpModal key="levelup" rewardXP={levelData.rewardXP} onNext={handleNextLevel} onClose={() => setShowLevelUp(false)} />}
@@ -343,20 +324,27 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
 
       <Header onReturnToMenu={() => { playClick(); onReturnToMenu(); }} onOpenSettings={() => { playClick(); setShowSettings(true); }} />
 
-      <div className="h-[calc(100vh-54px)] p-2 flex flex-col gap-2 min-h-0">
-        <div className="flex-1 min-h-0 flex flex-col lg:grid lg:grid-cols-[225px_minmax(0,1fr)_300px] gap-2 overflow-y-auto lg:overflow-hidden">
-          <DatabaseSidebar 
-            newTableFlash={newTableFlash} 
-            onOpenSchema={() => { playClick(); setShowSchema(true); }} 
-            onInspectTable={(tableName) => { playClick(); setInspectedTable(tableName); }}
-          />
+      <div className="h-[calc(100vh-54px)] flex flex-col p-2 pb-16 lg:pb-2 gap-2 min-h-0 relative">
+        
+        <div className="flex-1 min-h-0 flex flex-col lg:grid lg:grid-cols-[225px_minmax(0,1fr)_300px] gap-2 lg:overflow-hidden">
+          
+          {/* COLUMN  1: SCHEMA */}
+          <div className={`${activeTab === 'schema' ? 'flex' : 'hidden'} lg:flex flex-col h-full min-h-0`}>
+            <DatabaseSidebar 
+              newTableFlash={newTableFlash} 
+              onOpenSchema={() => { playClick(); setShowSchema(true); }} 
+              onInspectTable={(tableName) => { playClick(); setInspectedTable(tableName); }}
+            />
+          </div>
 
-          <main className="min-w-0 min-h-[500px] lg:min-h-0 flex flex-col gap-2 shrink-0 lg:shrink">
+          {/* COLUMN 2: TERMINAL */}
+          <main className={`${activeTab === 'terminal' ? 'flex' : 'hidden'} lg:flex min-w-0 flex-col gap-2 h-full lg:min-h-0 shrink-0 lg:shrink`}>
             <SqlEditor query={query} setQuery={setQuery} onRunQuery={handleRunQuery} viewedLevel={viewedLevel} currentLevel={currentLevel} onNavigate={handleNavigate} />
             <SqlResults results={results} sqlError={sqlError} execTime={execTime} />
           </main>
 
-          <div className="flex flex-col gap-2 min-h-0 shrink-0 lg:shrink">
+          {/* COLUMN 3: MISSION */}
+          <div className={`${activeTab === 'mission' ? 'flex' : 'hidden'} lg:flex flex-col gap-2 min-h-0 shrink-0 lg:shrink h-full`}>
             <button 
               onClick={() => { playClick(); setShowCaseFile(true); }}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#131920] border border-[var(--border)] hover:border-[var(--accent-muted)] hover:bg-[var(--surface-2)] text-[var(--accent-bright)] transition-all font-mono text-[11px] tracking-[0.2em] uppercase shadow-sm shrink-0"
@@ -369,8 +357,37 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
 
         </div>
 
-        <SystemLog logs={logs} />
+        {/* SYSTEM LOG (desktop) */}
+        <div className="hidden lg:block shrink-0">
+          <SystemLog logs={logs} />
+        </div>
       </div>
+
+      {/* BOTTOM NAVIGATION (mobile) */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-14 bg-[var(--surface-1)] border-t border-[var(--border)] flex items-center justify-between z-40">
+        <button 
+          onClick={() => { playClick(); setActiveTab('schema'); }} 
+          className={`flex-1 h-full flex flex-col items-center justify-center gap-1 transition-colors ${activeTab === 'schema' ? 'text-[var(--accent-bright)] border-t-2 border-[var(--accent)] bg-[var(--accent)]/10' : 'text-[var(--text-muted)] border-t-2 border-transparent'}`}
+        >
+          <Database className="w-5 h-5" />
+          <span className="text-[9px] font-mono tracking-widest">SCHEMA</span>
+        </button>
+        <button 
+          onClick={() => { playClick(); setActiveTab('terminal'); }} 
+          className={`flex-1 h-full flex flex-col items-center justify-center gap-1 transition-colors ${activeTab === 'terminal' ? 'text-[var(--accent-bright)] border-t-2 border-[var(--accent)] bg-[var(--accent)]/10' : 'text-[var(--text-muted)] border-t-2 border-transparent'}`}
+        >
+          <TerminalIcon className="w-5 h-5" />
+          <span className="text-[9px] font-mono tracking-widest">TERMINAL</span>
+        </button>
+        <button 
+          onClick={() => { playClick(); setActiveTab('mission'); }} 
+          className={`flex-1 h-full flex flex-col items-center justify-center gap-1 transition-colors ${activeTab === 'mission' ? 'text-[var(--accent-bright)] border-t-2 border-[var(--accent)] bg-[var(--accent)]/10' : 'text-[var(--text-muted)] border-t-2 border-transparent'}`}
+        >
+          <FileText className="w-5 h-5" />
+          <span className="text-[9px] font-mono tracking-widest">MISSION</span>
+        </button>
+      </nav>
+
     </div>
   );
 };
