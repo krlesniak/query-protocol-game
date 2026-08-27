@@ -1,5 +1,24 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage, type StateStorage } from 'zustand/middleware';
+
+const obfuscatedStorage: StateStorage = {
+  getItem: (name): string | null => {
+    const str = localStorage.getItem(name);
+    if (!str) return null;
+    try {
+      return decodeURIComponent(atob(str));
+    } catch {
+      return null;
+    }
+  },
+  setItem: (name, value): void => {
+    const encoded = btoa(encodeURIComponent(value));
+    localStorage.setItem(name, encoded);
+  },
+  removeItem: (name): void => {
+    localStorage.removeItem(name);
+  },
+};
 
 interface GameState {
   currentLevel: number;
@@ -53,7 +72,8 @@ const initialState = {
   score: 200,
   hasSeenIntro: false,
   unlockedTables: ['employees'],
-  collectedEvidence: [],
+  collectedEvidence: ['EVD_ORACLE_LAB_LOC', 'EVD_SERVER_LOG_CONTRADICTION', 'EVD_GHOST_PROFILE', 'EVD_ECHO_DOC', 'EVD_ARCHIVE_LOG', 'EVD_EXECUTIVE_PURGE', 'EVD_CCTV_ALPHA', 'EVD_DEAD_MAN', 'EVD_NODE_07', 'EVD_AUDIT_TRAIL', 'EVD_FINAL_PROTOCOL'],
+  // collectedEvidence: [],
   completedLevels: [],
   usedHints: {},
   queryAttempts: 0,
@@ -161,6 +181,7 @@ export const useGameStore = create<GameState>()(
     }),
     {
       name: 'query-protocol-game',
+      storage: createJSONStorage(() => obfuscatedStorage),
     }
   )
 );

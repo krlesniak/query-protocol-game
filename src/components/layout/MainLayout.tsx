@@ -61,8 +61,9 @@ export const MainLayout = ({ onReturnToMenu }: { onReturnToMenu: () => void }) =
   const levelData = LEVELS.find(l => l.id === viewedLevel) || LEVELS[LEVELS.length - 1];
 
   const initialQuery = (() => {
-    if (currentLevel > 1 && !completedQueries[currentLevel]) return `-- Protocol LVL_${currentLevel.toString().padStart(2, '0')}\n`;
-    return completedQueries[currentLevel] || `-- Protocol LVL_${currentLevel.toString().padStart(2, '0')}\n`;
+    if (completedQueries[currentLevel]) return completedQueries[currentLevel];
+    if (currentLevel === 1) return `-- Protocol LVL_${currentLevel.toString().padStart(2, '0')} \nSELECT * FROM employees;\n`;
+    return `-- Protocol LVL_${currentLevel.toString().padStart(2, '0')}\n`;
   })();
 
   const [query, setQuery] = useState(initialQuery);

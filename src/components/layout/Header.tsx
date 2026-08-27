@@ -21,7 +21,7 @@ export const Header = ({ onReturnToMenu, onOpenSettings }: HeaderProps) => {
             onClick={onReturnToMenu}
             className="font-mono text-[15px] sm:text-[18px] tracking-wide text-[var(--text-main)] font-bold hover:text-[var(--accent-bright)] transition-colors duration-200 truncate"
           >
-            query_protocol_
+            Query Protocol
           </button>
           
           <div className="hidden md:flex items-center gap-4 font-mono text-[12px] text-[var(--text-muted)]">
