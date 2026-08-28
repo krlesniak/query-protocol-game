@@ -42,6 +42,8 @@ interface GameState {
   sfxVolume: number;
   editorFontSize: number;
 
+  discoveredEasterEggs: string[];
+
   addScore: (points: number) => void;
   setCurrentLevel: (level: number) => void;
   unlockTable: (tableName: string) => void;
@@ -65,6 +67,8 @@ interface GameState {
   setMusicVolume: (volume: number) => void;
   setSfxVolume: (volume: number) => void;
   setEditorFontSize: (size: number) => void;
+
+  discoverEasterEgg: (evidenceId: string) => void;
 }
 
 const initialState = {
@@ -88,6 +92,8 @@ const initialState = {
   musicVolume: 0.3,
   sfxVolume: 0.4,
   editorFontSize: 15,
+
+  discoveredEasterEggs: [],
 };
 
 export const useGameStore = create<GameState>()(
@@ -178,7 +184,15 @@ export const useGameStore = create<GameState>()(
       setMusicVolume: (volume) => set({ musicVolume: volume }),
       setSfxVolume: (volume) => set({ sfxVolume: volume }),
       setEditorFontSize: (size) => set({ editorFontSize: size }),
+
+      discoverEasterEgg: (evidenceId: string) =>
+        set((state) => ({
+          discoveredEasterEggs: state.discoveredEasterEggs.includes(evidenceId)
+            ? state.discoveredEasterEggs
+            : [...state.discoveredEasterEggs, evidenceId],
+        })),
     }),
+    
     {
       name: 'query-protocol-game',
       storage: createJSONStorage(() => obfuscatedStorage),

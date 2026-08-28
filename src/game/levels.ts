@@ -283,15 +283,15 @@ export const LEVELS: LevelDefinition[] = [
     id: 15,
     title: "PROJECT MIRROR",
     briefing: "Zwykły SELECT to za mało, by udowodnić winę zarządu przed centralą. Wiemy o PROJECT MIRROR, ale musimy powiązać ten projekt z dyrektywą czyszczenia logów.",
-    objective: "Użyj JOIN i podzapytania EXISTS. Znajdź pełne imię nadawcy (jako sender) oraz odbiorcy (jako receiver) wiadomości 'PROJECT MIRROR', ale TYLKO jeśli w systemie zarejestrowano incydent ze statusem 'WARNING' w SERVER_ROOM_03.",
+    objective: "Użyj odpowiednich operatorów SQL. Znajdź pełne imię nadawcy (jako sender) oraz odbiorcy (jako receiver) wiadomości 'PROJECT MIRROR', ale TYLKO jeśli w systemie zarejestrowano incydent ze statusem 'WARNING' w SERVER_ROOM_03.",
     requiredRows: [{ sender: "Elias Voss", receiver: "Marcus Vance" }],
     maxRows: 1,
-    requiredKeywords: ["EXISTS", "WARNING", 'location_id'], 
+    requiredKeywords: ["EXISTS", "WARNING", 'location_id', 'JOIN'], 
     rewardXP: 1100,
     unlocksEvidence: "EVD_DEAD_MAN",
     hints: [
       { id: 1, text: "Będziesz potrzebował tabel: messages, employees, oraz incidents.", cost: 600 },
-      { id: 2, text: "Użyj aliasów (np. e1 dla nadawcy, e2 dla odbiorcy).", cost: 1200 },
+      { id: 2, text: "Użyj JOIN-ów i aliasów (np. e1 dla nadawcy, e2 dla odbiorcy).", cost: 1200 },
       { id: 3, text: "W klauzuli WHERE użyj EXISTS (SELECT 1 FROM incidents ...).", cost: 1800 }
     ]
   },
@@ -468,7 +468,7 @@ export const LEVELS: LevelDefinition[] = [
     id: 25,
     title: "THE REAL ARCHITECT",
     briefing: "Zarząd zaciera ślady. Musimy udowodnić bez cienia wątpliwości, kto kieruje MIRROR, wykluczając fałszywe tropy.",
-    objective: "Wyciągnij pełne imię nadawcy wiadomości 'PROJECT MIRROR', KTÓRY jednocześnie: ma clearance = 5 ORAZ NIE MA ani jednego odrzuconego wejścia (access_granted = 0) w logach. Użyj NOT EXISTS.",
+    objective: "Wyciągnij pełne imię nadawcy wiadomości 'PROJECT MIRROR', KTÓRY jednocześnie: ma clearance = 5 ORAZ NIE MA ani jednego odrzuconego wejścia (access_granted = 0) w logach.",
     requiredRows: [{ full_name: "Elias Voss" }],
     maxRows: 1,
     requiredKeywords: ["NOT", "EXISTS", "PROJECT MIRROR", "access_granted", "5"], 
