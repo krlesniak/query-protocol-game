@@ -23,6 +23,7 @@ export interface Evidence {
 }
 
 export const EVIDENCE_DB: Record<string, Evidence> = {
+  // ok
   "EVD_ORACLE_LAB_LOC": {
     id: "EVD_ORACLE_LAB_LOC",
     title: "SERVER ROOM 03 SCHEMATIC",
@@ -38,6 +39,7 @@ export const EVIDENCE_DB: Record<string, Evidence> = {
     }
   },
 
+  // ok
   "EVD_SERVER_LOG_CONTRADICTION": {
     id: "EVD_SERVER_LOG_CONTRADICTION",
     title: "ACCESS LOG CONTRADICTION",
@@ -53,6 +55,7 @@ export const EVIDENCE_DB: Record<string, Evidence> = {
     }
   },
 
+  // ok
   "EVD_GHOST_PROFILE": {
     id: "EVD_GHOST_PROFILE",
     title: "MARTIN VALE PROFILE",
@@ -68,6 +71,7 @@ export const EVIDENCE_DB: Record<string, Evidence> = {
     }
   },
 
+  // ok
   "EVD_ECHO_DOC": {
     id: "EVD_ECHO_DOC",
     title: "ORACLE'S WARNING",
@@ -78,11 +82,12 @@ export const EVIDENCE_DB: Record<string, Evidence> = {
     imagePath: "/assets/evidence/evidence_04.png",
     easterEgg: {
       actionType: 'standard',
-      x: 45, y: 45, width: 10, height: 10, // DO POPRAWY PO DODANIU OBRAZKA
+      x: 3.5, y: 78.0, width: 30, height: 3.7,
       message: "[HINT: LEVEL 21] Odzyskano usunięty wers wiadomości: 'Jeśli zarząd spróbuje wymazać prawdę, zastaw na nich pułapkę. Będziesz musiał użyć CREATE TRIGGER AFTER DELETE, żeby złapać ich na gorącym uczynku w audit_logs.'"
     }
   },
 
+  // ok
   "EVD_ARCHIVE_LOG": {
     id: "EVD_ARCHIVE_LOG",
     title: "THE SMOKESCREEN",
@@ -98,6 +103,7 @@ export const EVIDENCE_DB: Record<string, Evidence> = {
     }
   },
 
+  // ok
   "EVD_EXECUTIVE_PURGE": {
     id: "EVD_EXECUTIVE_PURGE",
     title: "EXECUTIVE PURGE ORDER",
@@ -113,6 +119,7 @@ export const EVIDENCE_DB: Record<string, Evidence> = {
     }
   },
 
+  // ok
   "EVD_CCTV_ALPHA": {
     id: "EVD_CCTV_ALPHA",
     title: "EXTRACTION ROUTE",
@@ -122,12 +129,13 @@ export const EVIDENCE_DB: Record<string, Evidence> = {
     storyDescription: "«Extraction route clear.»\n\nMartin Vale wasn't hunting ORACLE. He was helping him escape. The security operative smuggled the Architect out right under the Executive board's noses.",
     imagePath: "/assets/evidence/evidence_07.png",
     easterEgg: {
-      actionType: 'oracle_eyes', // NOWA MECHANIKA!
-      x: 40, y: 40, width: 20, height: 20, // Tymczasowe koordynaty, dostosujemy jak wygenerujesz grafikę
+      actionType: 'oracle_eyes',
+      x: 59.2, y: 25.7, width: 4.5, height: 13,
       message: "[HINT: LEVEL 16] Analiza śladów termicznych: Ucieczka odbyła się korytarzem technicznym w trakcie słynnej 'brakującej godziny'. Aby odtworzyć ich trasę w SQL i wykluczyć szum, musisz połączyć funkcje grupujące 'MIN' oraz 'MAX' w klauzuli 'HAVING'."
     }
   },
 
+  // ok
   "EVD_DEAD_MAN": {
     id: "EVD_DEAD_MAN",
     title: "PROJECT MIRROR EXPOSED",
@@ -137,13 +145,14 @@ export const EVIDENCE_DB: Record<string, Evidence> = {
     storyDescription: "PROJECT MIRROR. An unsanctioned, highly illegal data-harvesting operation run by Elias Voss. ORACLE found out about it and was about to blow the whistle. That's why he had to disappear.",
     imagePath: "/assets/evidence/evidence_08.png",
     easterEgg: {
-      actionType: 'password', // SPECJALNA MECHANIKA! Hasło: VOSS
+      actionType: 'password', // SPECIAL MECHANICS - requires password input to reveal hidden text
       actionConfig: { expectedPassword: 'VOSS' },
       x: 68.5, y: 26, width: 15.0, height: 9,
       message: "[HINT: LEVEL 25] Odzyskano notatki zablokowane hasłem dyrektora: Główny architekt projektu starannie ukrył swoje ślady i zablokował dostęp podrzędnym kontom. Użyj 'NOT EXISTS', aby znaleźć elitę zarządzającą, która komunikowała się o MIRROR, ale w jej profilu brakuje śladów odrzuconych logowań."
     }
   },
 
+  // ok
   "EVD_NODE_07": {
     id: "EVD_NODE_07",
     title: "NODE 07 ARCHITECTURE",
@@ -153,7 +162,7 @@ export const EVIDENCE_DB: Record<string, Evidence> = {
     storyDescription: "A completely off-the-books server cluster buried deep within the Nexus network topology. This is where PROJECT MIRROR lives. This is the beating heart of the conspiracy.",
     imagePath: "/assets/evidence/evidence_09.png",
     easterEgg: {
-      actionType: 'redacted', // SPECJALNA MECHANIKA! Odsłania zakryty tekst
+      actionType: 'redacted', // SPECIAL MECHANICS - shows redacted text when discovered
       actionConfig: { revealedText: "NODE_XX: CEO_DIRECT_LINE" },
       x: 35.5, y: 62.4, width: 18.0, height: 6,
       message: "[HINT: LEVEL 24] Dekryptaż warstwy graficznej zakończony. Projekt Mirror nie szpiegował tylko zwykłych pracowników, był podpięty bezpośrednio pod linie zarządu. Pamiętaj, struktura tych węzłów jest rekurencyjna. Użyj 'WITH RECURSIVE' i złącz iteracje przez 'UNION ALL'."
@@ -170,7 +179,7 @@ export const EVIDENCE_DB: Record<string, Evidence> = {
     imagePath: "/assets/evidence/evidence_10.png",
     easterEgg: {
       actionType: 'standard',
-      x: 45, y: 45, width: 10, height: 10, // DO POPRAWY PO DODANIU OBRAZKA
+      x: 73.6, y: 21, width: 22, height: 6.4,
       message: "[HINT: LEVEL 28] Logiki śledcze ujawniają maskowanie błędów. Administratorzy zacierają ślady wprowadzając szum statystyczny. Wylicz średnią bazową z operacji za pomocą 'AVG' i znajdź rekord o największym odchyleniu matematycznym wykorzystując bezwzględną funkcję 'ABS'."
     }
   },
@@ -185,7 +194,7 @@ export const EVIDENCE_DB: Record<string, Evidence> = {
     imagePath: "/assets/evidence/evidence_11.png",
     easterEgg: {
       actionType: 'standard',
-      x: 45, y: 45, width: 10, height: 10, // DO POPRAWY PO DODANIU OBRAZKA
+      x: 45, y: 45, width: 10, height: 10, // TO DO: adjust the easter egg area to match the actual hidden message location
       message: "[SYSTEM MESSAGE] Dziękuję. Za dokończenie tego, co zacząłem. Przekaż dowody centrali. Nie pozwól im wygrać. – Adrian"
     }
   }

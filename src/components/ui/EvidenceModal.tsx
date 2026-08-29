@@ -39,6 +39,7 @@ export const EvidenceModal = ({ evidenceId, onClose }: EvidenceModalProps) => {
   const { play: playHeartbeat } = useSound('heartbeat1.mp3', { volume: soundEnabled ? 1.0 : 0 });
   const { play: playBass } = useSound('bass_hit1.mp3', { volume: soundEnabled ? 1.0 : 0 });
   const { play: playGlitch } = useSound('glitch2.mp3', { volume: soundEnabled ? 0.5 : 0 });
+  const { play: playGlitch2 } = useSound('glitch1.mp3', { volume: soundEnabled ? 0.25 : 0 });
   const { play: playGlitchLight } = useSound('glitch_light.mp3', { volume: soundEnabled ? 1 : 0 });
   const { play: playError } = useSound('error.mp3', { volume: soundEnabled ? 0.6 : 0 });
   const { play: playSuccess } = useSound('success.mp3', { volume: soundEnabled ? 0.5 : 0 });
@@ -64,14 +65,14 @@ export const EvidenceModal = ({ evidenceId, onClose }: EvidenceModalProps) => {
       
       setTimeout(() => {
         setOraclePhase(3); 
-        playGlitch();
-        playError();
+        playGlitch2();
+        playHeartbeat();
       }, 200);
       
       setTimeout(() => {
         setOraclePhase(0); 
         setShowSecret(true); 
-      }, 2200);
+      }, 5000);
       return;
     }
 
@@ -149,7 +150,7 @@ export const EvidenceModal = ({ evidenceId, onClose }: EvidenceModalProps) => {
               <div 
                 className="absolute inset-0 opacity-50 mix-blend-screen animate-pulse" 
                 style={{ 
-                  backgroundImage: 'url(/assets/evidence/oracle_face.jpg)', 
+                  backgroundImage: 'url(/assets/evidence/oracle_eyes_01.png)', 
                   backgroundSize: 'cover', backgroundPosition: 'center', filter: 'contrast(200%) grayscale(100%)'
                 }} 
               />
