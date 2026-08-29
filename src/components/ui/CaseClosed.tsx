@@ -10,24 +10,32 @@ interface CaseClosedProps {
 }
 
 export const CaseClosed = ({ onReturnToMenu }: CaseClosedProps) => {
-  const { 
-    score, playTime, totalQueryAttempts, failedQueries, 
-    collectedEvidence, completedLevels, usedHints, resetGame,
-    soundEnabled, toggleSound // Pobieramy stan dźwięku ze sklepu
+  const {
+    score,
+    playTime,
+    totalQueryAttempts,
+    failedQueries,
+    collectedEvidence,
+    completedLevels,
+    usedHints,
+    resetGame,
+    soundEnabled,
+    toggleSound,
   } = useGameStore();
-  
+
   const [confirmWipe, setConfirmWipe] = useState(false);
 
-  // Podpinamy globalne wyciszenie (soundEnabled) pod lokalne dźwięki
-  useSound('hum2.mp3', { volume: soundEnabled ? 0.4 : 0, loop: true, autoPlay: true });
-  const { play: playClick } = useSound('keyboard.mp3', { volume: soundEnabled ? 0.5 : 0 });
-  const { play: playReveal } = useSound('bass_hit1.mp3', { volume: soundEnabled ? 0.4 : 0 });
-  const { play: playHover } = useSound('beep2.mp3', { volume: soundEnabled ? 0.1 : 0 });
+  /* --- AUDIO --- */
+  useSound('hum2.mp3', { volume: soundEnabled ? 0.28 : 0, loop: true, autoPlay: true });
+  const { play: playClick } = useSound('keyboard.mp3', { volume: soundEnabled ? 0.25 : 0 });
+  const { play: playReveal } = useSound('bass_hit1.mp3', { volume: soundEnabled ? 0.28 : 0 });
+  const { play: playHover } = useSound('beep2.mp3', { volume: soundEnabled ? 0.06 : 0 });
 
   useEffect(() => {
     playReveal();
   }, [playReveal]);
 
+  /* --- HELPERS --- */
   const formatTime = (seconds: number) => {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
@@ -46,175 +54,216 @@ export const CaseClosed = ({ onReturnToMenu }: CaseClosedProps) => {
 
   const totalHints = Object.values(usedHints).flat().length;
 
+  /* --- RESTART GAME --- */
+  const handleRestart = () => {
+    playClick();
+    resetGame();
+    onReturnToMenu();
+  };
+
+  /* --- ANIMATION VARIANTS --- */
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.3
-      }
-    }
+    show: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.3 } },
   };
 
   const itemVariants: Variants = {
-    hidden: { opacity: 0, x: -10 },
-    show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 100, damping: 20 } }
+    hidden: { opacity: 0, x: -8 },
+    show: { opacity: 1, x: 0, transition: { duration: 0.45, ease: 'easeOut' } },
   };
 
+  /* --- UI --- */
   return (
-    <div className="fixed inset-0 z-[9999] bg-[#05090c] font-mono p-4 sm:p-8 overflow-y-auto flex flex-col items-center justify-center">
-      <div className="pointer-events-none absolute inset-0 z-10 scanlines opacity-10"></div>
+    <div className="fixed inset-0 z-[9999] bg-[#050707] text-[#b3b5ad] font-mono overflow-y-auto select-none">
       
-      {/* VOLUME TOGGLE */}
-        <div className="fixed top-4 right-4 sm:top-8 sm:right-8 z-[9999]">
-          <button
-            onClick={() => {
-              playClick();
-              if (toggleSound) toggleSound();
-            }}
-            className="p-2 sm:p-3 border border-[var(--border)] bg-[var(--surface-1)] text-[var(--text-secondary)] hover:text-[var(--accent-bright)] hover:border-[var(--accent)] hover:shadow-[0_0_15px_var(--accent)] transition-all duration-300 group"
-          >
-            {soundEnabled !== false ? (
-              <Volume2 className="w-4 h-4 sm:w-5 sm:h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
-            ) : (
-              <VolumeX className="w-4 h-4 sm:w-5 sm:h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
-            )}
-          </button>
-        </div>
+      {/* BACKGROUND EFFECTS */}
+      <div className="pointer-events-none fixed inset-0 z-0 nexus-scanlines" />
+      <div className="pointer-events-none fixed inset-0 z-0 nexus-vignette" />
+      <div className="pointer-events-none fixed inset-0 z-0 nexus-noise" />
 
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.98, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="relative z-20 w-full max-w-3xl border border-[#1f2933] bg-[#0d131a] p-6 sm:p-12 flex flex-col gap-6 sm:gap-10 shadow-2xl my-auto"
-      >
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#8fa393]/40 to-transparent"></div>
-
-        <div className="border-b border-[#1f2933] pb-4 sm:pb-8">
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="flex flex-col gap-1 sm:gap-2"
-          >
-            <div className="cursor-pointer text-[#b3e7b0] glow-text-neon uppercase hover:text-[#5a7759] transition-colors duration-500 text-xl sm:text-2xl mb-1 sm:mb-2 font-bold tracking-widest">{'>_'}</div>
-
-            <h1 className="text-2xl sm:text-4xl font-bold tracking-[0.1em] sm:tracking-[0.2em] text-[#f8fafc] uppercase break-words">
-              Query_Protocol
-            </h1>
-            <p className="tracking-[0.1em] sm:tracking-[0.2em] text-[#64748b] text-[10px] sm:text-sm uppercase mt-1">
-              CASE #ORACLE-01 // INVESTIGATION ARCHIVED
-            </p>
-          </motion.div>
-        </div>
-
-        {/* STATISTICS  */}
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          animate="show"
-          className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-12"
-        >
-          <div className="flex flex-col gap-6 sm:gap-8">
-            <motion.div variants={itemVariants}>
-              <div className="text-[10px] sm:text-xs text-[#64748b] tracking-[0.2em] mb-1 uppercase">FINAL RANK</div>
-              <div className="text-xl sm:text-2xl font-bold tracking-wider text-[#b3e7b0] glow-text-neon uppercase">
-                {getRank(score)}
-              </div>
-            </motion.div>
-            <motion.div variants={itemVariants}>
-              <div className="text-[10px] sm:text-xs text-[#64748b] tracking-[0.2em] mb-1 uppercase">TOTAL XP SECURED</div>
-              <div className="text-xl sm:text-2xl font-light tracking-wider text-[#c4ecc2]">{score}</div>
-            </motion.div>
-            <motion.div variants={itemVariants}>
-              <div className="text-[10px] sm:text-xs text-[#64748b] tracking-[0.2em] mb-1 uppercase">TIME IN SYSTEM</div>
-              <div className="text-xl sm:text-2xl font-light tracking-wider text-[#c4ecc2]">{formatTime(playTime)}</div>
-            </motion.div>
+      <div className="relative z-20 min-h-screen w-full px-4 pt-20 pb-8 sm:px-8 sm:pt-24 sm:pb-12 flex flex-col items-center">
+        
+        {/* HEADER */}
+        <div className="w-full max-w-4xl mb-6 sm:mb-8 flex items-start justify-between gap-4">
+          <div className="text-[7px] sm:text-[9px] tracking-[0.25em] text-[#70756d]/70 uppercase leading-relaxed">
+            NEXUS CORPORATION <span className="mx-2 text-[#444943]">/</span> SECURITY OPERATIONS
           </div>
 
-          <div className="flex flex-col gap-6 sm:gap-8 border-t border-[#1f2933] sm:border-t-0 sm:border-l sm:border-[#1f2933] pt-6 sm:pt-0 sm:pl-10">
-            <motion.div variants={itemVariants}>
-              <div className="text-[10px] sm:text-xs text-[#64748b] tracking-[0.2em] mb-1 uppercase">LEVELS CLEARED</div>
-              <div className="text-xl sm:text-2xl font-light tracking-wider text-[#c4ecc2]">{completedLevels.length} / {LEVELS.length}</div>
-            </motion.div>
-            <motion.div variants={itemVariants}>
-              <div className="text-[10px] sm:text-xs text-[#64748b] tracking-[0.2em] mb-1 uppercase">EVIDENCE RECOVERED</div>
-              <div className="text-xl sm:text-2xl font-light tracking-wider text-[#c4ecc2]">{collectedEvidence.length} FILES</div>
-            </motion.div>
-            <motion.div variants={itemVariants}>
-            <div className="text-[10px] sm:text-xs text-[#64748b] tracking-[0.2em] mb-1 uppercase">QUERIES / ERRORS</div>
-            <div className="text-xl sm:text-2xl font-light tracking-wider text-[#c4ecc2]">
-                {totalQueryAttempts} / <span className="text-red-300 font-normal">{failedQueries}</span>
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="hidden sm:block text-[8px] tracking-[0.2em] text-[#777a72]/60 text-right uppercase leading-relaxed">
+              CASE: ORACLE-01<br />RECORD: FINAL
             </div>
-            </motion.div>
-            <motion.div variants={itemVariants}>
-              <div className="text-[10px] sm:text-xs text-[#64748b] tracking-[0.2em] mb-1 uppercase">HINTS USED</div>
-              <div className="text-xl sm:text-2xl font-light tracking-wider text-[#c4ecc2]">{totalHints}</div>
-            </motion.div>
-          </div>
-        </motion.div>
-
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 0.8 }}
-          className="mt-2 sm:mt-6 flex flex-col justify-start"
-        >
-          {!confirmWipe ? (
-            <button 
-              onClick={() => {
-                playClick();
-                setConfirmWipe(true);
-              }}
-              onMouseEnter={() => playHover()}
-              className="group relative flex items-center justify-between w-full px-4 sm:px-8 py-4 sm:py-5 border border-[var(--accent)] bg-[var(--accent-surface)] transition-all duration-300 font-mono text-xs sm:text-sm tracking-[0.2em] sm:tracking-[0.3em] uppercase overflow-hidden"
+            <button
+              onClick={() => { playClick(); if (toggleSound) toggleSound(); }}
+              className="p-2 sm:p-3 border border-[#50564f]/60 bg-[#080a0a] text-[#747970] hover:text-[#aaa991] hover:border-[#7d6b4b]/70 transition-all duration-300"
+              aria-label="Toggle sound"
             >
-              <span className="relative z-10 font-bold text-[var(--accent-bright)] group-hover:text-black transition-colors duration-300">
-                CLEAR SYSTEM LOGS & EXIT
-              </span>
-              <span className="relative z-10 text-[var(--accent-bright)] opacity-80 group-hover:text-black group-hover:opacity-100 group-hover:translate-x-1 transition-all font-bold">
-                {'>'}
-              </span>
-              <div className="absolute inset-0 w-full h-full bg-[var(--accent)] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300 ease-out z-0"></div>
+              {soundEnabled !== false ? (
+                <Volume2 className="w-4 h-4 sm:w-5 sm:h-5 opacity-70" />
+              ) : (
+                <VolumeX className="w-4 h-4 sm:w-5 sm:h-5 opacity-70" />
+              )}
             </button>
-          ) : (
-            <div className="flex flex-col gap-4 sm:gap-5 p-4 sm:p-6 border border-red-900/50 bg-red-950/10">
-              <span className="text-red-400 font-mono text-[10px] sm:text-sm tracking-widest text-center uppercase">
-                WARNING: THIS WILL WIPE ALL INVESTIGATION DATA. PROCEED?
-              </span>
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
-                <button 
-                  onClick={() => {
-                    playClick();
-                    resetGame();
-                    onReturnToMenu();
-                  }} 
-                  className="flex-1 py-3 bg-red-900/40 text-red-200 hover:bg-red-900 transition-colors font-mono tracking-widest text-[10px] sm:text-sm font-bold"
-                >
-                  YES, PURGE
-                </button>
-                <button 
-                  onClick={() => {
-                    playClick();
-                    setConfirmWipe(false);
-                  }} 
-                  className="flex-1 py-3 border border-[#3e4a59] text-[#64748b] hover:bg-[#1a232c] hover:text-white transition-colors font-mono tracking-widest text-[10px] sm:text-sm font-bold"
-                >
-                  CANCEL
-                </button>
+          </div>
+        </div>
+
+        {/* MAIN PANEL */}
+        <motion.div
+          initial={{ opacity: 0, y: 12, scale: 0.99 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.9, ease: 'easeOut' }}
+          className="relative w-full max-w-4xl border border-[#303630] bg-[#090c0c] shadow-[0_25px_80px_rgba(0,0,0,0.55)] overflow-hidden"
+        >
+          {/* TOP DOCUMENT LINE */}
+          <div className="absolute top-0 left-0 w-full h-px bg-[#7d6c4b]/50" />
+          
+          <div className="px-6 py-6 sm:px-10 sm:py-8 border-b border-[#303630]">
+            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.7 }} className="flex flex-col gap-3">
+              <div className="flex items-center justify-between gap-4 text-[8px] sm:text-[10px] tracking-[0.28em] text-[#6f756c] uppercase">
+                <span>EXECUTIVE SECURITY ARCHIVE</span>
+                <span className="text-[#806d4b]">RESTRICTED</span>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="w-1 h-10 sm:h-12 bg-[#7f6b48] opacity-70" />
+                <div>
+                  <h1 className="text-xl sm:text-3xl font-medium tracking-[0.12em] text-[#c4c5bc] uppercase">CASE CLOSED</h1>
+                  <p className="mt-2 text-[9px] sm:text-[11px] tracking-[0.2em] text-[#747970] uppercase">QUERY_PROTOCOL // ORACLE-01</p>
+                </div>
+              </div>
+              <div className="mt-2 text-[8px] sm:text-[10px] tracking-[0.18em] text-[#60655e] uppercase">
+                INVESTIGATION RECORD SEALED — EVIDENCE RETAINED
+              </div>
+            </motion.div>
+          </div>
+
+          <div className="px-6 sm:px-10 py-3 border-b border-[#292e29] bg-[#070909] flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 text-[8px] sm:text-[10px] tracking-[0.2em] text-[#73786f] uppercase">
+              <span className="w-1.5 h-1.5 bg-[#71806d]" /> INVESTIGATION STATUS
+            </div>
+            <span className="text-[8px] sm:text-[10px] tracking-[0.2em] text-[#a08a60] uppercase">ARCHIVED</span>
+          </div>
+
+          {/* STATS GRID */}
+          <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid grid-cols-1 sm:grid-cols-2">
+            
+            <div className="flex flex-col divide-y divide-[#292e29]">
+              <motion.div variants={itemVariants} className="px-6 py-5 sm:px-10 sm:py-6">
+                <div className="text-[8px] sm:text-[10px] text-[#656a63] tracking-[0.22em] mb-2 uppercase">FINAL CLASSIFICATION</div>
+                <div className="text-lg sm:text-xl tracking-[0.12em] text-[#a8956d] uppercase">{getRank(score)}</div>
+              </motion.div>
+              <motion.div variants={itemVariants} className="px-6 py-5 sm:px-10 sm:py-6">
+                <div className="text-[8px] sm:text-[10px] text-[#656a63] tracking-[0.22em] mb-2 uppercase">EVIDENCE VALUE</div>
+                <div className="text-lg sm:text-xl tracking-[0.12em] text-[#b7b8b0]">{score}</div>
+              </motion.div>
+              <motion.div variants={itemVariants} className="px-6 py-5 sm:px-10 sm:py-6">
+                <div className="text-[8px] sm:text-[10px] text-[#656a63] tracking-[0.22em] mb-2 uppercase">SESSION DURATION</div>
+                <div className="text-lg sm:text-xl tracking-[0.12em] text-[#b7b8b0]">{formatTime(playTime)}</div>
+              </motion.div>
+            </div>
+
+            <div className="flex flex-col divide-y divide-[#292e29] border-t sm:border-t-0 sm:border-l border-[#292e29]">
+              <motion.div variants={itemVariants} className="px-6 py-5 sm:px-10 sm:py-6">
+                <div className="text-[8px] sm:text-[10px] text-[#656a63] tracking-[0.22em] mb-2 uppercase">LEVELS CLEARED</div>
+                <div className="text-lg sm:text-xl tracking-[0.12em] text-[#b7b8b0]">{completedLevels.length} <span className="text-[#555a53]"> / {LEVELS.length}</span></div>
+              </motion.div>
+              <motion.div variants={itemVariants} className="px-6 py-5 sm:px-10 sm:py-6">
+                <div className="text-[8px] sm:text-[10px] text-[#656a63] tracking-[0.22em] mb-2 uppercase">EVIDENCE RECOVERED</div>
+                <div className="text-lg sm:text-xl tracking-[0.12em] text-[#b7b8b0]">{collectedEvidence.length} <span className="ml-2 text-[9px] sm:text-[10px] text-[#646a62]">FILES</span></div>
+              </motion.div>
+              <motion.div variants={itemVariants} className="px-6 py-5 sm:px-10 sm:py-6">
+                <div className="text-[8px] sm:text-[10px] text-[#656a63] tracking-[0.22em] mb-2 uppercase">QUERIES / FAILED</div>
+                <div className="text-lg sm:text-xl tracking-[0.12em] text-[#b7b8b0]">{totalQueryAttempts} <span className="text-[#8b6557] ml-2">/ {failedQueries}</span></div>
+              </motion.div>
+              <motion.div variants={itemVariants} className="px-6 py-5 sm:px-10 sm:py-6">
+                <div className="text-[8px] sm:text-[10px] text-[#656a63] tracking-[0.22em] mb-2 uppercase">ASSISTANCE REQUESTS</div>
+                <div className="text-lg sm:text-xl tracking-[0.12em] text-[#b7b8b0]">{totalHints}</div>
+              </motion.div>
+            </div>
+            
+          </motion.div>
+
+          {/* SECURITY NOTE */}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.1, duration: 0.8 }} className="mx-6 sm:mx-10 mt-6 mb-6 sm:mt-8 sm:mb-8 border border-[#3b4039] bg-[#070909] px-5 py-4 sm:px-6 sm:py-5">
+            <div className="flex items-start gap-3">
+              <span className="mt-1 w-1.5 h-1.5 shrink-0 bg-[#806d4b]" />
+              <div>
+                <div className="text-[8px] sm:text-[10px] tracking-[0.22em] text-[#8b8d84] uppercase">SECURITY NOTICE</div>
+                <p className="mt-2 text-[9px] sm:text-[11px] leading-relaxed tracking-[0.08em] text-[#666b63]">INVESTIGATION RECORD SEALED. ALL RECOVERED EVIDENCE REMAINS SUBJECT TO NEXUS SECURITY RETENTION POLICY.</p>
               </div>
             </div>
-          )}
+          </motion.div>
+
+          {/* ACTION BUTTONS */}
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.35, duration: 0.8 }} className="px-6 pb-6 sm:px-10 sm:pb-8">
+            {!confirmWipe ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  onClick={handleRestart}
+                  onMouseEnter={() => playHover()}
+                  className="group flex items-center justify-between w-full px-5 sm:px-7 py-4 sm:py-5 border border-[#555a52] bg-[#080a0a] hover:border-[#806d4b]/70 hover:bg-[#0c0e0d] transition-all duration-300 font-mono text-[9px] sm:text-[11px] tracking-[0.2em] uppercase"
+                >
+                  <span className="text-[#92958c] group-hover:text-[#b09a70] transition-colors duration-300">RESTART INVESTIGATION</span>
+                  <span className="text-[#656a62] group-hover:text-[#a18b61] transition-colors duration-300">↻</span>
+                </button>
+
+                <button
+                  onClick={() => { playClick(); setConfirmWipe(true); }}
+                  onMouseEnter={() => playHover()}
+                  className="group flex items-center justify-between w-full px-5 sm:px-7 py-4 sm:py-5 border border-[#76584f]/50 bg-[#0b0908] hover:border-[#8b6557]/70 hover:bg-[#120c0a] transition-all duration-300 font-mono text-[9px] sm:text-[11px] tracking-[0.2em] uppercase"
+                >
+                  <span className="text-[#806d64] group-hover:text-[#a47766] transition-colors duration-300">CLEAR RECORD & EXIT</span>
+                  <span className="text-[#6d5a54] group-hover:text-[#916c5d] transition-colors duration-300">→</span>
+                </button>
+              </div>
+            ) : (
+              <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="border border-[#76584f]/60 bg-[#0b0908] p-4 sm:p-6">
+                <div className="flex items-center gap-3 mb-5">
+                  <span className="w-1.5 h-1.5 bg-[#956957]" />
+                  <span className="text-[#9a7061] font-mono text-[9px] sm:text-[11px] tracking-[0.18em] uppercase">SECURITY WARNING</span>
+                </div>
+                <p className="text-[9px] sm:text-[11px] tracking-[0.12em] leading-relaxed text-[#777a72] mb-5">
+                  THIS ACTION WILL REMOVE LOCAL INVESTIGATION DATA FROM THE CURRENT SESSION. RECOVERED EVIDENCE WILL NO LONGER BE AVAILABLE.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={() => { playClick(); resetGame(); onReturnToMenu(); }}
+                    className="flex-1 py-3 border border-[#76584f]/60 bg-[#180f0c] text-[#a47766] hover:bg-[#261611] hover:border-[#946b5b] transition-colors font-mono tracking-[0.18em] text-[9px] sm:text-[11px] uppercase"
+                  >
+                    CONFIRM PURGE
+                  </button>
+                  <button
+                    onClick={() => { playClick(); setConfirmWipe(false); }}
+                    className="flex-1 py-3 border border-[#414740] bg-[#080a0a] text-[#686d65] hover:bg-[#101310] hover:text-[#9a9d94] transition-colors font-mono tracking-[0.18em] text-[9px] sm:text-[11px] uppercase"
+                  >
+                    RETAIN RECORD
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </motion.div>
+
+          <div className="border-t border-[#292e29] px-6 sm:px-10 py-3 flex items-center justify-between text-[7px] sm:text-[8px] tracking-[0.18em] text-[#50554e] uppercase">
+            <span>NEXUS SECURITY ARCHIVE</span>
+            <span>LEVEL: RESTRICTED</span>
+            <span className="hidden sm:block">RECORD SEALED</span>
+          </div>
+
         </motion.div>
-      </motion.div>
+      </div>
 
       <style>{`
-        .scanlines {
-          background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
-          background-size: 100% 4px;
+        .nexus-scanlines {
+          background: repeating-linear-gradient(to bottom, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, rgba(0,0,0,0.025) 1px, rgba(0,0,0,0.025) 4px);
+          opacity: 0.28;
         }
-        .glow-text-neon { text-shadow: 0 0 15px rgba(31, 255, 15, 0.6); }
+        .nexus-vignette {
+          background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.18) 70%, rgba(0,0,0,0.65) 100%);
+        }
+        .nexus-noise {
+          opacity: 0.025;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.45'/%3E%3C/svg%3E");
+          pointer-events: none;
+        }
       `}</style>
     </div>
   );

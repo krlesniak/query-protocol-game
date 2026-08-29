@@ -75,7 +75,7 @@ const initialState = {
   currentLevel: 1,
   score: 200,
   hasSeenIntro: false,
-  unlockedTables: ['employees'],
+  unlockedTables: ['employees', 'locations', 'access_logs', 'infrastructure_nodes'],
   collectedEvidence: ['EVD_ORACLE_LAB_LOC', 'EVD_SERVER_LOG_CONTRADICTION', 'EVD_GHOST_PROFILE', 'EVD_ECHO_DOC', 'EVD_ARCHIVE_LOG', 'EVD_EXECUTIVE_PURGE', 'EVD_CCTV_ALPHA', 'EVD_DEAD_MAN', 'EVD_NODE_07', 'EVD_AUDIT_TRAIL', 'EVD_FINAL_PROTOCOL'],
   // collectedEvidence: [],
   completedLevels: [],
@@ -192,7 +192,7 @@ export const useGameStore = create<GameState>()(
             : [...state.discoveredEasterEggs, evidenceId],
         })),
     }),
-    
+
     {
       name: 'query-protocol-game',
       storage: createJSONStorage(() => obfuscatedStorage),
