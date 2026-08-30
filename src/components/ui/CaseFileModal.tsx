@@ -10,41 +10,42 @@ interface CaseFileModalProps {
 
 export const CaseFileModal = ({ onClose, onOpenEvidence }: CaseFileModalProps) => {
   const { collectedEvidence } = useGameStore();
-  
   const allEvidence = Object.values(EVIDENCE_DB).sort((a, b) => a.sourceLevel - b.sourceLevel);
 
   return (
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
-      className="absolute inset-0 z-[90] flex items-center justify-center bg-black/85 backdrop-blur-md p-2 sm:p-4"
+      className="absolute inset-0 z-[90] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 sm:p-6"
       onClick={onClose}
     >
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} 
-        className="bg-[var(--surface-1)] border border-[var(--border)] w-full max-w-3xl max-h-[85vh] flex flex-col shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden"
+        className="bg-[#090c0c] border border-[#303630] w-full max-w-3xl max-h-[85vh] flex flex-col shadow-[0_25px_80px_rgba(0,0,0,0.7)] overflow-hidden relative"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-[var(--border)] bg-[#131920] shrink-0">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <FolderLock className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--accent-muted)] shrink-0" />
-            <span className="font-mono text-[10px] sm:text-[12px] text-[var(--text-main)] tracking-[0.1em] sm:tracking-[0.2em] font-bold truncate">
+        {/* HEADER */}
+        <div className="flex items-center justify-between px-5 sm:px-8 py-4 sm:py-5 border-b border-[#303630] bg-[#070909] shrink-0">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <FolderLock className="w-4 h-4 sm:w-5 sm:h-5 text-[#806d4b] shrink-0" />
+            <span className="font-mono text-xs sm:text-sm text-[#c0c2b9] tracking-[0.2em] font-bold truncate uppercase">
               CASE FILE #ORACLE-01
             </span>
           </div>
-          <button onClick={onClose} className="text-[var(--text-muted)] hover:text-white transition-colors bg-[var(--surface-2)] p-1 rounded-sm shrink-0">
+          <button onClick={onClose} className="text-[#656a63] hover:text-[#d4d6c8] transition-colors p-1 bg-[#0a0d0c] border border-[#303630] hover:border-[#a3ad82] rounded-none shrink-0">
              <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
         
-        <div className="flex-1 bg-[#0a0d10] p-4 sm:p-6 overflow-y-auto">
-          <div className="mb-6 sm:mb-8 border-l-2 border-[var(--accent-muted)] pl-3 sm:pl-4">
-            <h2 className="font-mono text-lg sm:text-xl text-white tracking-widest uppercase">Evidence Registry</h2>
-            <p className="font-mono text-[10px] sm:text-[12px] text-[var(--text-muted)] mt-1">
-              Recovered: {collectedEvidence.length} / {allEvidence.length}
+        {/* BODY */}
+        <div className="flex-1 bg-[#050707] p-5 sm:p-8 overflow-y-auto">
+          <div className="mb-6 sm:mb-8 border-l-2 border-[#a3ad82] pl-4 sm:pl-5">
+            <h2 className="font-mono text-base sm:text-lg text-[#b3b5ad] tracking-widest uppercase">EVIDENCE REGISTRY</h2>
+            <p className="font-mono text-[10px] sm:text-xs text-[#70756d] tracking-widest mt-1.5 uppercase">
+              RECOVERED: {collectedEvidence.length} / {allEvidence.length}
             </p>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             {allEvidence.map((ev, index) => {
               const isUnlocked = collectedEvidence.includes(ev.id);
               return (
@@ -52,31 +53,27 @@ export const CaseFileModal = ({ onClose, onOpenEvidence }: CaseFileModalProps) =
                   key={ev.id}
                   disabled={!isUnlocked}
                   onClick={() => onOpenEvidence(ev.id)}
-                  className={`flex items-center justify-between p-3 sm:p-4 border rounded-sm font-mono text-left transition-colors ${
-                    isUnlocked 
-                    ? 'border-[var(--border)] bg-[var(--surface-1)] hover:bg-[var(--surface-2)] cursor-pointer' 
-                    : 'border-white/5 bg-black/20 opacity-50 cursor-not-allowed'
-                  }`}
+                  className={`flex items-center justify-between p-4 sm:p-5 border rounded-none font-mono text-left transition-all duration-300 ${isUnlocked ? 'border-[#4e574d] bg-[#0a0d0c] hover:bg-[#121512] hover:border-[#a3ad82] cursor-pointer group' : 'border-[#1a1e1c] bg-[#030505] opacity-60 cursor-not-allowed'}`}
                 >
-                  <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
+                  <div className="flex items-center gap-4 sm:gap-5 overflow-hidden">
                     {isUnlocked ? (
-                      <CheckSquare className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500/80 shrink-0" />
+                      <CheckSquare className="w-4 h-4 sm:w-5 sm:h-5 text-[#a3ad82] shrink-0" />
                     ) : (
-                      <Square className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--text-muted)] shrink-0" />
+                      <Square className="w-4 h-4 sm:w-5 sm:h-5 text-[#454a44] shrink-0" />
                     )}
                     <div className="flex flex-col min-w-0">
-                      <span className={`text-[11px] sm:text-[13px] font-bold tracking-widest truncate ${isUnlocked ? 'text-[var(--text-main)]' : 'text-[var(--text-muted)]'}`}>
-                        {index + 1}. {isUnlocked ? ev.title : '████████████'}
+                      <span className={`text-xs sm:text-sm font-bold tracking-[0.15em] uppercase truncate transition-colors ${isUnlocked ? 'text-[#c0c2b9] group-hover:text-[#d4d6c8]' : 'text-[#555a53]'}`}>
+                        {String(index + 1).padStart(2, '0')}. {isUnlocked ? ev.title : '████████████'}
                       </span>
                       {isUnlocked && (
-                        <span className="text-[9px] sm:text-[10px] text-[var(--text-secondary)] mt-1 truncate">
+                        <span className="text-[9px] sm:text-[10px] text-[#70756d] tracking-widest mt-1.5 truncate uppercase">
                           LVL {ev.sourceLevel.toString().padStart(2, '0')} // {ev.type}
                         </span>
                       )}
                     </div>
                   </div>
                   {isUnlocked && (
-                    <span className="text-[9px] sm:text-[10px] text-[var(--accent-grey)] border border-[var(--accent-grey)]/30 px-2 py-1 rounded-sm bg-[var(--accent-muted)]/10 hidden sm:block shrink-0 ml-2">
+                    <span className="text-[9px] sm:text-[10px] text-[#806d4b] border border-[#806d4b]/40 px-3 py-1.5 bg-[#806d4b]/10 hidden sm:block shrink-0 ml-3 tracking-widest uppercase transition-colors group-hover:bg-[#806d4b]/20 group-hover:text-[#a8956d]">
                       VIEW FILE
                     </span>
                   )}

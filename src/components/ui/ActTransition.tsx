@@ -1,208 +1,254 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ActTransitionProps {
   levelCompleted: number;
   onComplete: () => void;
 }
 
-const TRANSITIONS: Record<number, { thoughts: string[], actTitle: string | null }> = {
-  0: { 
-    thoughts: [], 
-    actTitle: "ACT I — THE DISAPPEARANCE" 
-  },
-  5: { 
-    thoughts: ["EVIDENCE ANALYSIS COMPLETE.", "ORACLE DID NOT DISAPPEAR.", "SOMEONE USED HIS IDENTITY."], 
-    actTitle: "ACT II — SOMEONE IS LYING" 
-  },
-  10: { 
-    thoughts: ["ANOMALY CONFIRMED.", "THE ATTACK WAS NOT RANDOM."], 
-    actTitle: "ACT III — THE MIRROR" 
-  },
-  15: { 
-    thoughts: ["PROJECT MIRROR", "AUTHORIZED BY: ELIAS VOSS", "ACCESS LEVEL: EXECUTIVE"], 
-    actTitle: "ACT IV — ORACLE'S LAST QUERY" 
-  },
-  20: { 
-    thoughts: ["THE FALSE TRAIL WAS DELIBERATE.", "YOU WERE NEVER INVESTIGATING A THEFT.", "YOU WERE INVESTIGATING A COVER-UP."], 
-    actTitle: "ACT V — THE TRUTH" 
-  },
-  25: { 
-    thoughts: ["THE ARCHITECT WAS NOT THE TARGET.", "HE WAS THE SOURCE."], 
-    actTitle: "ACT VI — THE FINAL QUERY" 
-  },
-  29: { 
-    thoughts: ["LAST TRACE RECOVERED.", "ORACLE'S FINAL QUERY IS WAITING."], 
-    actTitle: null 
-  }
+interface TransitionData {
+  thoughts: string[];
+  actTitle: string | null;
+}
+
+const TRANSITIONS: Record<number, TransitionData> = {
+  0: { thoughts: [], actTitle: 'ACT I — THE DISAPPEARANCE' },
+  5: { thoughts: ['EVIDENCE ANALYSIS COMPLETE.', 'ORACLE DID NOT DISAPPEAR.', 'SOMEONE USED HIS IDENTITY.'], actTitle: 'ACT II — SOMEONE IS LYING' },
+  10: { thoughts: ['ANOMALY CONFIRMED.', 'THE ATTACK WAS NOT RANDOM.'], actTitle: 'ACT III — THE MIRROR' },
+  15: { thoughts: ['PROJECT MIRROR', 'AUTHORIZED BY: ELIAS VOSS', 'ACCESS LEVEL: EXECUTIVE'], actTitle: "ACT IV — ORACLE'S LAST QUERY" },
+  20: { thoughts: ['THE FALSE TRAIL WAS DELIBERATE.', 'YOU WERE NEVER INVESTIGATING A THEFT.', 'YOU WERE INVESTIGATING A COVER-UP.'], actTitle: 'ACT V — THE TRUTH' },
+  25: { thoughts: ['THE ARCHITECT WAS NOT THE TARGET.', 'HE WAS THE SOURCE.'], actTitle: 'ACT VI — THE FINAL QUERY' },
+  29: { thoughts: ['LAST TRACE RECOVERED.', "ORACLE'S FINAL QUERY IS WAITING."], actTitle: null },
 };
 
-const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+const DEFAULT_TRANSITION: TransitionData = { thoughts: [], actTitle: null };
+
+const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 export const ActTransition = ({ levelCompleted, onComplete }: ActTransitionProps) => {
-  const transitionData = useMemo(() => TRANSITIONS[levelCompleted] || { thoughts: [], actTitle: null }, [levelCompleted]);
+  const transitionData = useMemo(() => TRANSITIONS[levelCompleted] ?? DEFAULT_TRANSITION, [levelCompleted]);
   
-  const [phase, setPhase] = useState<'THOUGHTS' | 'ACT_TITLE'>(transitionData.thoughts.length > 0 ? 'THOUGHTS' : 'ACT_TITLE');
-  const [visibleLines, setVisibleLines] = useState<number>(0);
-  const [displayText, setDisplayText] = useState<string>('');
-  const [showActTitle, setShowActTitle] = useState(transitionData.thoughts.length === 0);
-  
+  const [displayedThoughts, setDisplayedThoughts] = useState<string[]>([]);
+  const [activeTypingIndex, setActiveTypingIndex] = useState<number>(-1);
+  const [fadeThoughts, setFadeThoughts] = useState(false);
+  const [showActTitle, setShowActTitle] = useState(false);
+
   const isMounted = useRef(true);
-  const bgmRef = useRef<HTMLAudioElement | null>(null);
-  const bgmRef2 = useRef<HTMLAudioElement | null>(null);
-  const typingAudioRef = useRef<HTMLAudioElement | null>(null);
   const onCompleteRef = useRef(onComplete);
+  
+  const bgmRef = useRef<HTMLAudioElement | null>(null);
+  const heartbeatRef = useRef<HTMLAudioElement | null>(null);
+  const keyboardAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const playSound = useCallback((fileName: string, volume = 0.3) => {
+    try {
+      const audio = new Audio(`/assets/audio/${fileName}`);
+      audio.volume = volume;
+      audio.play().catch(() => {});
+      audio.addEventListener('ended', () => { audio.remove(); });
+    } catch { /* ignore errors */ }
+  }, []);
 
   useEffect(() => {
     onCompleteRef.current = onComplete;
   }, [onComplete]);
 
-  const playSound = useCallback((fileName: string, volume: number = 0.4) => {
-    try {
-      const audio = new Audio(`/assets/audio/${fileName}`);
-      audio.volume = volume;
-      audio.play().catch(() => {});
-    } catch { /* ignore */ }
-  }, []);
-
   useEffect(() => {
     isMounted.current = true;
-    
-    typingAudioRef.current = new Audio('/assets/audio/keyboard.mp3');
-    typingAudioRef.current.volume = 0.15;
 
-    bgmRef.current = new Audio('/assets/audio/hum2.mp3');
-    bgmRef.current.volume = 0.4; 
-    bgmRef.current.loop = true;
-    bgmRef.current.play().catch(() => {});
+    const typingAudio = new Audio('/assets/audio/keyboard.mp3');
+    typingAudio.volume = 0.15;
+    keyboardAudioRef.current = typingAudio;
 
-    bgmRef2.current = new Audio('/assets/audio/heartbeat1.mp3');
-    bgmRef2.current.volume = 0.3;
-    bgmRef2.current.loop = true;
-    bgmRef2.current.play().catch(() => {});
+    const bgm = new Audio('/assets/audio/hum2.mp3');
+    bgm.volume = 0.28;
+    bgm.loop = true;
+    bgmRef.current = bgm;
 
-    return () => { 
-      isMounted.current = false; 
-      if (bgmRef.current) { bgmRef.current.pause(); bgmRef.current.currentTime = 0; }
-      if (bgmRef2.current) { bgmRef2.current.pause(); bgmRef2.current.currentTime = 0; }
+    const heartbeat = new Audio('/assets/audio/heartbeat1.mp3');
+    heartbeat.volume = 0.15;
+    heartbeat.loop = true;
+    heartbeatRef.current = heartbeat;
+
+    bgm.play().catch(() => {});
+    heartbeat.play().catch(() => {});
+
+    return () => {
+      isMounted.current = false;
+      if (bgmRef.current) { bgmRef.current.pause(); bgmRef.current = null; }
+      if (heartbeatRef.current) { heartbeatRef.current.pause(); heartbeatRef.current = null; }
+      if (keyboardAudioRef.current) { keyboardAudioRef.current.pause(); keyboardAudioRef.current = null; }
     };
   }, []);
 
   useEffect(() => {
-    let isCancelled = false;
+    let cancelled = false;
 
     const runSequence = async () => {
-      await delay(50);
-      if (isCancelled || !isMounted.current) return;
+      await delay(800); // Początkowa cisza
+      if (cancelled || !isMounted.current) return;
 
-      // THOUGHTS PHASE
       if (transitionData.thoughts.length > 0) {
-        playSound('bass_hit.mp3', 0.5);
-        await delay(950);
-        if (isCancelled || !isMounted.current) return;
+        playSound('bass_hit.mp3', 0.2);
+        await delay(1200);
 
         for (let i = 0; i < transitionData.thoughts.length; i++) {
-          if (!isMounted.current || isCancelled) return;
+          if (cancelled || !isMounted.current) return;
           
-          setVisibleLines(i);
           const currentLine = transitionData.thoughts[i];
-          
+          setDisplayedThoughts((prev) => [...prev, '']);
+          setActiveTypingIndex(i);
+
+          // Efekt powolnego pisania litera po literze
           for (let j = 0; j <= currentLine.length; j++) {
-            if (!isMounted.current || isCancelled) return;
-            setDisplayText(currentLine.substring(0, j));
+            if (cancelled || !isMounted.current) return;
             
-            if (typingAudioRef.current && currentLine.charAt(j - 1) !== ' ') {
-              typingAudioRef.current.currentTime = 0;
-              typingAudioRef.current.play().catch(() => {});
+            setDisplayedThoughts((prev) => {
+              const newThoughts = [...prev];
+              newThoughts[i] = currentLine.substring(0, j);
+              return newThoughts;
+            });
+
+            if (currentLine.charAt(j - 1) !== ' ' && j > 0) {
+              if (keyboardAudioRef.current && j % 2 === 0) {
+                keyboardAudioRef.current.currentTime = 0;
+                keyboardAudioRef.current.play().catch(() => {});
+              }
             }
-            await delay(40);
+            await delay(45); 
           }
 
-          if (!isMounted.current || isCancelled) return;
-          playSound('beep2.mp3', 0.2);
-          await delay(1200);
+          setActiveTypingIndex(-1);
+          playSound('beep2.mp3', 0.1);
+          
+          await delay(i === transitionData.thoughts.length - 1 ? 1800 : 1200);
         }
-        
+
+        setFadeThoughts(true);
+        await delay(1500); 
+      }
+
+      if (cancelled || !isMounted.current) return;
+
+      if (transitionData.actTitle) {
+        setShowActTitle(true);
+        playSound('bass_hit1.mp3', 0.4); 
+        await delay(4500);
+      } else if (transitionData.thoughts.length > 0) {
         await delay(1000);
       }
 
-      if (!isMounted.current || isCancelled) return;
-
-      setPhase('ACT_TITLE');
-      
-      if (transitionData.actTitle) {
-        await delay(600);
-        if (!isMounted.current || isCancelled) return;
-
-        playSound('bass_hit1.mp3', 0.3);
-    
-        setShowActTitle(true);
-        await delay(3500);
-      } else {
-        playSound('bass_hit.mp3', 0.3);
-        await delay(500);
-      }
-
-      if (!isMounted.current || isCancelled) return;
+      if (cancelled || !isMounted.current) return;
       onCompleteRef.current();
     };
 
     runSequence();
 
-    return () => {
-      isCancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [transitionData, playSound]);
 
   return (
-    <motion.div 
-      initial={{ opacity: 0 }} 
-      animate={{ opacity: 1 }} 
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
-      className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-[#05080a] text-[var(--accent-bright)] font-mono p-4 sm:p-8 select-none"
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, transition: { duration: 0.8, ease: 'easeInOut' } }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
+      className="fixed inset-0 z-[200] flex items-center justify-center overflow-hidden bg-[#030505] px-5 py-8 text-[#b3b5ad] font-mono select-none"
     >
-      <div className="pointer-events-none absolute inset-0 z-10 scanlines opacity-30"></div>
-      
-      {phase === 'THOUGHTS' && transitionData.thoughts.length > 0 && (
-        <div className="relative z-20 flex flex-col items-center justify-center gap-4 sm:gap-6 text-center max-w-3xl">
-          {transitionData.thoughts.map((text, index) => (
-            <div 
-              key={index} 
-              className={`text-base sm:text-xl md:text-3xl tracking-widest leading-relaxed ${index === transitionData.thoughts.length - 1 && index === visibleLines ? 'font-bold' : 'opacity-70'}`}
-            >
-              {index < visibleLines && text}
-              {index === visibleLines && (
-                <>
-                  {displayText}
-                  <span className="animate-pulse">_</span>
-                </>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+      <div className="pointer-events-none absolute inset-0 z-0 nexus-scanlines" />
+      <div className="pointer-events-none absolute inset-0 z-0 nexus-vignette" />
+      <div className="pointer-events-none absolute inset-0 z-0 nexus-noise" />
 
-      {phase === 'ACT_TITLE' && showActTitle && transitionData.actTitle && (
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.7 }}
-          animate={{ opacity: 1, scale: 0.8 }}
-          transition={{ duration: 2, ease: "easeOut" }}
-          className="relative z-20 flex items-center justify-center text-center"
-        >
-          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl tracking-[0.2em] sm:tracking-[0.3em] font-bold text-[var(--accent-bright)] glow-text uppercase px-4 break-words">
-            {transitionData.actTitle}
-          </h1>
-        </motion.div>
-      )}
+      <div className="pointer-events-none absolute inset-4 sm:inset-8 md:inset-12 border border-[#303630]/25" />
+      <div className="pointer-events-none absolute top-4 left-4 sm:top-8 sm:left-8 md:top-12 md:left-12 text-[7px] sm:text-[9px] tracking-[0.2em] text-[#50554e]/50 uppercase">NEXUS CORPORATION</div>
+      <div className="pointer-events-none absolute top-4 right-4 sm:top-8 sm:right-8 md:top-12 md:right-12 text-[7px] sm:text-[9px] tracking-[0.2em] text-[#50554e]/50 uppercase">SECURE ARCHIVE</div>
+      <div className="pointer-events-none absolute bottom-4 left-4 sm:bottom-8 sm:left-8 md:bottom-12 md:left-12 text-[7px] sm:text-[9px] tracking-[0.2em] text-[#50554e]/40 uppercase">QUERY_PROTOCOL</div>
+      <div className="pointer-events-none absolute bottom-4 right-4 sm:bottom-8 sm:right-8 md:bottom-12 md:right-12 text-[7px] sm:text-[9px] tracking-[0.2em] text-[#50554e]/40 uppercase">INTERNAL USE ONLY</div>
+      
+      <div className="pointer-events-none absolute top-4 left-4 sm:top-8 sm:left-8 w-5 h-5 border-l border-t border-[#596057]/40" />
+      <div className="pointer-events-none absolute top-4 right-4 sm:top-8 sm:right-8 w-5 h-5 border-r border-t border-[#596057]/40" />
+      <div className="pointer-events-none absolute bottom-4 left-4 sm:bottom-8 sm:left-8 w-5 h-5 border-l border-b border-[#596057]/40" />
+      <div className="pointer-events-none absolute bottom-4 right-4 sm:bottom-8 sm:right-8 w-5 h-5 border-r border-b border-[#596057]/40" />
+
+      <div className="relative z-20 w-full max-w-5xl flex items-center justify-center">
+        
+        <AnimatePresence>
+          {!fadeThoughts && displayedThoughts.length > 0 && (
+            <motion.div 
+              exit={{ opacity: 0, filter: "blur(4px)", transition: { duration: 1.2 } }} 
+              className="absolute w-full max-w-3xl text-center flex flex-col items-center"
+            >
+              <div className="mb-10 sm:mb-14 flex items-center justify-center gap-4">
+                <span className="h-px w-12 sm:w-20 bg-[#4b514b]/60" />
+                <span className="text-[8px] sm:text-[10px] tracking-[0.3em] text-[#71756f] uppercase">RECOVERED INTELLIGENCE</span>
+                <span className="h-px w-12 sm:w-20 bg-[#4b514b]/60" />
+              </div>
+
+              <div className="flex flex-col items-center gap-6 sm:gap-8">
+                {displayedThoughts.map((text, index) => (
+                  <div 
+                    key={index}
+                    className={`max-w-full px-4 text-center uppercase leading-relaxed break-words ${
+                      index === transitionData.thoughts.length - 1 
+                        ? 'text-[#c6c7c0] text-lg sm:text-2xl md:text-3xl font-medium tracking-[0.15em] sm:tracking-[0.2em] drop-shadow-[0_0_15px_rgba(200,200,200,0.1)]' 
+                        : 'text-[#8a8e86] text-xs sm:text-base md:text-lg tracking-[0.12em] sm:tracking-[0.18em]'
+                    }`}
+                  >
+                    {text}
+                    {activeTypingIndex === index && (
+                      <span className="inline-block w-2 h-4 sm:w-3 sm:h-5 ml-2 align-middle bg-[#8a8e86] animate-pulse" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {showActTitle && transitionData.actTitle && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }} 
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }} 
+              exit={{ opacity: 0, scale: 1.05 }}
+              transition={{ duration: 1.8, ease: "easeOut" }} 
+              className="absolute w-full flex flex-col items-center text-center"
+            >
+              <div className="mb-8 sm:mb-12 flex items-center gap-4">
+                <span className="h-px w-10 sm:w-16 bg-[#7a6a4d]/70" />
+                <span className="text-[8px] sm:text-[11px] tracking-[0.35em] text-[#9c8965] uppercase font-bold drop-shadow-[0_0_10px_rgba(156,137,101,0.3)]">
+                  NEXUS ARCHIVE // CLASSIFIED
+                </span>
+                <span className="h-px w-10 sm:w-16 bg-[#7a6a4d]/70" />
+              </div>
+
+              <h1 className="max-w-5xl px-4 text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] leading-relaxed text-[#d4d5cf] drop-shadow-[0_0_20px_rgba(255,255,255,0.15)] break-words">
+                {transitionData.actTitle}
+              </h1>
+
+              <motion.div initial={{ width: 0 }} animate={{ width: '180px' }} transition={{ delay: 0.8, duration: 1.5, ease: 'easeOut' }} className="mt-8 sm:mt-12 h-px bg-[#85724e]" />
+              
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5, duration: 1 }} className="mt-6 sm:mt-8 text-[8px] sm:text-[10px] tracking-[0.3em] text-[#626860] uppercase">
+                INVESTIGATION RECORD // NEXT PHASE
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+      </div>
 
       <style>{`
-        .scanlines {
-          background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
-          background-size: 100% 4px;
+        .nexus-scanlines {
+          background: repeating-linear-gradient(to bottom, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, rgba(0,0,0,0.03) 1px, rgba(0,0,0,0.03) 4px);
+          opacity: 0.35;
         }
-        .glow-text {
-          text-shadow: 0 0 20px rgba(255, 255, 255, 0.4), 0 0 40px rgba(255, 255, 255, 0.1);
+        .nexus-vignette {
+          background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.3) 65%, rgba(0,0,0,0.85) 100%);
+        }
+        .nexus-noise {
+          opacity: 0.025;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.45'/%3E%3C/svg%3E");
+          pointer-events: none;
         }
       `}</style>
     </motion.div>

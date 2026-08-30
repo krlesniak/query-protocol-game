@@ -20,81 +20,66 @@ export const TableInspectorModal = ({ tableName, onClose }: TableInspectorModalP
       try {
         const pragmaRes = dbService.execute(`PRAGMA table_info(${tableName});`);
         if (pragmaRes.length > 0) {
-          const colsInfo = pragmaRes[0].values.map(val => ({
-            name: String(val[1]),
-            type: String(val[2]),
-            pk: Boolean(val[5])
-          }));
+          const colsInfo = pragmaRes[0].values.map(val => ({ name: String(val[1]), type: String(val[2]), pk: Boolean(val[5]) }));
           setColumns(colsInfo);
         }
-
         const countRes = dbService.execute(`SELECT COUNT(*) FROM ${tableName};`);
-        if (countRes.length > 0) {
-          setRowCount(Number(countRes[0].values[0][0]));
-        }
-
+        if (countRes.length > 0) { setRowCount(Number(countRes[0].values[0][0])); }
         const dataRes = dbService.execute(`SELECT * FROM ${tableName} LIMIT 10;`);
-        if (dataRes.length > 0) {
-          setPreviewData({
-            cols: dataRes[0].columns,
-            rows: dataRes[0].values 
-          });
-        }
-      } catch {
-        setError("Failed to inspect table structure.");
-      }
+        if (dataRes.length > 0) { setPreviewData({ cols: dataRes[0].columns, rows: dataRes[0].values }); }
+      } catch { setError("Failed to inspect table structure."); }
     };
-
     loadTableData();
   }, [tableName]);
 
   return (
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
-      className="absolute inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-md p-2 sm:p-4"
+      className="absolute inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 sm:p-6"
       onClick={onClose}
     >
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} 
-        className="bg-[var(--surface-1)] border border-[var(--border)] w-full max-w-4xl max-h-[90vh] flex flex-col shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden"
+        initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} transition={{ duration: 0.3 }}
+        className="bg-[#090c0c] border border-[#303630] w-full max-w-4xl max-h-[90vh] flex flex-col shadow-[0_25px_80px_rgba(0,0,0,0.7)] overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-[var(--border)] bg-[#131920] shrink-0">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <TableIcon className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--accent-bright)] shrink-0" />
-            <span className="font-mono text-[10px] sm:text-[12px] text-[var(--accent-bright)] tracking-[0.1em] sm:tracking-[0.2em] font-bold truncate">
+        <div className="flex items-center justify-between px-5 sm:px-8 py-4 sm:py-5 border-b border-[#303630] bg-[#070909] shrink-0">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <TableIcon className="w-4 h-4 sm:w-5 sm:h-5 text-[#a3ad82] shrink-0" />
+            <span className="font-mono text-xs sm:text-sm text-[#a3ad82] tracking-[0.2em] font-bold truncate uppercase">
               NEXUS_OS // TABLE INSPECTOR
             </span>
           </div>
-          <button onClick={onClose} className="text-[var(--text-muted)] hover:text-white transition-colors bg-[var(--surface-2)] p-1 rounded-sm shrink-0">
+          <button onClick={onClose} className="text-[#656a63] hover:text-[#d4d6c8] transition-colors bg-[#0a0d0c] border border-[#303630] hover:border-[#a3ad82] p-1 rounded-none shrink-0">
              <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 
         {error ? (
-          <div className="p-4 sm:p-8 font-mono text-red-500/80 text-sm">{error}</div>
+          <div className="p-6 sm:p-10 font-mono text-[#956b59] text-sm tracking-widest uppercase">{error}</div>
         ) : (
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#0a0d10] font-mono">
-            <div className="mb-4 sm:mb-6 border-l-2 border-[var(--accent-bright)] pl-3 sm:pl-4">
-              <h2 className="text-xl sm:text-2xl text-white tracking-widest">{tableName.toUpperCase()}</h2>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2 text-[10px] sm:text-[12px] text-[var(--text-muted)]">
-                <span className="flex items-center gap-1"><Hash className="w-3 h-3" /> TOTAL RECORDS: {rowCount}</span>
-                <span className="flex items-center gap-1"><LayoutList className="w-3 h-3" /> COLUMNS: {columns.length}</span>
+          <div className="flex-1 overflow-y-auto p-5 sm:p-8 bg-[#050707] font-mono">
+            <div className="mb-6 sm:mb-8 border-l-2 border-[#806d4b] pl-4 sm:pl-5">
+              <h2 className="text-xl sm:text-3xl text-[#c0c2b9] tracking-widest uppercase font-bold">{tableName}</h2>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 mt-3 text-[10px] sm:text-xs tracking-widest text-[#70756d] uppercase">
+                <span className="flex items-center gap-2"><Hash className="w-3.5 h-3.5 text-[#806d4b]" /> TOTAL RECORDS: {rowCount}</span>
+                <span className="flex items-center gap-2"><LayoutList className="w-3.5 h-3.5 text-[#806d4b]" /> COLUMNS: {columns.length}</span>
               </div>
             </div>
 
-            <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
-              <div className="lg:w-1/3 border border-[var(--border)] bg-[var(--surface-1)] p-3 sm:p-4">
-                <h3 className="text-[10px] sm:text-[11px] tracking-[0.1em] text-[var(--text-secondary)] mb-3 sm:mb-4 flex items-center gap-2 border-b border-[var(--border)] pb-2">
+            <div className="flex flex-col lg:flex-row gap-5 sm:gap-8">
+              {/* SCHEMA STRUCTURE */}
+              <div className="lg:w-1/3 border border-[#303630] bg-[#090c0c] p-4 sm:p-6 shadow-sm">
+                <h3 className="text-[10px] sm:text-xs tracking-[0.15em] text-[#806d4b] mb-4 sm:mb-5 flex items-center gap-3 border-b border-[#303630] pb-3 uppercase font-bold">
                   <Type className="w-4 h-4 shrink-0" /> SCHEMA STRUCTURE
                 </h3>
-                <ul className="flex flex-col gap-2">
+                <ul className="flex flex-col gap-3">
                   {columns.map((col) => (
-                    <li key={col.name} className="flex items-center justify-between text-[11px] sm:text-[13px]">
-                      <span className={`font-bold ${col.pk ? 'text-amber-400/80' : 'text-[var(--accent-light-grey)]'} truncate mr-2`}>
+                    <li key={col.name} className="flex items-center justify-between text-[11px] sm:text-[13px] tracking-wide">
+                      <span className={`font-bold uppercase truncate mr-3 ${col.pk ? 'text-[#806d4b]' : 'text-[#b3b5ad]'}`}>
                         {col.name} {col.pk && '(PK)'}
                       </span>
-                      <span className="text-[9px] sm:text-[10px] text-[var(--text-muted)] bg-[var(--surface-2)] px-2 py-0.5 rounded-sm shrink-0">
+                      <span className="text-[9px] sm:text-[10px] text-[#656a63] bg-[#050707] border border-[#1a1e1c] px-2 py-1 rounded-none shrink-0 tracking-widest uppercase">
                         {col.type}
                       </span>
                     </li>
@@ -102,34 +87,34 @@ export const TableInspectorModal = ({ tableName, onClose }: TableInspectorModalP
                 </ul>
               </div>
 
-              <div className="lg:w-2/3 border border-[var(--border)] bg-[var(--surface-1)] p-3 sm:p-4 overflow-hidden flex flex-col">
-                <h3 className="text-[10px] sm:text-[11px] tracking-[0.1em] text-[var(--text-secondary)] mb-3 sm:mb-4 flex items-center gap-2 border-b border-[var(--border)] pb-2 shrink-0">
+              {/* DATA PREVIEW */}
+              <div className="lg:w-2/3 border border-[#303630] bg-[#090c0c] p-4 sm:p-6 shadow-sm overflow-hidden flex flex-col">
+                <h3 className="text-[10px] sm:text-xs tracking-[0.15em] text-[#a3ad82] mb-4 sm:mb-5 flex items-center gap-3 border-b border-[#303630] pb-3 shrink-0 uppercase font-bold">
                   <TableIcon className="w-4 h-4 shrink-0" /> DATA PREVIEW (TOP 10)
                 </h3>
-                {/* overflow-x-auto chroni przed rozepchaniem przez tabelę na mobile */}
                 <div className="overflow-x-auto pb-2">
-                  <table className="w-full text-left text-[11px] sm:text-[13px]">
+                  <table className="w-full text-left text-[11px] sm:text-[13px] tracking-wide">
                     <thead>
-                      <tr className="border-b border-[var(--border)] text-[var(--text-muted)]">
+                      <tr className="border-b border-[#4e574d] text-[#8c9187] uppercase">
                         {previewData.cols.map((col) => (
-                          <th key={col} className="p-2 font-normal whitespace-nowrap">{col}</th>
+                          <th key={col} className="p-3 font-bold whitespace-nowrap">{col}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {previewData.rows.length > 0 ? (
                         previewData.rows.map((row, i) => (
-                          <tr key={i} className="border-b border-[var(--border)] hover:bg-[var(--surface-2)] transition-colors">
+                          <tr key={i} className="border-b border-[#1a1e1c] hover:bg-[#121512] transition-colors">
                             {row.map((val, j) => (
-                              <td key={j} className="p-2 whitespace-nowrap text-[var(--accent-light-grey)] max-w-[150px] sm:max-w-[300px] truncate">
-                                {val === null ? <span className="text-red-400/50 italic">NULL</span> : String(val)}
+                              <td key={j} className="p-3 whitespace-nowrap text-[#b3b5ad] max-w-[150px] sm:max-w-[300px] truncate">
+                                {val === null ? <span className="text-[#956b59] italic">NULL</span> : String(val)}
                               </td>
                             ))}
                           </tr>
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={previewData.cols.length} className="p-4 text-center text-[var(--text-muted)] italic">
+                          <td colSpan={previewData.cols.length} className="p-6 text-center text-[#656a63] italic tracking-widest uppercase">
                             [ TABLE IS EMPTY ]
                           </td>
                         </tr>
@@ -139,7 +124,6 @@ export const TableInspectorModal = ({ tableName, onClose }: TableInspectorModalP
                 </div>
               </div>
             </div>
-
           </div>
         )}
       </motion.div>

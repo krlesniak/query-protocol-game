@@ -194,7 +194,7 @@ export const EVIDENCE_DB: Record<string, Evidence> = {
     imagePath: "/assets/evidence/evidence_11.png",
     easterEgg: {
       actionType: 'standard',
-      x: 45, y: 45, width: 10, height: 10, // TO DO: adjust the easter egg area to match the actual hidden message location
+      x: 59, y: 40, width: 11, height: 17, // TO DO: adjust the easter egg area to match the actual hidden message location
       message: "[SYSTEM MESSAGE] Dziękuję. Za dokończenie tego, co zacząłem. Przekaż dowody centrali. Nie pozwól im wygrać. – Adrian"
     }
   }
