@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { MainLayout } from './components/layout/MainLayout';
 import { IntroCinematic } from './components/intro/IntroCinematic';
 import { dbService } from './db/DatabaseService';
@@ -33,7 +33,6 @@ function App() {
   const [bootLogs, setBootLogs] = useState<string[]>([]);
   const [progress, setProgress] = useState(0);
   const [showResetWarning, setShowResetWarning] = useState(false);
-  const bootInitiated = useRef(false); // ZABEZPIECZENIE PRZED RESTARTEM
 
   const { currentLevel, score, collectedEvidence, resetGame, hasSeenIntro, setHasSeenIntro, soundEnabled, toggleSound, musicVolume, sfxVolume } = useGameStore();
 
@@ -45,10 +44,6 @@ function App() {
   const { play: playBeep } = useSound('beep2.mp3', { volume: soundEnabled ? sfxVolume : 0 });
 
   useEffect(() => {
-    // BLOKADA: Uruchom tylko raz przy starcie aplikacji
-    if (bootInitiated.current) return;
-    bootInitiated.current = true;
-
     let aborted = false;
 
     const initializeDatabase = async () => {
@@ -84,7 +79,9 @@ function App() {
 
     startSystem();
     return () => { aborted = true; };
-  }, [playKeyboard, playBeep]);
+    
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); 
 
   const handleContinue = () => { playClick(); window.setTimeout(() => { setAppState('playing'); }, 100); };
   const startGameFlow = () => { window.setTimeout(() => { if (!hasSeenIntro) { setAppState('intro'); } else { setAppState('playing'); } }, 100); };
@@ -95,7 +92,7 @@ function App() {
   return (
     <div className="min-h-screen w-full bg-[#030505] text-[#b3b5ad] flex items-center justify-center font-mono selection:bg-[#806d4b]/30 selection:text-[#d4d6c8] overflow-hidden relative">
       
-      {/* GLOBAL CRT OVERLAYS */}
+      {/* GLOBAL CRT OVERLAYS FOR BOOT AND MENU */}
       {(appState === 'booting' || appState === 'menu') && (
         <>
           <div className="pointer-events-none absolute inset-0 z-0 bg-[repeating-linear-gradient(to_bottom,rgba(255,255,255,0.015)_0px,rgba(255,255,255,0.015)_1px,rgba(0,0,0,0.03)_1px,rgba(0,0,0,0.03)_4px)] opacity-30 mix-blend-screen" />
