@@ -119,3 +119,28 @@
       monospace;
   }
 }
+
+/* NEXUS_OS Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050707;
+  border-left: 1px solid #1a1e1c;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #303630;
+  border-radius: 0px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4e574d;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #303630 #050707;
+}

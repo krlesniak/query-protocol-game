@@ -117,8 +117,8 @@ export const CaseClosed = ({ onReturnToMenu }: CaseClosedProps) => {
         <span>INTEGRITY // VERIFIED</span>
       </div>
 
-      {/* MAIN VIEWPORT*/}
-      <div className="relative z-20 flex min-h-full w-full items-center justify-center px-4 py-24 sm:px-8 sm:py-28">
+      {/* MAIN VIEWPORT */}
+      <div className="relative z-20 flex min-h-full w-full items-center justify-center px-4 pt-24 pb-12 sm:px-8 sm:py-14">
 
         {/* CENTRAL DOCUMENT */}
         <motion.div
@@ -129,15 +129,16 @@ export const CaseClosed = ({ onReturnToMenu }: CaseClosedProps) => {
         >
           <div className="absolute left-0 top-0 h-px w-full bg-[#806d4b]/70" />
 
-          <div className="shrink-0 border-b border-[#292e29] px-6 py-6 sm:px-10 sm:py-8">
+          {/* HEADER */}
+          <div className="shrink-0 border-b border-[#292e29] px-5 py-5 sm:px-8 sm:py-6">
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">
                 <div className="mb-2 text-[10px] sm:text-xs tracking-[0.24em] text-[#656a63] uppercase">EXECUTIVE SECURITY ARCHIVE</div>
                 <div className="flex items-center gap-4">
-                  <div className="h-12 w-1.5 shrink-0 bg-[#7f6b48]/70 sm:h-14" />
+                  <div className="h-10 w-1.5 shrink-0 bg-[#7f6b48]/70 sm:h-12" />
                   <div>
-                    <h1 className="text-2xl sm:text-4xl font-medium tracking-[0.1em] text-[#c0c2b9] uppercase">CASE CLOSED</h1>
-                    <div className="mt-1.5 text-[10px] sm:text-xs tracking-[0.18em] text-[#686d65] uppercase">QUERY_PROTOCOL // ORACLE-01</div>
+                    <h1 className="text-2xl sm:text-3xl font-medium tracking-[0.1em] text-[#c0c2b9] uppercase">CASE CLOSED</h1>
+                    <div className="mt-1.5 text-[9px] sm:text-[11px] tracking-[0.18em] text-[#686d65] uppercase">QUERY_PROTOCOL // ORACLE-01</div>
                   </div>
                 </div>
               </div>
@@ -148,79 +149,79 @@ export const CaseClosed = ({ onReturnToMenu }: CaseClosedProps) => {
             </div>
           </div>
 
-          <div className="flex shrink-0 items-center justify-between border-b border-[#292e29] bg-[#070a09]/80 px-6 py-3 sm:px-10">
-            <div className="flex items-center gap-3 text-[10px] sm:text-xs tracking-[0.17em] text-[#676d65] uppercase">
-              <span className="h-2 w-2 bg-[#71806d]" /> INVESTIGATION STATUS
+          <div className="flex shrink-0 items-center justify-between border-b border-[#292e29] bg-[#070a09]/80 px-5 py-2.5 sm:px-8">
+            <div className="flex items-center gap-3 text-[9px] sm:text-[11px] tracking-[0.17em] text-[#676d65] uppercase">
+              <span className="h-1.5 w-1.5 bg-[#71806d]" /> INVESTIGATION STATUS
             </div>
-            <div className="text-[10px] sm:text-xs tracking-[0.18em] text-[#9a875f] uppercase">ARCHIVED</div>
+            <div className="text-[9px] sm:text-[11px] tracking-[0.18em] text-[#9a875f] uppercase">ARCHIVED</div>
           </div>
 
           {/* STATS GRID */}
           <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid shrink-0 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-b border-[#292e29]">
             
-            <motion.div variants={itemVariants} className="border-b border-[#292e29] px-6 py-4 lg:border-b-0 lg:border-r sm:px-8 sm:py-5">
-              <div className="text-[10px] sm:text-xs tracking-[0.16em] text-[#5f655e] uppercase">CLASSIFICATION</div>
-              <div className="mt-2 truncate text-sm sm:text-base lg:text-lg tracking-[0.08em] text-[#a8956d] uppercase font-bold">{getRank(score)}</div>
+            <motion.div variants={itemVariants} className="border-b border-[#292e29] px-5 py-4 lg:border-b-0 lg:border-r sm:px-6">
+              <div className="text-[9px] sm:text-[11px] tracking-[0.16em] text-[#5f655e] uppercase">CLASSIFICATION</div>
+              <div className="mt-2 text-sm sm:text-base tracking-[0.08em] text-[#a8956d] uppercase font-bold break-words leading-tight">{getRank(score)}</div>
             </motion.div>
 
-            <motion.div variants={itemVariants} className="border-b border-[#292e29] px-6 py-4 lg:border-b-0 lg:border-r sm:px-8 sm:py-5">
-              <div className="text-[10px] sm:text-xs tracking-[0.16em] text-[#5f655e] uppercase">EVIDENCE VALUE</div>
-              <div className="mt-2 text-lg sm:text-xl lg:text-2xl tracking-[0.08em] text-[#b7b8b0]">{score}</div>
+            <motion.div variants={itemVariants} className="border-b border-[#292e29] px-5 py-4 lg:border-b-0 lg:border-r sm:px-6">
+              <div className="text-[9px] sm:text-[11px] tracking-[0.16em] text-[#5f655e] uppercase">EVIDENCE VALUE</div>
+              <div className="mt-2 text-lg sm:text-xl tracking-[0.08em] text-[#b7b8b0]">{score}</div>
             </motion.div>
 
-            <motion.div variants={itemVariants} className="border-b border-[#292e29] px-6 py-4 sm:border-r sm:border-b-0 lg:border-r sm:px-8 sm:py-5">
-              <div className="text-[10px] sm:text-xs tracking-[0.16em] text-[#5f655e] uppercase">SESSION</div>
-              <div className="mt-2 text-lg sm:text-xl lg:text-2xl tracking-[0.05em] text-[#b7b8b0]">{formatTime(playTime)}</div>
+            <motion.div variants={itemVariants} className="border-b border-[#292e29] px-5 py-4 sm:border-r sm:border-b-0 lg:border-r sm:px-6">
+              <div className="text-[9px] sm:text-[11px] tracking-[0.16em] text-[#5f655e] uppercase">SESSION</div>
+              <div className="mt-2 text-lg sm:text-xl tracking-[0.05em] text-[#b7b8b0]">{formatTime(playTime)}</div>
             </motion.div>
 
-            <motion.div variants={itemVariants} className="border-b border-[#292e29] px-6 py-4 sm:border-b-0 lg:border-r sm:px-8 sm:py-5">
-              <div className="text-[10px] sm:text-xs tracking-[0.16em] text-[#5f655e] uppercase">LEVELS CLEARED</div>
-              <div className="mt-2 text-lg sm:text-xl lg:text-2xl tracking-[0.08em] text-[#b7b8b0]">{completedLevels.length} <span className="text-[#555a53]">/ {LEVELS.length}</span></div>
+            <motion.div variants={itemVariants} className="border-b border-[#292e29] px-5 py-4 sm:border-b-0 lg:border-r sm:px-6">
+              <div className="text-[9px] sm:text-[11px] tracking-[0.16em] text-[#5f655e] uppercase">LEVELS CLEARED</div>
+              <div className="mt-2 text-lg sm:text-xl tracking-[0.08em] text-[#b7b8b0]">{completedLevels.length} <span className="text-[#555a53]">/ {LEVELS.length}</span></div>
             </motion.div>
 
-            <motion.div variants={itemVariants} className="border-b sm:border-b-0 sm:border-r border-[#292e29] px-6 py-4 lg:border-t lg:border-r sm:px-8 sm:py-5">
-              <div className="text-[10px] sm:text-xs tracking-[0.16em] text-[#5f655e] uppercase">EVIDENCE</div>
-              <div className="mt-2 text-lg sm:text-xl lg:text-2xl tracking-[0.08em] text-[#b7b8b0]">{collectedEvidence.length} <span className="ml-2 text-[10px] sm:text-xs text-[#646a62]">FILES</span></div>
+            <motion.div variants={itemVariants} className="border-b sm:border-b-0 sm:border-r border-[#292e29] px-5 py-4 lg:border-t lg:border-r sm:px-6">
+              <div className="text-[9px] sm:text-[11px] tracking-[0.16em] text-[#5f655e] uppercase">EVIDENCE</div>
+              <div className="mt-2 text-lg sm:text-xl tracking-[0.08em] text-[#b7b8b0]">{collectedEvidence.length} <span className="ml-2 text-[9px] sm:text-[10px] text-[#646a62]">FILES</span></div>
             </motion.div>
 
-            <motion.div variants={itemVariants} className="border-b sm:border-b-0 border-[#292e29] px-6 py-4 lg:border-t lg:border-r sm:px-8 sm:py-5">
-              <div className="text-[10px] sm:text-xs tracking-[0.16em] text-[#5f655e] uppercase">QUERIES / FAILED</div>
-              <div className="mt-2 text-lg sm:text-xl lg:text-2xl tracking-[0.08em] text-[#b7b8b0]">{totalQueryAttempts} <span className="ml-2 text-[#8b6557]">/ {failedQueries}</span></div>
+            <motion.div variants={itemVariants} className="border-b sm:border-b-0 border-[#292e29] px-5 py-4 lg:border-t lg:border-r sm:px-6">
+              <div className="text-[9px] sm:text-[11px] tracking-[0.16em] text-[#5f655e] uppercase">QUERIES / FAILED</div>
+              <div className="mt-2 text-lg sm:text-xl tracking-[0.08em] text-[#b7b8b0]">{totalQueryAttempts} <span className="ml-2 text-[#8b6557]">/ {failedQueries}</span></div>
             </motion.div>
 
-            <motion.div variants={itemVariants} className="border-b sm:border-b-0 sm:border-r border-[#292e29] px-6 py-4 lg:border-t lg:border-r sm:px-8 sm:py-5">
-              <div className="text-[10px] sm:text-xs tracking-[0.16em] text-[#5f655e] uppercase">ASSISTANCE</div>
-              <div className="mt-2 text-lg sm:text-xl lg:text-2xl tracking-[0.08em] text-[#b7b8b0]">{totalHints}</div>
+            <motion.div variants={itemVariants} className="border-b sm:border-b-0 sm:border-r border-[#292e29] px-5 py-4 lg:border-t lg:border-r sm:px-6">
+              <div className="text-[9px] sm:text-[11px] tracking-[0.16em] text-[#5f655e] uppercase">ASSISTANCE</div>
+              <div className="mt-2 text-lg sm:text-xl tracking-[0.08em] text-[#b7b8b0]">{totalHints}</div>
             </motion.div>
 
-            <motion.div variants={itemVariants} className="px-6 py-4 sm:px-8 sm:py-5 lg:border-t">
-              <div className="text-[10px] sm:text-xs tracking-[0.16em] text-[#5f655e] uppercase">RECORD STATE</div>
-              <div className="mt-2 text-sm sm:text-base lg:text-lg tracking-[0.08em] text-[#a08a60] uppercase font-bold">SEALED</div>
+            <motion.div variants={itemVariants} className="px-5 py-4 sm:px-6 lg:border-t">
+              <div className="text-[9px] sm:text-[11px] tracking-[0.16em] text-[#5f655e] uppercase">RECORD STATE</div>
+              <div className="mt-2 text-sm sm:text-base tracking-[0.08em] text-[#a08a60] uppercase font-bold">SEALED</div>
             </motion.div>
 
           </motion.div>
 
           {/* INVESTIGATION NOTE */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8, duration: 0.6 }} className="mx-5 my-5 sm:mx-10 sm:my-8 shrink-0 border border-[#353a34] bg-[#070a09]/65 px-6 py-5 sm:px-8 sm:py-6">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8, duration: 0.6 }} className="mx-5 my-4 sm:mx-8 sm:my-6 shrink-0 border border-[#353a34] bg-[#070a09]/65 px-5 py-4 sm:px-6 sm:py-5">
             <div className="flex items-center gap-3">
-              <span className="h-2 w-2 shrink-0 bg-[#806d4b]" />
-              <span className="text-[10px] sm:text-xs tracking-[0.18em] text-[#8b8d84] uppercase font-bold">SECURITY NOTICE</span>
+              <span className="h-1.5 w-1.5 shrink-0 bg-[#806d4b]" />
+              <span className="text-[9px] sm:text-[11px] tracking-[0.18em] text-[#8b8d84] uppercase font-bold">SECURITY NOTICE</span>
             </div>
-            <p className="mt-3 text-xs sm:text-sm leading-relaxed tracking-[0.05em] text-[#656a63]">
+            <p className="mt-2.5 text-[11px] sm:text-xs leading-relaxed tracking-[0.05em] text-[#656a63]">
               INVESTIGATION RECORD SEALED. RECOVERED EVIDENCE RETAINED UNDER NEXUS SECURITY POLICY. ALL UNAUTHORIZED ACCESS ATTEMPTS WILL BE LOGGED.
             </p>
           </motion.div>
 
           {/* ACTIONS */}
-          <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1, duration: 0.6 }} className="shrink-0 px-5 pb-5 sm:px-10 sm:pb-8">
+          <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1, duration: 0.6 }} className="shrink-0 px-5 pb-5 sm:px-8 sm:pb-6">
             {!confirmWipe ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <button
                   onClick={handleRestart}
                   onMouseEnter={playHover}
-                  className="group flex min-w-0 items-center justify-between border border-[#555a52] bg-[#080a0a]/75 px-5 py-4 sm:px-6 sm:py-5 transition-all duration-300 hover:border-[#806d4b]/70 hover:bg-[#0d100f]"
+                  className="group flex min-w-0 items-center justify-between border border-[#555a52] bg-[#080a0a]/75 px-4 py-3.5 sm:px-5 sm:py-4 transition-all duration-300 hover:border-[#806d4b]/70 hover:bg-[#0d100f]"
                 >
-                  <span className="truncate text-[10px] sm:text-xs font-bold tracking-[0.18em] text-[#92958c] uppercase transition-colors group-hover:text-[#b09a70]">
+                  <span className="truncate text-[9px] sm:text-[11px] font-bold tracking-[0.18em] text-[#92958c] uppercase transition-colors group-hover:text-[#b09a70]">
                     RESTART INVESTIGATION
                   </span>
                   <span className="ml-3 text-sm text-[#656a62] transition-colors group-hover:text-[#a18b61]">↻</span>
@@ -229,33 +230,33 @@ export const CaseClosed = ({ onReturnToMenu }: CaseClosedProps) => {
                 <button
                   onClick={() => { playClick(); setConfirmWipe(true); }}
                   onMouseEnter={playHover}
-                  className="group flex min-w-0 items-center justify-between border border-[#76584f]/50 bg-[#0b0908]/70 px-5 py-4 sm:px-6 sm:py-5 transition-all duration-300 hover:border-[#8b6557]/70 hover:bg-[#120c0a]"
+                  className="group flex min-w-0 items-center justify-between border border-[#76584f]/50 bg-[#0b0908]/70 px-4 py-3.5 sm:px-5 sm:py-4 transition-all duration-300 hover:border-[#8b6557]/70 hover:bg-[#120c0a]"
                 >
-                  <span className="truncate text-[10px] sm:text-xs font-bold tracking-[0.18em] text-[#806d64] uppercase transition-colors group-hover:text-[#a47766]">
+                  <span className="truncate text-[9px] sm:text-[11px] font-bold tracking-[0.18em] text-[#806d64] uppercase transition-colors group-hover:text-[#a47766]">
                     CLEAR RECORD & EXIT
                   </span>
                   <span className="ml-3 text-sm text-[#6d5a54] transition-colors group-hover:text-[#916c5d]">→</span>
                 </button>
               </div>
             ) : (
-              <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="border border-[#76584f]/60 bg-[#0b0908]/85 p-5 sm:p-6">
-                <div className="mb-3 flex items-center gap-3">
-                  <span className="h-2 w-2 bg-[#956957]" />
-                  <span className="text-[10px] sm:text-xs font-bold tracking-[0.15em] text-[#9a7061] uppercase">SECURITY WARNING</span>
+              <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="border border-[#76584f]/60 bg-[#0b0908]/85 p-4 sm:p-5">
+                <div className="mb-2.5 flex items-center gap-3">
+                  <span className="h-1.5 w-1.5 bg-[#956957]" />
+                  <span className="text-[9px] sm:text-[11px] font-bold tracking-[0.15em] text-[#9a7061] uppercase">SECURITY WARNING</span>
                 </div>
-                <p className="mb-5 text-xs sm:text-sm leading-relaxed tracking-[0.07em] text-[#777a72]">
+                <p className="mb-4 text-[11px] sm:text-xs leading-relaxed tracking-[0.07em] text-[#777a72]">
                   THIS ACTION WILL REMOVE LOCAL INVESTIGATION DATA FROM THE CURRENT SESSION. ALL PROGRESS WILL BE LOST.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <button
                     onClick={handleConfirmPurge}
-                    className="border border-[#76584f]/60 bg-[#180f0c] py-3.5 sm:py-4 text-[10px] sm:text-xs font-bold tracking-[0.12em] text-[#a47766] uppercase transition-colors hover:border-[#946b5b] hover:bg-[#261611]"
+                    className="border border-[#76584f]/60 bg-[#180f0c] py-3 text-[9px] sm:text-[11px] font-bold tracking-[0.12em] text-[#a47766] uppercase transition-colors hover:border-[#946b5b] hover:bg-[#261611]"
                   >
                     CONFIRM PURGE
                   </button>
                   <button
                     onClick={() => { playClick(); setConfirmWipe(false); }}
-                    className="border border-[#414740] bg-[#080a0a] py-3.5 sm:py-4 text-[10px] sm:text-xs tracking-[0.12em] text-[#686d65] uppercase transition-colors hover:bg-[#101310] hover:text-[#9a9d94]"
+                    className="border border-[#414740] bg-[#080a0a] py-3 text-[9px] sm:text-[11px] tracking-[0.12em] text-[#686d65] uppercase transition-colors hover:bg-[#101310] hover:text-[#9a9d94]"
                   >
                     RETAIN RECORD
                   </button>
@@ -264,7 +265,7 @@ export const CaseClosed = ({ onReturnToMenu }: CaseClosedProps) => {
             )}
           </motion.div>
 
-          <div className="flex shrink-0 items-center justify-between border-t border-[#292e29] px-6 py-3 sm:px-10 sm:py-4 text-[8px] sm:text-[10px] tracking-[0.18em] text-[#50554e] uppercase">
+          <div className="flex shrink-0 items-center justify-between border-t border-[#292e29] px-5 py-2.5 sm:px-8 sm:py-3 text-[7px] sm:text-[9px] tracking-[0.18em] text-[#50554e] uppercase">
             <span>NEXUS SECURITY ARCHIVE</span>
             <span>LEVEL: RESTRICTED</span>
             <span className="hidden sm:block">RECORD SEALED</span>

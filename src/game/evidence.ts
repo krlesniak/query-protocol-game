@@ -34,7 +34,7 @@ export const EVIDENCE_DB: Record<string, Evidence> = {
     imagePath: "/assets/evidence/evidence_01.png",
     easterEgg: {
       actionType: 'standard',
-      x: 72, y: 27, width: 7, height: 7,
+      x: 72, y: 24, width: 7, height: 7,
       message: "[HINT: LEVEL 4] Log serwisowy: Kamera CCTV-82 uległa \"awarii\" zasilania dokładnie o 23:47. Sprawca musiał celowo uszkodzić zasilanie przed wejściem. Szukaj zdarzeń o statusie 'CRITICAL' w tabeli incidents."
     }
   },
@@ -50,7 +50,7 @@ export const EVIDENCE_DB: Record<string, Evidence> = {
     imagePath: "/assets/evidence/evidence_02.png",
     easterEgg: {
       actionType: 'standard',
-      x: 56.5, y: 75.0, width: 25, height: 5.5,
+      x: 56.5, y: 80.0, width: 25, height: 6.5,
       message: "[HINT: LEVEL 5] Indeks bazy nie zgadza się z faktyczną liczbą rekordów. Ktoś z zewnątrz nie dałby rady tak głęboko zmanipulować logów. Szukaj sprawcy (lub jego poświadczeń) w dziale 'SECURITY' z najwyższym dostępem (clearance_level = 5)."
     }
   },
@@ -66,7 +66,7 @@ export const EVIDENCE_DB: Record<string, Evidence> = {
     imagePath: "/assets/evidence/evidence_03.png",
     easterEgg: {
       actionType: 'standard',
-      x: 8.7, y: 59.5, width: 13.5, height: 6,
+      x: 8.7, y: 62.0, width: 13.5, height: 6.5,
       message: "[HINT: LEVEL 6] Analiza RFID w tle: Karta pracownika ID 13 logowała się minionej nocy do terminala komunikacyjnego na sektorze głównym. Użyj operatora LIKE ze znakiem '%', aby przeszukać tabelę messages pod kątem jego nieoficjalnych raportów ze zmiany."
     }
   },
@@ -82,7 +82,7 @@ export const EVIDENCE_DB: Record<string, Evidence> = {
     imagePath: "/assets/evidence/evidence_04.png",
     easterEgg: {
       actionType: 'standard',
-      x: 3.5, y: 78.0, width: 30, height: 3.7,
+      x: 3.5, y: 83.6, width: 30, height: 3.7,
       message: "[HINT: LEVEL 21] Odzyskano usunięty wers wiadomości: 'Jeśli zarząd spróbuje wymazać prawdę, zastaw na nich pułapkę. Będziesz musiał użyć CREATE TRIGGER AFTER DELETE, żeby złapać ich na gorącym uczynku w audit_logs.'"
     }
   },
@@ -98,7 +98,7 @@ export const EVIDENCE_DB: Record<string, Evidence> = {
     imagePath: "/assets/evidence/evidence_05.png",
     easterEgg: {
       actionType: 'standard',
-      x: 60.4, y: 32.8, width: 3.5, height: 5,
+      x: 60.4, y: 30.0, width: 3.5, height: 5,
       message: "[HINT: LEVEL 10] Ostrzeżenie systemu IDS wyizolowało 892 pakiety z jednego źródła. Aby odnaleźć winnego tej anomalii, musisz zagregować dane (GROUP BY employee_id), posortować wyniki malejąco (ORDER BY ... DESC) i ograniczyć je (LIMIT 1)."
     }
   },
@@ -130,7 +130,7 @@ export const EVIDENCE_DB: Record<string, Evidence> = {
     imagePath: "/assets/evidence/evidence_07.png",
     easterEgg: {
       actionType: 'oracle_eyes',
-      x: 59.2, y: 25.7, width: 4.5, height: 13,
+      x: 59.2, y: 21.5, width: 4.5, height: 15,
       message: "[HINT: LEVEL 16] Analiza śladów termicznych: Ucieczka odbyła się korytarzem technicznym w trakcie słynnej 'brakującej godziny'. Aby odtworzyć ich trasę w SQL i wykluczyć szum, musisz połączyć funkcje grupujące 'MIN' oraz 'MAX' w klauzuli 'HAVING'."
     }
   },
@@ -147,7 +147,7 @@ export const EVIDENCE_DB: Record<string, Evidence> = {
     easterEgg: {
       actionType: 'password', // SPECIAL MECHANICS - requires password input to reveal hidden text
       actionConfig: { expectedPassword: 'VOSS' },
-      x: 68.5, y: 26, width: 15.0, height: 9,
+      x: 68.5, y: 22, width: 15.0, height: 10,
       message: "[HINT: LEVEL 25] Odzyskano notatki zablokowane hasłem dyrektora: Główny architekt projektu starannie ukrył swoje ślady i zablokował dostęp podrzędnym kontom. Użyj 'NOT EXISTS', aby znaleźć elitę zarządzającą, która komunikowała się o MIRROR, ale w jej profilu brakuje śladów odrzuconych logowań."
     }
   },
@@ -164,7 +164,7 @@ export const EVIDENCE_DB: Record<string, Evidence> = {
     easterEgg: {
       actionType: 'redacted', // SPECIAL MECHANICS - shows redacted text when discovered
       actionConfig: { revealedText: "NODE_XX: CEO_DIRECT_LINE" },
-      x: 35.5, y: 62.4, width: 18.0, height: 6,
+      x: 35.5, y: 65.2, width: 20.0, height: 6.7,
       message: "[HINT: LEVEL 24] Dekryptaż warstwy graficznej zakończony. Projekt Mirror nie szpiegował tylko zwykłych pracowników, był podpięty bezpośrednio pod linie zarządu. Pamiętaj, struktura tych węzłów jest rekurencyjna. Użyj 'WITH RECURSIVE' i złącz iteracje przez 'UNION ALL'."
     }
   },
@@ -179,7 +179,7 @@ export const EVIDENCE_DB: Record<string, Evidence> = {
     imagePath: "/assets/evidence/evidence_10.png",
     easterEgg: {
       actionType: 'standard',
-      x: 73.6, y: 21, width: 22, height: 6.4,
+      x: 73.6, y: 16.6, width: 22, height: 6.4,
       message: "[HINT: LEVEL 28] Logiki śledcze ujawniają maskowanie błędów. Administratorzy zacierają ślady wprowadzając szum statystyczny. Wylicz średnią bazową z operacji za pomocą 'AVG' i znajdź rekord o największym odchyleniu matematycznym wykorzystując bezwzględną funkcję 'ABS'."
     }
   },
@@ -194,7 +194,7 @@ export const EVIDENCE_DB: Record<string, Evidence> = {
     imagePath: "/assets/evidence/evidence_11.png",
     easterEgg: {
       actionType: 'standard',
-      x: 59, y: 40, width: 11, height: 17, // TO DO: adjust the easter egg area to match the actual hidden message location
+      x: 59, y: 39, width: 11, height: 18,
       message: "[SYSTEM MESSAGE] Dziękuję. Za dokończenie tego, co zacząłem. Przekaż dowody centrali. Nie pozwól im wygrać. – Adrian"
     }
   }

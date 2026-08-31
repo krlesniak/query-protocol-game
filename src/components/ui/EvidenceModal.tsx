@@ -85,17 +85,16 @@ export const EvidenceModal = ({ evidenceId, onClose }: EvidenceModalProps) => {
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-[100] flex items-center justify-center bg-[#030505]/95 backdrop-blur-md p-2 sm:p-6" onClick={onClose}>
-      
-      <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} className="bg-[#090c0c] border border-[#303630] w-[95vw] max-w-7xl h-[90vh] flex flex-col shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden relative" onClick={e => e.stopPropagation()}>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-[100] flex items-center justify-center bg-[#030505]/95 backdrop-blur-md p-0 sm:p-6" onClick={onClose}>
+      <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} className="bg-[#090c0c] border border-[#303630] w-full sm:w-[95vw] sm:max-w-7xl h-full sm:h-[90vh] flex flex-col shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden relative" onClick={e => e.stopPropagation()}>
         
         {/* HEADER */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-[#303630] bg-[#070909] shrink-0">
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5 text-[#806d4b] shrink-0" />
             <span className="font-mono text-[10px] sm:text-[12px] text-[#c0c2b9] tracking-[0.1em] sm:tracking-[0.2em] font-bold truncate uppercase">NEXUS_OS // CLASSIFIED DATA</span>
           </div>
-          <div className="flex items-center gap-4 sm:gap-6">
+          <div className="flex items-center gap-4 sm:gap-6 shrink-0">
             {ev?.easterEgg && (
               <span className={`hidden sm:flex font-mono text-[9px] sm:text-[10px] tracking-widest px-2 py-1 border rounded-none uppercase ${isSecretDiscovered ? 'text-[#a3ad82] border-[#4e574d] bg-[#0a0d0c]' : 'text-[#555a53] border-[#303630]'}`}>
                 {isSecretDiscovered ? 'SECRET: FOUND' : 'SECRET: UNKNOWN'}
@@ -111,10 +110,10 @@ export const EvidenceModal = ({ evidenceId, onClose }: EvidenceModalProps) => {
         {!ev ? (
           <div className="p-10 text-center font-mono text-[#956b59] text-sm sm:text-base tracking-widest uppercase">ERROR: FILE CORRUPTED OR NOT FOUND</div>
         ) : (
-          <div className="flex flex-col lg:flex-row h-full min-h-0 overflow-hidden">
+          <div className="flex flex-col lg:flex-row h-full min-h-0 overflow-hidden relative">
             
-            {/* IMAGE VIEWER  */}
-            <div className="lg:w-[65%] xl:w-[70%] bg-[#030505] border-b lg:border-b-0 lg:border-r border-[#303630] relative flex shrink-0 overflow-hidden">
+            {/* IMAGE VIEWER */}
+            <div className="h-[50%] lg:h-full lg:w-[65%] xl:w-[70%] bg-[#030505] border-b lg:border-b-0 lg:border-r border-[#303630] relative flex shrink-0 overflow-hidden">
               <div className="absolute inset-0 pointer-events-none z-0" style={{ backgroundImage: 'linear-gradient(rgba(163,173,130,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(163,173,130,0.02) 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
               {!imageError ? (
                 <TransformWrapper initialScale={1} minScale={0.8} maxScale={5} centerZoomedOut={true} doubleClick={{ mode: "zoomIn", step: 1 }} wheel={{ step: 0.15 }}>
@@ -128,11 +127,11 @@ export const EvidenceModal = ({ evidenceId, onClose }: EvidenceModalProps) => {
                       
                       <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }} contentStyle={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         
-                        <div className="relative w-full h-full flex items-center justify-center">
+                        <div className="relative inline-block leading-none max-w-full max-h-full">
                           <img 
                             src={ev.imagePath} 
                             alt={ev.title} 
-                            className="w-full h-full object-contain relative z-10 shadow-2xl border border-[#303630]/20 cursor-grab active:cursor-grabbing" 
+                            className="block w-auto h-auto max-w-full max-h-[45vh] lg:max-h-[85vh] shadow-[0_0_40px_rgba(0,0,0,0.6)] border border-[#303630]/40 cursor-grab active:cursor-grabbing" 
                             onError={() => setImageError(true)} 
                           />
                           
@@ -143,7 +142,7 @@ export const EvidenceModal = ({ evidenceId, onClose }: EvidenceModalProps) => {
                               style={{ left: `${ev.easterEgg.x}%`, top: `${ev.easterEgg.y}%`, width: `${ev.easterEgg.width}%`, height: `${ev.easterEgg.height}%` }}
                             >
                               {ev.easterEgg.actionType === 'redacted' && isSecretDiscovered && (
-                                <div className="w-full h-full bg-[#050707] border border-[#a3ad82] text-[#a3ad82] flex items-center justify-center font-mono text-[7px] sm:text-[10px] whitespace-nowrap z-30 shadow-[0_0_10px_rgba(163,173,130,0.3)] tracking-widest">
+                                <div className="w-full h-full bg-[#050707] border border-[#a3ad82] text-[#a3ad82] flex items-center justify-center font-mono text-[4.5px] sm:text-[10px] whitespace-nowrap z-30 shadow-[0_0_10px_rgba(163,173,130,0.3)] tracking-widest">
                                   {ev.easterEgg.actionConfig?.revealedText}
                                 </div>
                               )}
@@ -165,9 +164,9 @@ export const EvidenceModal = ({ evidenceId, onClose }: EvidenceModalProps) => {
             </div>
 
             {/* TEXT PANEL */}
-            <div className="lg:w-[35%] xl:w-[30%] flex flex-col p-5 sm:p-8 bg-[#090c0c] lg:overflow-y-auto z-10 relative shadow-[0_-10px_30px_rgba(0,0,0,0.3)] lg:shadow-[-10px_0_30px_rgba(0,0,0,0.3)]">
+            <div className="h-[50%] lg:h-full lg:w-[35%] xl:w-[30%] flex flex-col p-5 sm:p-8 bg-[#090c0c] overflow-y-auto z-10 relative shadow-[0_-10px_30px_rgba(0,0,0,0.3)] lg:shadow-[-10px_0_30px_rgba(0,0,0,0.3)]">
               <div className="mb-5 sm:mb-8 shrink-0">
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-mono text-[#c0c2b9] tracking-[0.15em] uppercase leading-tight mb-4 sm:mb-6">{ev.title}</h2>
+                <h2 className="text-lg sm:text-2xl lg:text-3xl font-mono text-[#c0c2b9] tracking-[0.15em] uppercase leading-tight mb-4 sm:mb-6">{ev.title}</h2>
                 <div className="flex flex-wrap gap-2">
                   <span className="text-[8px] sm:text-[10px] font-mono text-[#a3ad82] px-2 py-1 border border-[#4e574d] bg-[#0a0d0c] rounded-none tracking-widest uppercase">TYPE: {ev.type}</span>
                   <span className="text-[8px] sm:text-[10px] font-mono text-[#806d4b] px-2 py-1 border border-[#665b43] bg-[#0c0e0d] rounded-none tracking-widest uppercase">SOURCE_LVL: {ev.sourceLevel.toString().padStart(2, '0')}</span>
@@ -195,8 +194,6 @@ export const EvidenceModal = ({ evidenceId, onClose }: EvidenceModalProps) => {
               <div className="h-1 w-full bg-[#a3ad82] shrink-0" />
               
               <div className="p-4 sm:p-5 flex flex-col min-h-0 overflow-y-auto">
-                
-                {/* Header Hint */}
                 <div className="flex justify-between items-start gap-4 mb-4">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 text-[#a3ad82] text-[10px] sm:text-[11px] tracking-widest font-bold uppercase">
@@ -271,7 +268,6 @@ export const EvidenceModal = ({ evidenceId, onClose }: EvidenceModalProps) => {
           {showPasswordPrompt && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-[300] bg-[#020506]/85 backdrop-blur-[3px] flex items-center justify-center p-4">
               <motion.div initial={{ opacity: 0, y: 8, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.98 }} transition={{ duration: 0.18 }} className="relative w-full max-w-md bg-[#090d0f] border border-[#3a4440] shadow-[0_18px_60px_rgba(0,0,0,0.75)] overflow-hidden">
-                <div className="pointer-events-none absolute inset-0 opacity-[0.035] bg-[repeating-linear-gradient(to_bottom,transparent_0px,transparent_2px,#aab5ad_3px)]" />
                 <div className="relative px-5 sm:px-6 pt-5 border-b border-[#303936] pb-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">

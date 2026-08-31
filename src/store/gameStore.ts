@@ -77,8 +77,8 @@ const initialState = {
   hasSeenIntro: false,
   // unlockedTables: ['employees', 'locations', 'access_logs', 'infrastructure_nodes', 'messages', 'incidents', 'audit_logs', 'internal_projects'],
   unlockedTables: ['employees'],
-  // collectedEvidence: ['EVD_ORACLE_LAB_LOC', 'EVD_SERVER_LOG_CONTRADICTION', 'EVD_GHOST_PROFILE', 'EVD_ECHO_DOC', 'EVD_ARCHIVE_LOG', 'EVD_EXECUTIVE_PURGE', 'EVD_CCTV_ALPHA', 'EVD_DEAD_MAN', 'EVD_NODE_07', 'EVD_AUDIT_TRAIL', 'EVD_FINAL_PROTOCOL'],
-  collectedEvidence: [],
+  collectedEvidence: ['EVD_ORACLE_LAB_LOC', 'EVD_SERVER_LOG_CONTRADICTION', 'EVD_GHOST_PROFILE', 'EVD_ECHO_DOC', 'EVD_ARCHIVE_LOG', 'EVD_EXECUTIVE_PURGE', 'EVD_CCTV_ALPHA', 'EVD_DEAD_MAN', 'EVD_NODE_07', 'EVD_AUDIT_TRAIL', 'EVD_FINAL_PROTOCOL'],
+  // collectedEvidence: [],
   completedLevels: [],
   usedHints: {},
   queryAttempts: 0,
@@ -197,6 +197,25 @@ export const useGameStore = create<GameState>()(
     {
       name: 'query-protocol-game',
       storage: createJSONStorage(() => obfuscatedStorage),
+
+      partialize: (state) => ({ 
+        currentLevel: state.currentLevel,
+        score: state.score,
+        collectedEvidence: state.collectedEvidence,
+        unlockedTables: state.unlockedTables,
+        completedQueries: state.completedQueries,
+        completedLevels: state.completedLevels,
+        discoveredEasterEggs: state.discoveredEasterEggs,
+        usedHints: state.usedHints,
+        playTime: state.playTime,
+        hasSeenIntro: state.hasSeenIntro,
+        totalQueryAttempts: state.totalQueryAttempts,
+        failedQueries: state.failedQueries,
+        editorFontSize: state.editorFontSize,
+        soundEnabled: state.soundEnabled,
+        musicVolume: state.musicVolume,
+        sfxVolume: state.sfxVolume,
+      }),
     }
   )
 );

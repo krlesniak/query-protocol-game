@@ -33,6 +33,8 @@ function App() {
   const [bootLogs, setBootLogs] = useState<string[]>([]);
   const [progress, setProgress] = useState(0);
   const [showResetWarning, setShowResetWarning] = useState(false);
+  
+  const [mousePos, setMousePos] = useState({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
 
   const { currentLevel, score, collectedEvidence, resetGame, hasSeenIntro, setHasSeenIntro, soundEnabled, toggleSound, musicVolume, sfxVolume } = useGameStore();
 
@@ -79,9 +81,8 @@ function App() {
 
     startSystem();
     return () => { aborted = true; };
-    
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); 
+  }, []);
 
   const handleContinue = () => { playClick(); window.setTimeout(() => { setAppState('playing'); }, 100); };
   const startGameFlow = () => { window.setTimeout(() => { if (!hasSeenIntro) { setAppState('intro'); } else { setAppState('playing'); } }, 100); };
@@ -89,8 +90,22 @@ function App() {
   const confirmReset = () => { playClick(); resetGame(); setShowResetWarning(false); startGameFlow(); };
   const handleSoundToggle = () => { playClick(); toggleSound(); };
 
+  const handleMouseMove = (e: React.MouseEvent) => {
+    setMousePos({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length > 0) {
+      setMousePos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+    }
+  };
+
   return (
-    <div className="min-h-screen w-full bg-[#030505] text-[#b3b5ad] flex items-center justify-center font-mono selection:bg-[#806d4b]/30 selection:text-[#d4d6c8] overflow-hidden relative">
+    <div 
+      onMouseMove={handleMouseMove}
+      onTouchMove={handleTouchMove}
+      className="min-h-screen w-full bg-[#030505] text-[#b3b5ad] flex items-center justify-center font-mono selection:bg-[#806d4b]/30 selection:text-[#d4d6c8] overflow-hidden relative"
+    >
       
       {/* GLOBAL CRT OVERLAYS FOR BOOT AND MENU */}
       {(appState === 'booting' || appState === 'menu') && (
@@ -98,13 +113,18 @@ function App() {
           <div className="pointer-events-none absolute inset-0 z-0 bg-[repeating-linear-gradient(to_bottom,rgba(255,255,255,0.015)_0px,rgba(255,255,255,0.015)_1px,rgba(0,0,0,0.03)_1px,rgba(0,0,0,0.03)_4px)] opacity-30 mix-blend-screen" />
           <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(0,0,0,0.3)_65%,rgba(0,0,0,0.85)_100%)]" />
           <div className="pointer-events-none absolute inset-0 z-0 opacity-[0.025]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 180 180\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\' opacity=\'.45\'/%3E%3C/svg%3E")' }} />
+          
+          <div 
+            className="pointer-events-none absolute inset-0 z-[1] transition-opacity duration-300"
+            style={{ background: `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, rgba(163,173,130,0.06), transparent 40%)` }}
+          />
         </>
       )}
 
       {/* SOUND CONTROL */}
       {(appState === 'booting' || appState === 'menu') && (
         <div className="fixed top-4 right-4 sm:top-8 sm:right-8 z-[9999]">
-          <button type="button" onClick={handleSoundToggle} className="p-3 sm:p-4 border border-[#444a43] bg-[#080b0b]/90 text-[#737970] hover:text-[#aaa18a] hover:border-[#806d4b]/70 hover:bg-[#0c0f0e] transition-all duration-300 group backdrop-blur-sm">
+          <button type="button" onClick={handleSoundToggle} className="p-3 sm:p-4 border border-[#444a43] bg-[#080b0b]/90 text-[#737970] hover:text-[#aaa18a] hover:border-[#806d4b]/70 hover:bg-[#0c0f0e] transition-all duration-300 group backdrop-blur-sm relative z-20">
             {soundEnabled ? <Volume2 className="w-5 h-5 sm:w-6 sm:h-6 opacity-70 group-hover:opacity-100 transition-opacity" /> : <VolumeX className="w-5 h-5 sm:w-6 sm:h-6 opacity-70 group-hover:opacity-100 transition-opacity" />}
           </button>
         </div>
