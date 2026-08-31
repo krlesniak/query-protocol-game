@@ -38,7 +38,6 @@ const getFieldPoint = (table: SchemaTable, fieldName: string, side: 'left' | 'ri
 };
 
 const getRelationPath = (fromTable: SchemaTable, toTable: SchemaTable, fromField: string, toField: string) => {
-  // ROZWIĄZANIE PROBLEMU SELF-REFERENCING (np. infrastruktura -> infrastruktura)
   if (fromTable.name === toTable.name) {
     const from = getFieldPoint(fromTable, fromField, 'right');
     const to = getFieldPoint(toTable, toField, 'right');
