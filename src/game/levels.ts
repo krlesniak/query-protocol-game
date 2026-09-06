@@ -28,14 +28,15 @@ export const LEVELS: LevelDefinition[] = [
     id: 1,
     title: "FIRST CONTACT",
     briefing: "Główny architekt bezpieczeństwa NEXUS zniknął 48 godzin temu. Oficjalny komunikat mówi o kradzieży danych i ucieczce. Problem: jego profil nadal istnieje w wewnętrznej bazie pracowników.",
-    objective: "Ustal pełne imię i nazwisko architekta o pseudonimie ORACLE oraz jego aktualny status w systemie.",
+    objective: "Ustal pełne imię i nazwisko architekta o pseudonimie 'oracle_01' oraz jego aktualny status w systemie.",
     requiredRows: [{ full_name: "Adrian Voss", status: "ACTIVE" }],
+    requiredKeywords: ["WHERE"],
     maxRows: 1,
     rewardXP: 150,
     unlocksTable: "locations",
     hints: [
       { id: 1, text: "Potrzebujesz tabeli employees oraz kolumn full_name i status.", cost: 50 },
-      { id: 2, text: "Wyfiltruj rekord, którego username odpowiada pseudonimowi ORACLE.", cost: 100 }
+      { id: 2, text: "Wyfiltruj rekord, którego username odpowiada pseudonimowi 'oracle_01'.", cost: 100 }
     ]
   },
 
@@ -46,6 +47,7 @@ export const LEVELS: LevelDefinition[] = [
     briefing: "Profil ORACLE'a nadal oznaczony jest jako ACTIVE. W jego danych znajduje się identyfikator przypisanego obszaru roboczego. Jeśli ktoś chciał go znaleźć, właśnie tam powinien zacząć.",
     objective: "Odnajdź nazwę i sektor lokacji przypisanej do Adriana Vossa.",
     requiredRows: [{ name: "SERVER_ROOM_03", sector: "CORE" }],
+    requiredKeywords: ["WHERE"],
     maxRows: 1,
     rewardXP: 200,
     unlocksTable: "access_logs",
@@ -117,7 +119,7 @@ export const LEVELS: LevelDefinition[] = [
     id: 6,
     title: "NIGHT SHIFT",
     briefing: "Martin Vale twierdzi, że tamtej nocy nie było go w budynku. Jego grafik również wygląda podejrzanie. W skrzynce wiadomości znaleziono jednak ślad jego obecności.",
-    objective: "Znajdź wiadomość Martina zawierającą informację o rozpoczęciu nocnej zmiany.",
+    objective: "Znajdź wiadomość Martina zawierającą informację o rozpoczęciu nocnej zmiany (body LIKE ...night/shift/start...).",
     requiredRows: [{ body: "Starting my night shift in Sector CORE." }],
     maxRows: 1,
     requiredKeywords: ["LIKE"],
