@@ -1,5 +1,7 @@
 # Query Protocol — NEXUS_OS
 
+🔗 **[Play the game live here!](https://queryprotocol.netlify.app)**
+
 Query Protocol (NEXUS_OS) is an interactive, browser-based SQL detective game. You play as a security analyst investigating the mysterious disappearance of ORACLE, NEXUS Corporation's Chief Security Architect. 
 
 Write real SQL queries, inspect hidden evidence, and uncover the truth behind Project MIRROR.
