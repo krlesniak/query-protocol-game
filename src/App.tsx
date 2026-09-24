@@ -36,9 +36,10 @@ function App() {
   
   const [mousePos, setMousePos] = useState({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
 
-  const { currentLevel, score, collectedEvidence, resetGame, hasSeenIntro, setHasSeenIntro, soundEnabled, toggleSound, musicVolume, sfxVolume } = useGameStore();
+  const { currentLevel, score, collectedEvidence, resetGame, setHasSeenIntro, soundEnabled, toggleSound, musicVolume, sfxVolume } = useGameStore();
 
-  const hasProgress = currentLevel > 1 || score > 0 || collectedEvidence.length > 0;
+  // NAPRAWIONY BŁĄD: Sprawdzamy czy wynik jest różny od domyślnych 200 punktów, a nie większy od zera.
+  const hasProgress = currentLevel > 1 || score !== 200 || collectedEvidence.length > 0;
 
   useSound('hum2.mp3', { volume: soundEnabled ? musicVolume : 0, loop: true, autoPlay: true });
   const { play: playClick } = useSound('mouse.mp3', { volume: soundEnabled ? sfxVolume : 0 });
@@ -85,9 +86,35 @@ function App() {
   }, []);
 
   const handleContinue = () => { playClick(); window.setTimeout(() => { setAppState('playing'); }, 100); };
-  const startGameFlow = () => { window.setTimeout(() => { if (!hasSeenIntro) { setAppState('intro'); } else { setAppState('playing'); } }, 100); };
-  const handleNewGame = () => { playClick(); if (hasProgress) { setShowResetWarning(true); return; } resetGame(); startGameFlow(); };
-  const confirmReset = () => { playClick(); resetGame(); setShowResetWarning(false); startGameFlow(); };
+  
+  const startGameFlow = () => { 
+    window.setTimeout(() => { 
+      const freshHasSeenIntro = useGameStore.getState().hasSeenIntro;
+      if (!freshHasSeenIntro) { 
+        setAppState('intro'); 
+      } else { 
+        setAppState('playing'); 
+      } 
+    }, 100); 
+  };
+
+  const handleNewGame = () => { 
+    playClick(); 
+    if (hasProgress) { 
+      setShowResetWarning(true); 
+      return; 
+    } 
+    resetGame(); 
+    startGameFlow(); 
+  };
+  
+  const confirmReset = () => { 
+    playClick(); 
+    resetGame(); 
+    setShowResetWarning(false); 
+    startGameFlow(); 
+  };
+  
   const handleSoundToggle = () => { playClick(); toggleSound(); };
 
   const handleMouseMove = (e: React.MouseEvent) => {
